@@ -1,32 +1,42 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện trang chủ quản trị hiển thị tin tức mới nhất (Đã chuyển sang sử dụng Layout Admin có Sidebar), 
+Ngay thuc hien: 15/05/2026
+*@
+
 @model IEnumerable<CMS.Data.Entities.Post>
+@* Khai báo Model nhận danh sách các bài viết mới *@
 @{
-    ViewData["Title"] = "Home Page";
+    Layout = "_LayoutAdmin"; @* Sử dụng Layout quản trị Admin có Sidebar thay vì menu ngang *@
+    ViewData["Title"] = "Home Page"; @* Đặt tiêu đề trang là Home Page *@
 }
 
-<div class="text-center">
-    <h1 class="display-4">NGUYỄN QUỲNH THẢO VY</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<div class="text-center"> @* Vùng căn giữa nội dung tiêu đề chính *@
+    <h1 class="display-4">NGUYỄN QUỲNH THẢO VY</h1> @* Tên hiển thị lớn của sinh viên *@
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> @* Đường dẫn tìm hiểu về ASP.NET Core *@
+</div> @* Kết thúc vùng tiêu đề *@
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4 text-danger">TIN TỨC MỚI NHẤT</h2>
-    <div class="row">
-        @foreach (var item in Model)
+<div class="container mt-5"> @* Vùng chứa danh sách bài viết cách lề trên mt-5 *@
+    <h2 class="text-center mb-4 text-danger">TIN TỨC MỚI NHẤT</h2> @* Tiêu đề danh sách màu đỏ nổi bật *@
+    <div class="row"> @* Dòng chứa các cột bài viết *@
+        @foreach (var item in Model) @* Vòng lặp duyệt qua từng bài viết trong Model *@
         {
-            <div class="col-md-4">
-                <div class="card shadow-sm h-100">
-                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/images/placeholder.png") : item.ImageUrl)" class="card-img-top" alt="Thumbnail" style="object-fit:cover;height:180px">
-                    <div class="card-body">
-                        <span class="badge bg-primary mb-2">@item.Category?.Name</span>
-                        <h5 class="card-title">@item.Title</h5>
-                        <p class="card-text text-truncate" style="max-height:3.6rem;">@Html.Raw(item.Content)</p>
-                        <a href="/Post/Details/@item.Id" class="btn btn-outline-danger btn-sm">Đọc tiếp</a>
-                    </div>
-                    <div class="card-footer text-muted small">
-                        Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy")
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-</div>
+            <div class="col-md-4"> @* Cột chiếm 4/12 độ rộng màn hình md *@
+                <div class="card shadow-sm h-100"> @* Thẻ card có bóng mờ và chiều cao 100% *@
+                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/images/placeholder.png") : item.ImageUrl)" class="card-img-top" alt="Thumbnail" style="object-fit:cover;height:180px"> @* Ảnh đại diện bài viết có kích thước co giãn và ảnh mặc định nếu trống *@
+                    <div class="card-body"> @* Thân thẻ card *@
+                        <span class="badge bg-primary mb-2">@item.Category?.Name</span> @* Nhãn hiển thị tên danh mục màu xanh *@
+                        <h5 class="card-title">@item.Title</h5> @* Tiêu đề bài viết *@
+                        <p class="card-text text-truncate" style="max-height:3.6rem;">@Html.Raw(item.Content)</p> @* Nội dung bài viết thu gọn *@
+                        <a href="/Post/Details/@item.Id" class="btn btn-outline-danger btn-sm">Đọc tiếp</a> @* Nút đọc tiếp dẫn sang trang Details *@
+                    </div> @* Kết thúc thân thẻ *@
+                    <div class="card-footer text-muted small"> @* Chân thẻ card *@
+                        Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy") @* Định dạng ngày đăng *@
+                    </div> @* Kết thúc chân thẻ *@
+                </div> @* Kết thúc thẻ *@
+            </div> @* Kết thúc cột *@
+        } @* Kết thúc vòng lặp *@
+    </div> @* Kết thúc dòng *@
+</div> @* Kết thúc vùng chứa *@

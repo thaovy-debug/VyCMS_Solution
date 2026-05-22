@@ -2,13 +2,14 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Hiển thị danh sách người dùng hệ thống quản trị, bảo mật bằng cách ẩn chuỗi băm mật khẩu, 
+Mo ta: Quản lý danh sách thành viên hệ thống, hỗ trợ thêm mới, cập nhật thông tin (với xử lý đổi mật khẩu thông minh) và xóa thành viên, 
 Ngay thuc hien: 15/05/2026
 */
 
 using Microsoft.AspNetCore.Mvc; // Sử dụng các thành phần hỗ trợ ASP.NET MVC Controller và ActionResult
 using CMS.Data; // Sử dụng lớp kết nối cơ sở dữ liệu chính ApplicationDbContext
 using CMS.Data.Entities; // Sử dụng lớp thực thể User từ namespace CMS.Data.Entities
+using Microsoft.EntityFrameworkCore; // Hỗ trợ AsNoTracking và các thao tác nâng cao
 using System.Linq; // Sử dụng các phương thức mở rộng LINQ để xử lý dữ liệu
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
@@ -37,6 +38,81 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                 .ToList(); // Tải dữ liệu từ database và lưu vào danh sách (List)
 
             return View(users); // Trả về giao diện Index và truyền danh sách người dùng sang View
+        }
+
+        // GET: Hiển thị form thêm mới thành viên
+        [HttpGet] // Chỉ nhận yêu cầu qua giao diện
+        public IActionResult Create() // Hàm hiển thị giao diện thêm thành viên mới
+        {
+            return View(); // Trả về View tạo mới
+        }
+
+        // POST: Xử lý thêm mới thành viên vào hệ thống
+        [HttpPost] // Tiếp nhận yêu cầu dạng gửi dữ liệu lên máy chủ
+        public IActionResult Create(User model) // Nhận đối tượng User từ biểu mẫu nhập liệu
+        {
+            // 1. Kiểm tra xem tên đăng nhập (Username) đã tồn tại hay chưa
+            var checkExist = _context.Users.Any(u => u.Username == model.Username); // Thực hiện kiểm tra nhanh sự tồn tại
+            if (checkExist) // Nếu tên đăng nhập đã được sử dụng
+            {
+                // Thêm thông tin báo lỗi trùng tên đăng nhập vào ModelState để hiển thị lên giao diện
+                ModelState.AddModelError("Username", "Tên đăng nhập này đã có người dùng!"); // Đăng ký lỗi
+                return View(model); // Trả về giao diện cùng thông tin đã điền và thông báo lỗi tương ứng
+            }
+
+            // 2. Lưu thành viên mới vào Cơ sở dữ liệu SQL Server
+            _context.Users.Add(model); // Thêm User mới vào DbContext ở trạng thái chờ
+            _context.SaveChanges(); // Lưu các thay đổi thực sự xuống CSDL
+
+            return RedirectToAction("Index"); // Quay về trang danh sách thành viên sau khi lưu thành công
+        }
+
+        // GET: Hiển thị form cập nhật thông tin thành viên kèm dữ liệu cũ
+        [HttpGet] // Nhận yêu cầu hiển thị
+        public IActionResult Edit(int id) // Hàm hiển thị giao diện chỉnh sửa tài khoản theo Id
+        {
+            var user = _context.Users.Find(id); // Tìm kiếm người dùng tương ứng trong CSDL
+            if (user == null) return NotFound(); // Trả về lỗi 404 nếu không tìm thấy người dùng
+            
+            return View(user); // Truyền đối tượng người dùng cũ sang View Edit
+        }
+
+        // POST: Thực hiện lưu thay đổi thông tin thành viên
+        [HttpPost] // Nhận yêu cầu submit từ giao diện
+        public IActionResult Edit(User model, string? NewPassword) // model nhận thông tin cơ bản, NewPassword nhận mật khẩu mới
+        {
+            // 1. Tìm User gốc trong Database bằng AsNoTracking để lấy mật khẩu cũ mà không theo dõi thực thể
+            var existingUser = _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == model.Id); // Tìm thực thể cũ
+            
+            if (existingUser == null) return NotFound(); // Trả về 404 nếu tài khoản không tồn tại
+
+            // 2. Xử lý mật khẩu: Nếu người dùng nhập mật khẩu mới thì gán, ngược lại giữ nguyên mật khẩu cũ
+            if (!string.IsNullOrEmpty(NewPassword)) // Nếu ô mật khẩu mới không trống
+            {
+                model.PasswordHash = NewPassword; // Gán mật khẩu mới cho tài khoản (ở buổi 5 sẽ học mã hóa băm)
+            }
+            else // Nếu để trống ô mật khẩu mới
+            {
+                model.PasswordHash = existingUser.PasswordHash; // Giữ lại mật khẩu cũ từ tài khoản gốc
+            }
+
+            // 3. Cập nhật các thay đổi vào Cơ sở dữ liệu SQL Server
+            _context.Users.Update(model); // Cập nhật thực thể
+            _context.SaveChanges(); // Lưu thực sự xuống CSDL
+
+            return RedirectToAction("Index"); // Quay về trang hiển thị danh sách thành viên Index
+        }
+
+        // Action xử lý xóa thành viên hệ thống
+        public IActionResult Delete(int id) // Nhận Id của người dùng cần xóa
+        {
+            var user = _context.Users.Find(id); // Tìm người dùng trong CSDL bằng Id khóa chính
+            if (user != null) // Nếu tồn tại người dùng tương ứng
+            {
+                _context.Users.Remove(user); // Tiến hành xóa thực thể khỏi tập hợp quản lý
+                _context.SaveChanges(); // Chốt lưu các thay đổi thực sự xuống SQL Server
+            }
+            return RedirectToAction("Index"); // Quay lại trang Index hiển thị danh sách
         }
     }
 }

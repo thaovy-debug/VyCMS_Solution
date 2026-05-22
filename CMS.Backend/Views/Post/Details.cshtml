@@ -1,25 +1,37 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện hiển thị chi tiết nội dung bài viết, render HTML thô từ CKEditor, 
+Ngay thuc hien: 15/05/2026
+*@
+
 @model CMS.Data.Entities.Post
+@* Khai báo Model kiểu Post để hiển thị thông tin bài viết chi tiết *@
+@{
+    Layout = "_LayoutAdmin"; @* Sử dụng Layout quản trị chung *@
+}
 
-<div class="container mt-4">
-    <h2 class="mb-3 text-primary">@Model.Title</h2>
+<div class="container mt-4"> @* Vùng chứa chính, margin-top mt-4 *@
+    <h2 class="mb-3 text-primary">@Model.Title</h2> @* Tiêu đề bài viết hiển thị lớn, màu xanh chính *@
     
-    <div class="mb-3">
-        <span class="badge bg-info text-dark">Danh mục: @Model.Category?.Name</span>
-        <span class="text-muted small ms-2">Ngày đăng: @Model.CreatedDate.ToString("dd/MM/yyyy")</span>
-    </div>
+    <div class="mb-3"> @* Nhóm thông tin phụ *@
+        <span class="badge bg-info text-dark">Danh mục: @Model.Category?.Name</span> @* Huy hiệu hiển thị tên chuyên mục *@
+        <span class="text-muted small ms-2">Ngày đăng: @Model.CreatedDate.ToString("dd/MM/yyyy")</span> @* Hiển thị ngày đăng bài viết *@
+    </div> @* Kết thúc nhóm *@
 
-    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    @if (!string.IsNullOrEmpty(Model.ImageUrl)) @* Kiểm tra nếu có đường dẫn ảnh đại diện *@
     {
-        <div class="mb-4">
-            <img src="@Model.ImageUrl" alt="Thumbnail" class="img-fluid rounded" style="max-height: 400px; object-fit: cover;" />
-        </div>
+        <div class="mb-4"> @* Vùng chứa ảnh đại diện *@
+            <img src="@Model.ImageUrl" alt="Thumbnail" class="img-fluid rounded" style="max-height: 400px; object-fit: cover;" /> @* Hiển thị ảnh co giãn tốt, bo góc *@
+        </div> @* Kết thúc vùng ảnh *@
     }
 
-    <div class="content mb-5">
-        @Html.Raw(Model.Content)
-    </div>
+    <div class="content mb-5"> @* Vùng chứa nội dung bài viết *@
+        @Html.Raw(Model.Content) @* Sử dụng Html.Raw để kết xuất các thẻ HTML định dạng từ CKEditor thay vì hiển thị text thô *@
+    </div> @* Kết thúc vùng nội dung *@
 
-    <div>
-        <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
-    </div>
-</div>
+    <div> @* Vùng chứa nút quay lại *@
+        <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a> @* Nút bấm liên kết quay về trang danh sách Index *@
+    </div> @* Kết thúc vùng nút *@
+</div> @* Kết thúc container *@

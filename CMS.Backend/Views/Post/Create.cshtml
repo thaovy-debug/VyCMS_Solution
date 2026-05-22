@@ -1,0 +1,87 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện thêm bài viết mới tích hợp trình soạn thảo CKEditor 5 và hỗ trợ tải ảnh lên, 
+Ngay thuc hien: 15/05/2026
+*@
+
+@model CMS.Data.Entities.Post
+@* Khai báo Model kiểu Post nhận dữ liệu từ form nhập *@
+
+@{
+    Layout = "_LayoutAdmin"; @* Sử dụng layout quản trị Admin *@
+    ViewData["Title"] = "Thêm bài viết mới"; @* Thiết lập tiêu đề trang cho Layout hiển thị *@
+}
+
+<div class="container mt-4"> @* Vùng chứa chính, margin-top mt-4 *@
+    <div class="card shadow"> @* Thẻ card có bóng mờ đổ bóng *@
+        <div class="card-header bg-primary text-white"> @* Đầu thẻ card màu nền xanh chính, chữ trắng *@
+            <h4 class="mb-0"><i class="bi bi-file-earmark-plus"></i> THÊM BÀI VIẾT MỚI</h4> @* Tiêu đề và biểu tượng *@
+        </div> @* Kết thúc đầu thẻ card *@
+        <div class="card-body"> @* Thân thẻ card chứa form nhập liệu *@
+            <form asp-action="Create" method="post" enctype="multipart/form-data"> @* Form gửi POST đến Action Create, hỗ trợ tải file (enctype) *@
+                <div class="row"> @* Chia lưới dòng Bootstrap *@
+                    <div class="col-md-8"> @* Cột trái rộng 8/12 chứa các trường thông tin văn bản dài *@
+                        <div class="mb-3"> @* Nhóm ô nhập tiêu đề *@
+                            <label class="form-label fw-bold">Tiêu đề bài viết:</label> @* Nhãn tiêu đề *@
+                            <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề..." required /> @* Ô nhập tiêu đề *@
+                        </div> @* Kết thúc ô nhập *@
+
+                        <div class="mb-3"> @* Nhóm ô nhập nội dung *@
+                            <label class="form-label fw-bold">Nội dung chi tiết:</label> @* Nhãn nội dung *@
+                            <textarea asp-for="Content" class="form-control" rows="10" placeholder="Viết nội dung tại đây..."></textarea> @* Khung soạn thảo văn bản chính *@
+                        </div> @* Kết thúc ô nhập *@
+                    </div> @* Kết thúc cột trái *@
+
+                    <div class="col-md-4"> @* Cột phải rộng 4/12 chứa các thuộc tính bổ trợ *@
+                        <div class="mb-3"> @* Nhóm chọn chuyên mục *@
+                            <label class="form-label fw-bold">Chuyên mục:</label> @* Nhãn chọn *@
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryList" required> @* Dropdown danh mục lấy từ ViewBag *@
+                                <option value="">-- Chọn danh mục --</option> @* Tùy chọn mặc định *@
+                            </select> @* Kết thúc thẻ select *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <div class="mb-3"> @* Nhóm tải ảnh đại diện lên *@
+                            <label class="form-label fw-bold">Tải ảnh đại diện lên:</label> @* Nhãn tải ảnh *@
+                            <input type="file" name="uploadImage" class="form-control" accept="image/*" /> @* Ô chọn file ảnh *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <div class="mb-3"> @* Nhóm nhập Link ảnh thay thế *@
+                            <label class="form-label fw-bold">Hoặc Link ảnh đại diện (URL):</label> @* Nhãn nhập link *@
+                            <input asp-for="ImageUrl" class="form-control" placeholder="https://..." /> @* Ô nhập URL *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <div class="mb-3"> @* Nhóm nhập ngày đăng *@
+                            <label class="form-label fw-bold">Ngày đăng:</label> @* Nhãn ngày *@
+                            <input asp-for="CreatedDate" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" /> @* Ô nhập lịch chọn ngày *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <hr /> @* Kẻ đường ngang *@
+                        <div class="d-grid gap-2"> @* Khối các nút nhấn tràn lề rộng *@
+                            <button type="submit" class="btn btn-success"> @* Nút Lưu và đăng bài *@
+                                <i class="bi bi-cloud-arrow-up"></i> Lưu và Đăng bài @* Biểu tượng và nhãn *@
+                            </button> @* Kết thúc nút lưu *@
+                            <a asp-action="Index" class="btn btn-secondary"> @* Nút quay lại trang danh sách *@
+                                <i class="bi bi-arrow-left"></i> Quay lại danh sách @* Biểu tượng và nhãn *@
+                            </a> @* Kết thúc nút quay lại *@
+                        </div> @* Kết thúc khối *@
+                    </div> @* Kết thúc cột phải *@
+                </div> @* Kết thúc dòng *@
+            </form> @* Kết thúc form *@
+        </div> @* Kết thúc thân thẻ *@
+    </div> @* Kết thúc thẻ card *@
+</div> @* Kết thúc vùng chứa *@
+
+@section Scripts { @* Định nghĩa Section Script để chèn mã script xuống cuối trang layout *@
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script> @* Tải thư viện CKEditor 5 CDN *@
+
+    <script>
+        // Kích hoạt trình soạn thảo giàu tính năng (Rich Text Editor) cho thẻ textarea có id là 'Content'
+        ClassicEditor
+            .create(document.querySelector('#Content')) // Khởi tạo CKEditor 5 trên phần tử có id là Content
+            .catch(error => {
+                console.error(error); // Ghi nhận lỗi ra console của trình duyệt nếu có lỗi xảy ra
+            });
+    </script>
+}

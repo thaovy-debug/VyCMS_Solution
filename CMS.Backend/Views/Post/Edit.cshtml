@@ -1,0 +1,96 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện chỉnh sửa bài viết cũ tích hợp CKEditor 5, hiển thị ảnh cũ và hỗ trợ thay thế ảnh mới, 
+Ngay thuc hien: 15/05/2026
+*@
+
+@model CMS.Data.Entities.Post
+@* Khai báo Model kiểu Post chứa dữ liệu bài viết cần chỉnh sửa *@
+
+@{
+    Layout = "_LayoutAdmin"; @* Sử dụng Layout quản trị chung *@
+    ViewData["Title"] = "Chỉnh sửa bài viết"; @* Thiết lập tiêu đề trang cho Layout *@
+}
+
+<div class="container mt-4"> @* Vùng chứa chính *@
+    <div class="card shadow"> @* Thẻ card có bóng mờ *@
+        <div class="card-header bg-warning text-dark"> @* Đầu thẻ card nền màu vàng cảnh báo, chữ tối *@
+            <h4 class="mb-0"><i class="bi bi-pencil-square"></i> CHỈNH SỬA BÀI VIẾT</h4> @* Tiêu đề và biểu tượng *@
+        </div> @* Kết thúc đầu thẻ *@
+        <div class="card-body"> @* Thân thẻ card *@
+            <form asp-action="Edit" method="post" enctype="multipart/form-data"> @* Form gửi POST đến Action Edit, hỗ trợ tải file lên *@
+                <input type="hidden" asp-for="Id" /> @* Thẻ ẩn để lưu giữ lại khóa chính Id của bài viết phục vụ cập nhật *@
+
+                <div class="row"> @* Chia lưới dòng Bootstrap *@
+                    <div class="col-md-8"> @* Cột trái rộng 8/12 *@
+                        <div class="mb-3"> @* Nhóm tiêu đề *@
+                            <label class="form-label fw-bold">Tiêu đề bài viết:</label> @* Nhãn tiêu đề *@
+                            <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề..." required /> @* Ô nhập tiêu đề *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <div class="mb-3"> @* Nhóm nội dung *@
+                            <label class="form-label fw-bold">Nội dung chi tiết:</label> @* Nhãn nội dung *@
+                            <textarea asp-for="Content" class="form-control" rows="10" placeholder="Viết nội dung tại đây..."></textarea> @* Khung soạn thảo nội dung *@
+                        </div> @* Kết thúc nhóm *@
+                    </div> @* Kết thúc cột trái *@
+
+                    <div class="col-md-4"> @* Cột phải rộng 4/12 *@
+                        <div class="mb-3"> @* Nhóm chuyên mục *@
+                            <label class="form-label fw-bold">Chuyên mục:</label> @* Nhãn chuyên mục *@
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryList" required> @* Chọn chuyên mục liên kết *@
+                                <option value="">-- Chọn danh mục --</option> @* Tùy chọn mặc định *@
+                            </select> @* Kết thúc select *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <div class="mb-3"> @* Nhóm hiển thị và tải ảnh đại diện *@
+                            <label class="form-label fw-bold">Ảnh đại diện hiện tại:</label> @* Nhãn ảnh hiện tại *@
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl)) @* Kiểm tra nếu bài viết đã có sẵn đường dẫn hình ảnh *@
+                            {
+                                <div class="mb-2"> @* Vùng chứa ảnh hiện tại *@
+                                    <img src="@Model.ImageUrl" alt="Current Image" class="img-thumbnail" style="max-height: 150px; object-fit: cover;" /> @* Thẻ hiển thị ảnh thu nhỏ *@
+                                </div>
+                            }
+                            <input type="file" name="uploadImage" class="form-control" accept="image/*" /> @* Ô chọn tệp ảnh mới để thay thế *@
+                            <small class="text-muted">Tải file lên nếu muốn thay đổi ảnh đại diện.</small> @* Ghi chú hướng dẫn *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <div class="mb-3"> @* Nhóm đường dẫn ảnh thủ công *@
+                            <label class="form-label fw-bold">Đường dẫn ảnh (URL):</label> @* Nhãn URL *@
+                            <input asp-for="ImageUrl" class="form-control" placeholder="Để trống nếu đã tải ảnh lên ở trên..." /> @* Ô nhập URL ảnh *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <div class="mb-3"> @* Nhóm ngày đăng *@
+                            <label class="form-label fw-bold">Ngày đăng:</label> @* Nhãn ngày *@
+                            <input asp-for="CreatedDate" type="date" class="form-control" value="@Model.CreatedDate.ToString("yyyy-MM-dd")" /> @* Ô nhập ngày chọn lịch *@
+                        </div> @* Kết thúc nhóm *@
+
+                        <hr /> @* Đường kẻ ngang *@
+                        <div class="d-grid gap-2"> @* Nhóm nút bấm rộng *@
+                            <button type="submit" class="btn btn-warning text-dark"> @* Nút lưu thay đổi *@
+                                <i class="bi bi-cloud-arrow-up"></i> Cập nhật thay đổi @* Biểu tượng và nhãn nút *@
+                            </button> @* Kết thúc nút cập nhật *@
+                            <a asp-action="Index" class="btn btn-secondary"> @* Nút quay lại danh sách bài viết *@
+                                <i class="bi bi-arrow-left"></i> Quay lại danh sách @* Biểu tượng và nhãn *@
+                            </a> @* Kết thúc nút quay lại *@
+                        </div> @* Kết thúc nhóm *@
+                    </div> @* Kết thúc cột phải *@
+                </div> @* Kết thúc dòng *@
+            </form> @* Kết thúc form *@
+        </div> @* Kết thúc thân thẻ *@
+    </div> @* Kết thúc thẻ *@
+</div> @* Kết thúc vùng chứa *@
+
+@section Scripts { @* Định nghĩa Section Script *@
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script> @* Tải thư viện CKEditor 5 CDN *@
+
+    <script>
+        // Kích hoạt trình soạn thảo giàu tính năng (Rich Text Editor) cho thẻ textarea có id là 'Content'
+        ClassicEditor
+            .create(document.querySelector('#Content')) // Khởi tạo CKEditor 5 trên phần tử có id là Content
+            .catch(error => {
+                console.error(error); // Ghi nhận lỗi ra console của trình duyệt nếu có lỗi xảy ra
+            });
+    </script>
+}

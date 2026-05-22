@@ -2,11 +2,14 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Giao diện chỉnh sửa thông tin danh mục bài viết, 
+Mo ta: Giao diện chỉnh sửa thông tin danh mục bài viết (Đã áp dụng Layout Admin quản trị), 
 Ngay thuc hien: 15/05/2026
 *@
 @model CMS.Data.Entities.Category
 @* Định nghĩa Model kiểu Category nhận từ Controller *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
 
 <div class="container mt-4"> @* Vùng chứa chính, canh lề trên mt-4 sử dụng Bootstrap *@
     <h2 class="text-warning">CHỈNH SỬA DANH MỤC</h2> @* Tiêu đề chỉnh sửa danh mục chữ màu cảnh báo (vàng) *@

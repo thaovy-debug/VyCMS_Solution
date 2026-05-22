@@ -1,0 +1,57 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện chỉnh sửa thông tin thành viên (Đã áp dụng Layout Admin quản trị, khóa trường tài khoản chỉ cho đổi mật khẩu mới hoặc đổi tên/vai trò), 
+Ngay thuc hien: 15/05/2026
+*@
+
+@model CMS.Data.Entities.User
+@* Khai báo Model kiểu User chứa thông tin người dùng cần chỉnh sửa *@
+
+@{
+    Layout = "_LayoutAdmin"; @* Sử dụng Layout quản trị chung *@
+    ViewData["Title"] = "Chỉnh sửa thành viên"; @* Thiết lập tiêu đề trang cho layout *@
+}
+
+<div class="container mt-4"> @* Vùng chứa chính *@
+    <div class="card shadow"> @* Thẻ card có bóng mờ *@
+        <div class="card-header bg-warning text-dark"> @* Đầu thẻ card nền vàng cảnh báo, chữ tối *@
+            <h5 class="mb-0">CẬP NHẬT THÔNG TIN THÀNH VIÊN</h5> @* Tiêu đề biểu mẫu *@
+        </div> @* Kết thúc đầu thẻ *@
+        <div class="card-body"> @* Thân thẻ card *@
+            <form asp-action="Edit" method="post"> @* Form gửi POST đến Action Edit cập nhật thông tin *@
+                <input type="hidden" asp-for="Id" /> @* Thẻ ẩn để lưu giữ khóa chính Id phục vụ cập nhật *@
+                
+                <div class="row mb-3"> @* Dòng chứa tài khoản và mật khẩu *@
+                    <div class="col-md-6"> @* Cột tài khoản *@
+                        <label class="fw-bold">Tên đăng nhập:</label> @* Nhãn *@
+                        <input asp-for="Username" class="form-control" readonly /> @* Ô hiển thị Username chỉ đọc (readonly) không cho thay đổi *@
+                        <small class="text-muted">Tên đăng nhập không được phép sửa.</small> @* Ghi chú chỉ dẫn *@
+                    </div> @* Kết thúc cột *@
+                    <div class="col-md-6"> @* Cột nhập mật khẩu mới *@
+                        <label class="fw-bold">Mật khẩu mới:</label> @* Nhãn mật khẩu mới *@
+                        <input type="password" name="NewPassword" class="form-control" placeholder="Để trống nếu không muốn đổi" /> @* Ô nhập mật khẩu mới, ánh xạ với tham số NewPassword của Controller *@
+                    </div> @* Kết thúc cột *@
+                </div> @* Kết thúc dòng *@
+
+                <div class="row mb-3"> @* Dòng chứa họ tên và vai trò *@
+                    <div class="col-md-6"> @* Cột họ tên *@
+                        <label class="fw-bold">Họ và Tên:</label> @* Nhãn *@
+                        <input asp-for="FullName" class="form-control" required /> @* Ô nhập họ tên *@
+                    </div> @* Kết thúc cột *@
+                    <div class="col-md-6"> @* Cột vai trò *@
+                        <label class="fw-bold">Vai trò:</label> @* Nhãn vai trò *@
+                        <select asp-for="Role" class="form-select" required> @* Hộp chọn vai trò *@
+                            <option value="Admin">Admin</option> @* Tùy chọn quyền Admin *@
+                            <option value="Editor">Editor</option> @* Tùy chọn quyền Editor *@
+                        </select> @* Kết thúc hộp chọn *@
+                    </div> @* Kết thúc cột *@
+                </div> @* Kết thúc dòng *@
+
+                <button type="submit" class="btn btn-primary">Cập nhật</button> @* Nút cập nhật thay đổi *@
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a> @* Nút quay lại danh sách *@
+            </form> @* Kết thúc form *@
+        </div> @* Kết thúc thân thẻ *@
+    </div> @* Kết thúc thẻ *@
+</div> @* Kết thúc vùng chứa *@

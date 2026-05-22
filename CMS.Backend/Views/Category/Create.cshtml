@@ -1,21 +1,32 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện thêm danh mục bài viết mới (Đã áp dụng Layout Admin quản trị), 
+Ngay thuc hien: 15/05/2026
+*@
 @model CMS.Data.Entities.Category
+@* Định nghĩa Model kiểu Category nhận từ Controller *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
 
-<div class="container mt-4">
-    <h2 class="text-primary">THÊM DANH MỤC MỚI</h2>
-    <hr />
+<div class="container mt-4"> @* Vùng chứa chính, margin-top mt-4 *@
+    <h2 class="text-primary">THÊM DANH MỤC MỚI</h2> @* Tiêu đề chính *@
+    <hr /> @* Kẻ đường ngang phân cách *@
 
-    <form asp-action="Create" method="post">
-        <div class="mb-3">
-            <label class="form-label">Tên danh mục:</label>
-            <input asp-for="Name" class="form-control" />
-        </div>
+    <form asp-action="Create" method="post"> @* Form gửi yêu cầu POST đến Action Create *@
+        <div class="mb-3"> @* Nhóm nhập tên *@
+            <label class="form-label">Tên danh mục:</label> @* Nhãn nhập *@
+            <input asp-for="Name" class="form-control" required /> @* Ô nhập tên *@
+        </div> @* Kết thúc nhóm *@
 
-        <div class="mb-3">
-            <label class="form-label">Mô tả:</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-        </div>
+        <div class="mb-3"> @* Nhóm nhập mô tả *@
+            <label class="form-label">Mô tả:</label> @* Nhãn nhập *@
+            <textarea asp-for="Description" class="form-control"></textarea> @* Khung văn bản mô tả *@
+        </div> @* Kết thúc nhóm *@
 
-        <button type="submit" class="btn btn-success">Lưu vào hệ thống</button>
-        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
-    </form>
-</div>
+        <button type="submit" class="btn btn-success">Lưu vào hệ thống</button> @* Nút lưu dữ liệu *@
+        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a> @* Nút hủy bỏ quay về Index *@
+    </form> @* Kết thúc form *@
+</div> @* Kết thúc vùng chứa *@

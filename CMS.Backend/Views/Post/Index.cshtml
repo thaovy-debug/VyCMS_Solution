@@ -1,31 +1,47 @@
-﻿@model IEnumerable<CMS.Data.Entities.Post>
-<div class="py-4">
-    <h2 class="text-danger fw-bold">DANH SÁCH BÀI VIẾT MỚI NHẤT</h2>
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện hiển thị danh sách bài viết quản trị (Đã bổ sung Layout quản trị, nút thêm, sửa và xóa bài viết), 
+Ngay thuc hien: 15/05/2026
+*@
+@model IEnumerable<CMS.Data.Entities.Post>
+@* Khai báo Model nhận danh sách bài viết từ CSDL *@
+@{
+    Layout = "_LayoutAdmin"; @* Sử dụng Layout quản trị chung vừa thiết lập *@
+}
 
-    <div class="row g-3 mt-3">
-        @foreach (var post in Model)
+<div class="container mt-4"> @* Vùng chứa chính, khoảng cách trên mt-4 *@
+    <div class="d-flex justify-content-between align-items-center mb-3"> @* Bố cục flex căn đều hai bên *@
+        <h2 class="text-dark">DANH SÁCH BÀI VIẾT</h2> @* Tiêu đề danh sách màu tối *@
+        <a asp-action="Create" class="btn btn-success"> @* Nút bấm liên kết sang Action Create tạo bài viết *@
+            <i class="bi bi-plus-circle"></i> Thêm bài viết mới @* Biểu tượng dấu cộng và nhãn nút *@
+        </a> @* Kết thúc nút thêm bài viết *@
+    </div> @* Kết thúc vùng tiêu đề *@
+    <div class="row"> @* Dòng lưới chứa các cột thẻ bài viết *@
+        @foreach (var item in Model) @* Vòng lặp duyệt qua từng bài viết trong Model *@
         {
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <img src="@(string.IsNullOrEmpty(post.ImageUrl) ? Url.Content("~/images/placeholder.png") : post.ImageUrl)"
-                         class="card-img-top" alt="thumbnail" style="object-fit:cover;height:180px" />
-                    <div class="card-body d-flex flex-column">
-                        <span class="badge bg-info text-dark">@post.Category?.Name</span>
-                        <h5 class="card-title">
-                            @Html.DisplayFor(m => post.Title)
-                        </h5>
-                        <p class="card-text text-truncate" style="max-height:3.6rem;">
-                            @Html.Raw(post.Content)
-                        </p>
-                        <p class="text-muted small mt-auto">
-                            Ngày đăng: @post.CreatedDate.ToString("dd/MM/yyyy")
-                        </p>
-                        <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id" class="btn btn-sm btn-outline-primary mt-2">
-                            Xem chi tiết
-                        </a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-</div>
+            <div class="col-md-4 mb-3"> @* Cột chiếm 4/12 độ rộng màn hình md, margin bottom mb-3 *@
+                <div class="card shadow-sm"> @* Thẻ card có bóng mờ nhẹ *@
+                    <img src="@item.ImageUrl" class="card-img-top" alt="Thumbnail" style="object-fit:cover;height:180px"> @* Ảnh đại diện bài viết với chiều cao cố định và tự co giãn *@
+                    <div class="card-body"> @* Thân thẻ card *@
+                        <span class="badge bg-info text-dark">@item.Category?.Name</span> @* Nhãn hiển thị tên chuyên mục, phòng hờ Category null *@
+                        <h5 class="card-title text-primary">@item.Title</h5> @* Tiêu đề bài viết màu xanh *@
+                        <p class="card-text text-truncate">@Html.Raw(item.Content)</p> @* Nội dung bài viết hiển thị thu gọn một dòng *@
+                        <p class="text-muted small">Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy")</p> @* Hiển thị ngày đăng định dạng dd/MM/yyyy *@
+                        <a href="/Post/Details/@item.Id" class="btn btn-outline-primary btn-sm">Xem chi tiết</a> @* Nút xem chi tiết bài viết *@
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning"> @* Nút sửa bài viết theo Id *@
+                            Sửa @* Nhãn sửa *@
+                        </a> @* Kết thúc nút sửa *@
+                            
+                        <a asp-action="Delete" asp-route-id="@item.Id" @* Nút xóa bài viết theo Id *@
+                           class="btn btn-sm btn-outline-danger" @* Màu viền đỏ cảnh báo *@
+                           onclick="return confirm('Chúng ta có chắc chắn muốn xóa bài viết này không?')"> @* Hộp thoại xác nhận trước khi thực hiện xóa *@
+                            <i class="bi bi-trash"></i> Xóa @* Biểu tượng rác và nhãn xóa *@
+                        </a> @* Kết thúc nút xóa *@
+                    </div> @* Kết thúc thân thẻ *@
+                </div> @* Kết thúc thẻ *@
+            </div> @* Kết thúc cột *@
+        } @* Kết thúc vòng lặp *@
+    </div> @* Kết thúc dòng *@
+</div> @* Kết thúc vùng chứa *@

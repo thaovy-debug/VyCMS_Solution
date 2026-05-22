@@ -1,0 +1,57 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện thêm mới thành viên hệ thống (Đã áp dụng Layout Admin quản trị), 
+Ngay thuc hien: 15/05/2026
+*@
+
+@model CMS.Data.Entities.User
+@* Khai báo Model nhận dữ liệu thành viên từ form nhập liệu *@
+
+@{
+    Layout = "_LayoutAdmin"; @* Sử dụng Layout quản trị chung *@
+    ViewData["Title"] = "Thêm thành viên"; @* Thiết lập tiêu đề trang cho layout *@
+}
+
+<div class="container mt-4"> @* Vùng chứa chính *@
+    <div class="card shadow"> @* Thẻ card có bóng mờ *@
+        <div class="card-header bg-dark text-white"> @* Đầu thẻ card nền tối, chữ trắng *@
+            <h5 class="mb-0">THÊM THÀNH VIÊN HỆ THỐNG</h5> @* Tiêu đề biểu mẫu *@
+        </div> @* Kết thúc đầu thẻ *@
+        <div class="card-body"> @* Thân thẻ card *@
+            <form asp-action="Create" method="post"> @* Form gửi POST đến Action Create tạo User *@
+                <div class="row"> @* Dòng chứa hai trường thông tin tên đăng nhập và mật khẩu *@
+                    <div class="col-md-6 mb-3"> @* Cột rộng 6/12 cho Tên đăng nhập *@
+                        <label class="form-label fw-bold">Tên đăng nhập (Username):</label> @* Nhãn Tên đăng nhập *@
+                        <input asp-for="Username" class="form-control" placeholder="Ví dụ: admin_thai" required /> @* Ô nhập Username *@
+                    </div> @* Kết thúc cột *@
+                    <div class="col-md-6 mb-3"> @* Cột rộng 6/12 cho Mật khẩu *@
+                        <label class="form-label fw-bold">Mật khẩu:</label> @* Nhãn mật khẩu *@
+                        <input asp-for="PasswordHash" type="password" class="form-control" placeholder="Nhập mật khẩu..." required /> @* Ô nhập mật khẩu kiểu password ẩn ký tự *@
+                    </div> @* Kết thúc cột *@
+                </div> @* Kết thúc dòng *@
+
+                <div class="row"> @* Dòng chứa hai trường thông tin họ tên và vai trò *@
+                    <div class="col-md-6 mb-3"> @* Cột rộng 6/12 cho Họ và Tên *@
+                        <label class="form-label fw-bold">Họ và Tên:</label> @* Nhãn họ tên *@
+                        <input asp-for="FullName" class="form-control" placeholder="Nguyễn Văn A" required /> @* Ô nhập họ tên *@
+                    </div> @* Kết thúc cột *@
+                    <div class="col-md-6 mb-3"> @* Cột rộng 6/12 cho vai trò *@
+                        <label class="form-label fw-bold">Vai trò (Role):</label> @* Nhãn vai trò *@
+                        <select asp-for="Role" class="form-select" required> @* Hộp lựa chọn dropdown *@
+                            <option value="">-- Chọn quyền hạn --</option> @* Tùy chọn trống *@
+                            <option value="Admin">Quản trị viên (Admin)</option> @* Vai trò Admin *@
+                            <option value="Editor">Biên tập viên (Editor)</option> @* Vai trò Editor *@
+                        </select> @* Kết thúc hộp chọn *@
+                    </div> @* Kết thúc cột *@
+                </div> @* Kết thúc dòng *@
+
+                <div class="mt-3"> @* Vùng chứa các nút thao tác phía dưới *@
+                    <button type="submit" class="btn btn-primary">Lưu thành viên</button> @* Nút lưu dữ liệu gửi form *@
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại</a> @* Nút quay về danh sách thành viên *@
+                </div> @* Kết thúc vùng nút *@
+            </form> @* Kết thúc form *@
+        </div> @* Kết thúc thân thẻ *@
+    </div> @* Kết thúc thẻ *@
+</div> @* Kết thúc vùng chứa *@

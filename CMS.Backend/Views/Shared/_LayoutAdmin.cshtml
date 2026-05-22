@@ -1,0 +1,57 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Layout quản trị Admin Panel chung cho VyCMS, chứa Sidebar điều hướng (chỉ giữ 4 chức năng cốt lõi) và phần hiển thị Body
+Ngay thuc hien: 15/05/2026
+*@
+
+<!DOCTYPE html> @* Khai báo kiểu tài liệu HTML5 *@
+<html lang="en"> @* Mở thẻ html với ngôn ngữ tiếng Anh *@
+<head> @* Mở thẻ head chứa các thông tin cấu hình trang *@
+    <meta charset="utf-8" /> @* Định dạng bảng mã ký tự UTF-8 *@
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> @* Cấu hình viewport giúp trang web hiển thị co giãn tốt trên di động *@
+    <title>@ViewData["Title"] - VyCMS Admin</title> @* Tiêu đề trang web kết hợp ViewData từ các View con *@
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> @* Liên kết tới thư viện CSS Bootstrap nội bộ *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"> @* Liên kết tới thư viện Bootstrap Icons thông qua CDN *@
+    <style> @* Khai báo CSS tùy chỉnh dành cho Sidebar *@
+        .sidebar { min-height: 100vh; background-color: #212529; color: white; } @* CSS cho Sidebar chiếm chiều cao tối thiểu bằng màn hình, nền tối và chữ trắng *@
+        .sidebar a { color: #adb5bd; text-decoration: none; display: block; padding: 10px 20px; } @* Định dạng các liên kết trong Sidebar có khoảng đệm và không có gạch chân *@
+        .sidebar a:hover { background-color: #343a40; color: white; } @* CSS hover làm nổi bật liên kết khi di chuột qua *@
+        .sidebar .active { background-color: #0d6efd; color: white; } @* CSS cho lớp active hiển thị liên kết đang được chọn *@
+    </style> @* Đóng thẻ style *@
+</head> @* Đóng thẻ head *@
+<body> @* Mở thẻ body chứa nội dung trang web *@
+    <div class="container-fluid"> @* Vùng chứa fluid của Bootstrap rộng toàn màn hình *@
+        <div class="row"> @* Dòng lưới Bootstrap chứa hai cột Sidebar và Nội dung chính *@
+            <nav class="col-md-3 col-lg-2 sidebar p-0"> @* Cột Sidebar (chiếm 3/12 cột trên màn hình md, 2/12 trên lg), không padding *@
+                <div class="p-3 text-center border-bottom border-secondary"> @* Tiêu đề Sidebar căn giữa, có đường viền dưới *@
+                    <h4 class="text-white">VyCMS Admin</h4> @* Dòng chữ thương hiệu quản trị VyCMS màu trắng *@
+                </div> @* Kết thúc tiêu đề *@
+                <div class="mt-3"> @* Vùng chứa danh sách các liên kết điều hướng, cách trên mt-3 *@
+                    <a asp-controller="Home" asp-action="Index"> @* Liên kết đến Action Index của HomeController *@
+                        <i class="bi bi-speedometer2"></i> Bảng điều khiển @* Biểu tượng và nhãn của Dashboard *@
+                    </a> @* Kết thúc liên kết *@
+                    <a asp-controller="Category" asp-action="Index"> @* Liên kết đến Action Index của CategoryController *@
+                        <i class="bi bi-grid"></i> Quản lý Danh mục @* Biểu tượng và nhãn quản lý danh mục bài viết *@
+                    </a> @* Kết thúc liên kết *@
+                    <a asp-controller="Post" asp-action="Index"> @* Liên kết đến Action Index của PostController *@
+                        <i class="bi bi-file-earmark-post"></i> Quản lý Bài viết @* Biểu tượng và nhãn quản lý bài viết *@
+                    </a> @* Kết thúc liên kết *@
+                    <a asp-controller="User" asp-action="Index"> @* Liên kết đến Action Index của UserController *@
+                        <i class="bi bi-people"></i> Quản lý Thành viên @* Biểu tượng và nhãn quản lý tài khoản người dùng *@
+                    </a> @* Kết thúc liên kết *@
+                </div> @* Đóng vùng chứa liên kết *@
+            </nav> @* Đóng cột Sidebar *@
+
+            <main class="col-md-9 col-lg-10 ms-sm-auto p-4"> @* Cột nội dung chính bên phải (chiếm 9/12 cột md, 10/12 cột lg) *@
+                @RenderBody() @* Lệnh RenderBody để nạp động giao diện của từng trang chức năng vào đây *@
+            </main> @* Đóng vùng nội dung chính *@
+        </div> @* Đóng dòng *@
+    </div> @* Đóng container-fluid *@
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script> @* Tải thư viện jQuery nội bộ *@
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> @* Tải thư viện JavaScript Bootstrap bundle *@
+    @await RenderSectionAsync("Scripts", required: false) @* Nạp các đoạn mã script bổ sung từ các View con nếu có *@
+</body> @* Đóng body *@
+</html> @* Đóng html *@

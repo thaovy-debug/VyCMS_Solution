@@ -2,11 +2,14 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Giao diện hiển thị danh sách các danh mục bài viết từ cơ sở dữ liệu, 
+Mo ta: Giao diện hiển thị danh sách các danh mục bài viết từ cơ sở dữ liệu (Đã áp dụng Layout Admin quản trị), 
 Ngay thuc hien: 15/05/2026
 *@
 @model IEnumerable<CMS.Data.Entities.Category>
 @* Khai báo Model nhận danh sách (tập hợp) các thực thể Category *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
 
 <a asp-action="Create" class="btn btn-success mb-3"> @* Thẻ liên kết mở giao diện thêm danh mục mới (Action Create) *@
     <i class="bi bi-plus-circle"></i> Thêm danh mục mới @* Biểu tượng dấu cộng từ Bootstrap Icons và nhãn nút *@
