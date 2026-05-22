@@ -29,7 +29,13 @@ Ngay thuc hien: 15/05/2026
                     <div class="card-body"> @* Thân thẻ card *@
                         <span class="badge bg-primary mb-2">@item.Category?.Name</span> @* Nhãn hiển thị tên danh mục màu xanh *@
                         <h5 class="card-title">@item.Title</h5> @* Tiêu đề bài viết *@
-                        <p class="card-text text-truncate" style="max-height:3.6rem;">@Html.Raw(item.Content)</p> @* Nội dung bài viết thu gọn *@
+                        @{
+                            // Loại bỏ thẻ HTML và hiển thị văn bản thuần túy thu gọn trên 1 dòng
+                            var plainText = !string.IsNullOrEmpty(item.Content) 
+                                ? System.Text.RegularExpressions.Regex.Replace(item.Content, "<.*?>", string.Empty) 
+                                : string.Empty;
+                        }
+                        <p class="card-text text-truncate" title="@plainText">@plainText</p> @* Nội dung bài viết thu gọn *@
                         <a href="/Post/Details/@item.Id" class="btn btn-outline-danger btn-sm">Đọc tiếp</a> @* Nút đọc tiếp dẫn sang trang Details *@
                     </div> @* Kết thúc thân thẻ *@
                     <div class="card-footer text-muted small"> @* Chân thẻ card *@

@@ -1,0 +1,119 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện hiển thị chi tiết thông tin đơn hàng, danh sách các sản phẩm và tổng tiền thanh toán (Đã áp dụng Layout Admin), 
+Ngay thuc hien: 15/05/2026
+*@
+@model CMS.Data.Entities.Order
+@* Khai báo Model kiểu Order *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+    var totalAmount = 0m; @* Khởi tạo biến tổng tiền *@
+}
+
+<div class="container mt-4 mb-5"> @* Vùng chứa chính *@
+    <div class="d-flex justify-content-between align-items-center mb-3"> @* Bố cục căn ngang *@
+        <h2 class="text-primary">CHI TIẾT ĐƠN HÀNG #@Model.Id</h2> @* Tiêu đề chính *@
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại danh sách
+        </a> @* Nút quay lại *@
+    </div>
+
+    <div class="row mb-4"> @* Dòng chứa hai khung thông tin *@
+        <div class="col-md-6"> @* Khung thông tin khách hàng *@
+            <div class="card h-100"> @* Thẻ card *@
+                <div class="card-header bg-light"> @* Đầu card *@
+                    <h5 class="card-title m-0">Thông Tin Khách Hàng</h5>
+                </div>
+                <div class="card-body"> @* Thân card *@
+                    <p><strong>Họ và tên:</strong> @Model.Customer?.FullName</p>
+                    <p><strong>Email:</strong> @Model.Customer?.Email</p>
+                    <p><strong>Số điện thoại:</strong> @Model.Customer?.Phone</p>
+                    <p><strong>Địa chỉ giao hàng:</strong> @Model.Customer?.Address</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6"> @* Khung thông tin đơn hàng *@
+            <div class="card h-100"> @* Thẻ card *@
+                <div class="card-header bg-light"> @* Đầu card *@
+                    <h5 class="card-title m-0">Thông Tin Đơn Hàng</h5>
+                </div>
+                <div class="card-body"> @* Thân card *@
+                    <p><strong>Ngày đặt hàng:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p>
+                        <strong>Trạng thái:</strong>
+                        @if (Model.Status == 0) // Chờ duyệt
+                        {
+                            <span class="badge bg-warning text-dark px-3 py-1">Chờ duyệt</span>
+                        }
+                        else if (Model.Status == 1) // Đang giao
+                        {
+                            <span class="badge bg-primary px-3 py-1">Đang giao</span>
+                        }
+                        else if (Model.Status == 2) // Đã xong
+                        {
+                            <span class="badge bg-success px-3 py-1">Đã xong</span>
+                        }
+                    </p>
+                    <p><strong>Ghi chú đơn hàng:</strong> @(string.IsNullOrEmpty(Model.Notes) ? "Không có ghi chú" : Model.Notes)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card"> @* Thẻ card chứa danh sách sản phẩm đặt mua *@
+        <div class="card-header bg-primary text-white"> @* Đầu card màu xanh *@
+            <h5 class="card-title m-0">Danh Sách Sản Phẩm Đã Đặt</h5>
+        </div>
+        <div class="card-body p-0"> @* Thân card loại bỏ padding để bảng vừa khít *@
+            <table class="table table-striped table-bordered align-middle m-0"> @* Bảng không margin *@
+                <thead class="table-light"> @* Tiêu đề các cột *@
+                    <tr>
+                        <th style="width:70px">Stt</th>
+                        <th>Tên sản phẩm</th>
+                        <th style="width:180px" class="text-end">Đơn giá</th>
+                        <th style="width:100px" class="text-center">Số lượng</th>
+                        <th style="width:200px" class="text-end">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                    {
+                        int index = 1;
+                        foreach (var detail in Model.OrderDetails)
+                        {
+                            var subtotal = detail.UnitPrice * detail.Quantity;
+                            totalAmount += subtotal;
+
+                            <tr>
+                                <td class="text-center">@index</td>
+                                <td>
+                                    <span class="fw-bold text-dark">@detail.Product?.Name</span>
+                                    <span class="text-muted d-block small">ID sản phẩm: @detail.ProductId</span>
+                                </td>
+                                <td class="text-end">@detail.UnitPrice.ToString("N0") đ</td>
+                                <td class="text-center">@detail.Quantity</td>
+                                <td class="text-end fw-bold text-danger">@subtotal.ToString("N0") đ</td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted p-4">Đơn hàng chưa có chi tiết sản phẩm.</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light"> @* Chân bảng tính tổng cộng *@
+                    <tr>
+                        <td colspan="4" class="text-end fw-bold">TỔNG CỘNG:</td>
+                        <td class="text-end fw-bold text-danger fs-5">@totalAmount.ToString("N0") đ</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

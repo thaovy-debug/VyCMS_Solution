@@ -1,0 +1,34 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện thêm mới loại sản phẩm vào hệ thống (Đã áp dụng Layout Admin quản trị), 
+Ngay thuc hien: 15/05/2026
+*@
+@model CMS.Data.Entities.CategoryProduct
+@* Khai báo Model kiểu CategoryProduct *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
+
+<div class="container mt-4"> @* Vùng chứa chính *@
+    <h2 class="text-primary">THÊM LOẠI SẢN PHẨM MỚI</h2> @* Tiêu đề chính *@
+    <hr /> @* Đường kẻ phân cách *@
+
+    <form asp-action="Create" method="post"> @* Form gửi yêu cầu POST *@
+        <div class="mb-3"> @* Nhóm nhập tên *@
+            <label class="form-label fw-bold">Tên loại sản phẩm:</label> @* Nhãn nhập *@
+            <input asp-for="Name" class="form-control" placeholder="Nhập tên loại sản phẩm (ví dụ: Điện thoại, Laptop...)" required /> @* Ô nhập tên *@
+            <span asp-validation-for="Name" class="text-danger small"></span> @* Kiểm tra lỗi dữ liệu *@
+        </div> @* Kết thúc nhóm *@
+
+        <div class="mb-3"> @* Nhóm nhập mô tả *@
+            <label class="form-label fw-bold">Mô tả:</label> @* Nhãn nhập *@
+            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Nhập mô tả ngắn cho loại sản phẩm"></textarea> @* Khung văn bản mô tả *@
+            <span asp-validation-for="Description" class="text-danger small"></span> @* Kiểm tra lỗi *@
+        </div> @* Kết thúc nhóm *@
+
+        <button type="submit" class="btn btn-success">Lưu vào hệ thống</button> @* Nút lưu dữ liệu *@
+        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a> @* Nút hủy bỏ *@
+    </form> @* Kết thúc form *@
+</div> @* Kết thúc vùng chứa *@

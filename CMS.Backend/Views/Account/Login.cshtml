@@ -1,0 +1,50 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện đăng nhập hệ thống VyCMS Admin (Sử dụng Layout độc lập không dùng LayoutAdmin), 
+Ngay thuc hien: 15/05/2026
+*@
+
+@{
+    Layout = null; // Trang đăng nhập độc lập hoàn toàn, không sử dụng Layout chung của hệ thống quản trị
+}
+<!DOCTYPE html> @* Khai báo kiểu tài liệu HTML5 *@
+<html lang="vi"> @* Mở thẻ html thiết lập ngôn ngữ Tiếng Việt *@
+<head> @* Vùng chứa tiêu đề và cấu hình *@
+    <meta charset="utf-8" /> @* Bảng mã ký tự chuẩn UTF-8 tránh lỗi font chữ *@
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> @* Hỗ trợ co giãn giao diện tương thích thiết bị di động *@
+    <title>Đăng nhập hệ thống - VyCMS</title> @* Tiêu đề trang hiển thị trên tab trình duyệt *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> @* Liên kết thư viện CSS Bootstrap 5 thông qua CDN *@
+</head> @* Kết thúc thẻ head *@
+<body class="bg-light d-flex align-items-center" style="min-height: 100vh;"> @* Nền sáng nhạt, sử dụng Flexbox căn giữa khung đăng nhập theo phương thẳng đứng *@
+    <div class="container"> @* Vùng chứa căn lề chính *@
+        <div class="row justify-content-center"> @* Dòng chứa cột biểu mẫu căn giữa *@
+            <div class="col-md-4"> @* Cột chiếm 4/12 cột lưới trên màn hình trung bình *@
+                <div class="card shadow border-0"> @* Khung thẻ card có bóng mờ và không viền *@
+                    <div class="card-header bg-primary text-white text-center py-3"> @* Đầu thẻ card màu xanh chính, chữ trắng, căn giữa *@
+                        <h5 class="mb-0">HỆ THỐNG QUẢN TRỊ VyCMS</h5> @* Dòng chữ thương hiệu tiêu đề *@
+                    </div> @* Kết thúc đầu thẻ *@
+                    <div class="card-body p-4"> @* Thân thẻ card chứa form nhập liệu với padding dày p-4 *@
+                        <form asp-action="Login" method="post"> @* Thẻ form gửi yêu cầu POST đến Action Login xử lý đăng nhập *@
+                            <div class="mb-3"> @* Nhóm nhập liệu Tên đăng nhập *@
+                                <label class="form-label">Tên đăng nhập:</label> @* Nhãn chỉ dẫn *@
+                                <input type="text" name="username" class="form-control" placeholder="Nhập tài khoản quản trị..." required /> @* Ô nhập tài khoản, có thuộc tính required bắt buộc điền *@
+                            </div> @* Kết thúc nhóm *@
+                            <div class="mb-3"> @* Nhóm nhập liệu Mật khẩu *@
+                                <label class="form-label">Mật khẩu:</label> @* Nhãn chỉ dẫn mật khẩu *@
+                                <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu..." required /> @* Ô nhập mật khẩu kiểu password ẩn ký tự *@
+                            </div> @* Kết thúc nhóm *@
+                            @if (ViewBag.Error != null) @* Kiểm tra nếu có lỗi đăng nhập trả về từ Controller *@
+                            {
+                                <div class="alert alert-danger py-2 small">@ViewBag.Error</div> @* Hiển thị hộp thoại lỗi màu đỏ nhạt *@
+                            }
+                            <button type="submit" class="btn btn-primary w-100">ĐĂNG NHẬP</button> @* Nút bấm loại submit gửi form rộng 100% *@
+                        </form> @* Kết thúc form *@
+                    </div> @* Kết thúc thân thẻ *@
+                </div> @* Kết thúc thẻ card *@
+            </div> @* Kết thúc cột *@
+        </div> @* Kết thúc dòng *@
+    </div> @* Kết thúc container *@
+</body> @* Kết thúc body *@
+</html> @* Kết thúc html *@

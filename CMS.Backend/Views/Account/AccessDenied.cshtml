@@ -1,0 +1,32 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện hiển thị thông báo lỗi 403 khi thành viên không đủ thẩm quyền truy cập (Ví dụ Editor vào User), 
+Ngay thuc hien: 15/05/2026
+*@
+
+@{
+    Layout = "_LayoutAdmin"; @* Sử dụng Layout quản trị chung của hệ thống quản trị *@
+    ViewData["Title"] = "Từ chối truy cập"; @* Thiết lập tiêu đề trang cho thanh tab *@
+}
+
+<div class="container mt-5 text-center"> @* Vùng chứa chính, cách lề trên mt-5, căn giữa toàn bộ nội dung *@
+    <div class="row justify-content-center"> @* Dòng lưới căn giữa *@
+        <div class="col-md-6"> @* Cột rộng 6/12 ở màn hình trung bình *@
+            <div class="card shadow p-5 border-0"> @* Thẻ card có bóng mờ, padding lớn p-5 và không viền *@
+                <div class="mb-4"> @* Vùng chứa icon *@
+                    <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 4rem;"></i> @* Biểu tượng tam giác cảnh báo màu đỏ *@
+                </div> @* Kết thúc vùng icon *@
+                <h1 class="text-danger fw-bold">403 - TỪ CHỐI TRUY CẬP</h1> @* Tiêu đề chính báo lỗi 403 *@
+                <p class="text-muted my-3 fs-5"> @* Đoạn văn bản mô tả lỗi, font chữ hơi lớn fs-5 *@
+                    Tài khoản của bạn không có đủ quyền hạn để xem trang này. Vui lòng liên hệ với quản trị viên hệ thống để biết thêm chi tiết.
+                </p> @* Kết thúc đoạn văn bản *@
+                <div class="mt-4"> @* Nhóm các nút điều hướng *@
+                    <a href="/" class="btn btn-primary me-2">Quay lại trang chủ</a> @* Nút đưa về trang chủ hệ thống *@
+                    <a asp-controller="Account" asp-action="Logout" class="btn btn-outline-danger">Đăng xuất tài khoản</a> @* Nút đăng xuất tài khoản *@
+                </div> @* Kết thúc nhóm nút *@
+            </div> @* Kết thúc card *@
+        </div> @* Kết thúc cột *@
+    </div> @* Kết thúc dòng *@
+</div> @* Kết thúc container *@

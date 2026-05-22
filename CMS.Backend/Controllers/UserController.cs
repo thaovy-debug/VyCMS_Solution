@@ -2,7 +2,7 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Quản lý danh sách thành viên hệ thống, hỗ trợ thêm mới, cập nhật thông tin (với xử lý đổi mật khẩu thông minh) và xóa thành viên, 
+Mo ta: Quản lý danh sách thành viên hệ thống, hỗ trợ thêm mới, cập nhật thông tin (với xử lý đổi mật khẩu thông minh) và xóa thành viên, chỉ cho phép vai trò Admin [Authorize(Roles = "Admin")], 
 Ngay thuc hien: 15/05/2026
 */
 
@@ -11,9 +11,11 @@ using CMS.Data; // Sử dụng lớp kết nối cơ sở dữ liệu chính App
 using CMS.Data.Entities; // Sử dụng lớp thực thể User từ namespace CMS.Data.Entities
 using Microsoft.EntityFrameworkCore; // Hỗ trợ AsNoTracking và các thao tác nâng cao
 using System.Linq; // Sử dụng các phương thức mở rộng LINQ để xử lý dữ liệu
+using Microsoft.AspNetCore.Authorization; // Sử dụng phân quyền và xác thực người dùng
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
 {
+    [Authorize(Roles = "Admin")] // Chỉ tài khoản có vai trò là "Admin" mới được phép vào quản trị thành viên
     public class UserController : Controller // Định nghĩa lớp UserController kế thừa từ lớp Controller cơ bản
     {
         private readonly ApplicationDbContext _context; // Biến cục bộ lưu trữ kết nối CSDL chỉ đọc

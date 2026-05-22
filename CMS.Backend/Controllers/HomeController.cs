@@ -2,7 +2,7 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Điều hướng trang chủ Backend, xử lý hiển thị bài viết mới nhất và thông tin lỗi ứng dụng, 
+Mo ta: Điều hướng trang chủ Backend, xử lý hiển thị bài viết mới nhất và thông tin lỗi ứng dụng, tích hợp xác thực [Authorize] cho trang quản trị chính, 
 Ngay thuc hien: 15/05/2026
 */
 
@@ -11,9 +11,11 @@ using Microsoft.AspNetCore.Mvc; // Sử dụng các thành phần hỗ trợ MVC
 using Microsoft.EntityFrameworkCore; // Sử dụng Entity Framework Core cho các thao tác truy vấn CSDL nâng cao (như Include)
 using System.Diagnostics; // Cung cấp các công cụ chuẩn đoán lỗi và giám sát hệ thống (Activity)
 using CMS.Data; // Sử dụng đối tượng kết nối CSDL ApplicationDbContext
+using Microsoft.AspNetCore.Authorization; // Sử dụng phân quyền và xác thực người dùng
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
 {
+    [Authorize] // Bắt buộc đăng nhập để truy cập trang chủ quản trị Backend
     public class HomeController : Controller // Định nghĩa lớp HomeController kế thừa từ Controller cơ bản
     {
         private readonly ILogger<HomeController> _logger; // Đối tượng hỗ trợ ghi nhật ký log hoạt động

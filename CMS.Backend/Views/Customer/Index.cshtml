@@ -1,26 +1,55 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện quản lý danh sách khách hàng trong hệ thống CMS Backend (Đã áp dụng Layout Admin), 
+Ngay thuc hien: 15/05/2026
+*@
 @model IEnumerable<CMS.Data.Entities.Customer>
+@* Khai báo Model nhận danh sách thực thể Customer *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
 
-<h2 class="text-primary">DANH S�CH KH�CH H�NG (D? LI?U M?U)</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>H? v� t�n</th>
-            <th>Email</th>
-            <th>?i?n tho?i</th>
-            <th>??a ch?</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.FullName</td>
-                <td>@item.Email</td>
-                <td>@item.Phone</td>
-                <td>@item.Address</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="py-4"> @* Vùng đệm dọc cho trang *@
+    <div class="d-flex justify-content-between align-items-center mb-3"> @* Bố cục căn ngang hai đầu *@
+        <h2 class="text-primary">QUẢN LÝ KHÁCH HÀNG</h2> @* Tiêu đề quản lý *@
+        <a asp-action="Create" class="btn btn-success"> @* Nút thêm mới *@
+            <i class="bi bi-plus-circle"></i> Thêm khách hàng mới
+        </a> @* Kết thúc nút thêm *@
+    </div> @* Kết thúc tiêu đề *@
+
+    <table class="table table-striped table-bordered align-middle"> @* Bảng kẻ sọc, có viền *@
+        <thead class="table-light"> @* Phần đầu bảng *@
+            <tr> @* Dòng tiêu đề *@
+                <th style="width:70px">ID</th> @* Cột ID *@
+                <th>Họ và tên</th> @* Cột họ tên *@
+                <th>Email liên hệ</th> @* Cột địa chỉ email *@
+                <th style="width:150px">Số điện thoại</th> @* Cột điện thoại *@
+                <th>Địa chỉ giao hàng</th> @* Cột địa chỉ *@
+                <th style="width:180px">Thao tác</th> @* Cột thao tác *@
+            </tr> @* Đóng dòng *@
+        </thead> @* Đóng đầu *@
+        <tbody> @* Phần thân *@
+            @foreach (var item in Model) @* Duyệt qua danh sách khách hàng *@
+            {
+                <tr> @* Dòng dữ liệu *@
+                    <td>@item.Id</td> @* Ô hiển thị mã Id *@
+                    <td class="fw-bold">@item.FullName</td> @* Ô hiển thị họ tên *@
+                    <td>@item.Email</td> @* Ô hiển thị Email *@
+                    <td>@item.Phone</td> @* Ô hiển thị điện thoại *@
+                    <td>@item.Address</td> @* Ô hiển thị địa chỉ *@
+                    <td> @* Ô chứa các nút chức năng *@
+                        @* Nút sửa *@
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Sửa</a>
+                        
+                        @* Nút xóa *@
+                        <a asp-action="Delete" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng @item.FullName không? Việc này có thể ảnh hưởng tới các đơn đặt hàng liên quan.')">Xóa</a>
+                    </td> @* Đóng ô thao tác *@
+                </tr> @* Đóng dòng *@
+            } @* Đóng vòng lặp *@
+        </tbody> @* Đóng thân *@
+    </table> @* Đóng bảng *@
+</div> @* Đóng khối py-4 *@

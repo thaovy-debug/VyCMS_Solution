@@ -2,33 +2,132 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Hiển thị danh sách sản phẩm trong hệ thống kèm theo tên danh mục sản phẩm tương ứng, 
+Mo ta: Quản lý các chức năng CRUD cho sản phẩm, hỗ trợ upload ảnh trực tiếp từ máy tính lên thư mục wwwroot/uploads, tích hợp xác thực Cookie [Authorize], 
 Ngay thuc hien: 15/05/2026
 */
 
-using CMS.Data; // Sử dụng lớp kết nối cơ sở dữ liệu chính ApplicationDbContext
-using CMS.Data.Entities; // Sử dụng các lớp thực thể dữ liệu (Product, CategoryProduct...)
-using Microsoft.AspNetCore.Mvc; // Sử dụng các thành phần hỗ trợ ASP.NET MVC Controller và ActionResult
-using Microsoft.EntityFrameworkCore; // Sử dụng Entity Framework Core hỗ trợ tải liên kết (Include)
+using CMS.Data; // Sử dụng lớp DbContext chính
+using CMS.Data.Entities; // Sử dụng thực thể Product, CategoryProduct
+using Microsoft.AspNetCore.Mvc; // Sử dụng các lớp điều hướng Controller và View
+using Microsoft.AspNetCore.Authorization; // Sử dụng phân quyền và xác thực người dùng
+using Microsoft.EntityFrameworkCore; // Sử dụng nạp chồng liên kết Include
+using Microsoft.AspNetCore.Http; // Sử dụng IFormFile hỗ trợ upload ảnh
+using System; // Sử dụng lớp Guid
+using System.IO; // Sử dụng các thao tác File, Path, Directory
+using System.Linq; // Sử dụng LINQ
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
 {
-    public class ProductController : Controller // Định nghĩa lớp ProductController kế thừa từ lớp Controller cơ bản
+    [Authorize] // Yêu cầu người dùng đăng nhập trước khi thao tác
+    public class ProductController : Controller // Lớp ProductController kế thừa từ Controller
     {
-        private readonly ApplicationDbContext _context; // Biến cục bộ lưu trữ kết nối CSDL chỉ đọc
+        private readonly ApplicationDbContext _context; // Biến kết nối CSDL
 
-        public ProductController(ApplicationDbContext context) // Phương thức khởi dựng nạp đối tượng DbContext thông qua DI
+        public ProductController(ApplicationDbContext context) // Phương thức khởi dựng
         {
-            _context = context; // Gán đối tượng kết nối vào biến cục bộ
+            _context = context; // Gán DbContext
         }
 
-        public IActionResult Index() // Hàm xử lý hiển thị danh sách sản phẩm
+        public IActionResult Index() // Hàm hiển thị danh sách toàn bộ sản phẩm
         {
-            var products = _context.Products // Truy vấn bảng Products
-                .Include(p => p.CategoryProduct) // Tải kèm thông tin danh mục sản phẩm liên kết (CategoryProduct)
-                .ToList(); // Thực hiện tải dữ liệu và chuyển thành dạng List
+            var products = _context.Products // Lấy dữ liệu từ bảng Products
+                .Include(p => p.CategoryProduct) // Nạp kèm danh mục sản phẩm liên kết
+                .ToList();
+            return View(products); // Trả về View Index
+        }
 
-            return View(products); // Trả về giao diện Index và truyền danh sách sản phẩm sang View
+        [HttpGet] // Nhận HTTP GET
+        public IActionResult Create() // Hàm hiển thị giao diện thêm sản phẩm mới
+        {
+            ViewBag.CategoriesProducts = _context.CategoriesProducts.ToList(); // Truyền danh sách loại sản phẩm sang View dạng ViewBag
+            return View(); // Trả về View tạo mới
+        }
+
+        [HttpPost] // Nhận HTTP POST
+        public IActionResult Create(Product model, IFormFile? uploadImage) // Hàm xử lý lưu thông tin sản phẩm mới kèm ảnh upload
+        {
+            if (ModelState.IsValid) // Kiểm tra tính hợp lệ của dữ liệu form
+            {
+                if (uploadImage != null && uploadImage.Length > 0) // Nếu người dùng tải file lên
+                {
+                    string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"); // Định nghĩa thư mục lưu ảnh
+                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder); // Tạo thư mục nếu chưa tồn tại
+
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName); // Tạo tên file ảnh ngẫu nhiên duy nhất
+                    string filePath = Path.Combine(folder, fileName); // Đường dẫn lưu vật lý
+
+                    using (var stream = new FileStream(filePath, FileMode.Create)) // Mở luồng lưu file
+                    {
+                        uploadImage.CopyTo(stream); // Thực hiện sao chép file
+                    }
+
+                    model.ImageUrl = "/uploads/" + fileName; // Gán đường dẫn tương đối của ảnh
+                }
+
+                _context.Products.Add(model); // Thêm sản phẩm vào DbContext
+                _context.SaveChanges(); // Lưu vào CSDL
+                return RedirectToAction("Index"); // Quay lại trang danh sách
+            }
+            ViewBag.CategoriesProducts = _context.CategoriesProducts.ToList(); // Nạp lại danh sách nếu có lỗi
+            return View(model); // Trả lại View cùng thông báo lỗi
+        }
+
+        [HttpGet] // Nhận HTTP GET
+        public IActionResult Edit(int id) // Hàm hiển thị giao diện sửa sản phẩm theo Id
+        {
+            var product = _context.Products.Find(id); // Tìm sản phẩm theo Id
+            if (product == null) return NotFound(); // Trả về 404 nếu không thấy
+            ViewBag.CategoriesProducts = _context.CategoriesProducts.ToList(); // Truyền danh sách loại sản phẩm sang View
+            return View(product); // Trả về View chỉnh sửa
+        }
+
+        [HttpPost] // Nhận HTTP POST
+        public IActionResult Edit(Product model, IFormFile? uploadImage) // Hàm xử lý cập nhật thay đổi sản phẩm kèm ảnh mới
+        {
+            if (ModelState.IsValid) // Kiểm tra tính hợp lệ
+            {
+                if (uploadImage != null && uploadImage.Length > 0) // Nếu người dùng có chọn file ảnh mới
+                {
+                    string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"); // Thư mục lưu ảnh
+                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder); // Tạo nếu chưa có
+
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName); // Tạo tên file duy nhất
+                    string filePath = Path.Combine(folder, fileName); // Đường dẫn vật lý
+
+                    using (var stream = new FileStream(filePath, FileMode.Create)) // Lưu file
+                    {
+                        uploadImage.CopyTo(stream);
+                    }
+
+                    model.ImageUrl = "/uploads/" + fileName; // Lưu đường dẫn ảnh mới
+                }
+                else // Nếu giữ nguyên ảnh cũ
+                {
+                    // Lấy thông tin sản phẩm gốc để giữ nguyên ImageUrl cũ
+                    var oldProduct = _context.Products.AsNoTracking().FirstOrDefault(p => p.Id == model.Id);
+                    if (oldProduct != null && string.IsNullOrEmpty(model.ImageUrl))
+                    {
+                        model.ImageUrl = oldProduct.ImageUrl; // Giữ lại ảnh cũ
+                    }
+                }
+
+                _context.Products.Update(model); // Cập nhật thông tin sản phẩm
+                _context.SaveChanges(); // Lưu thay đổi vào CSDL
+                return RedirectToAction("Index"); // Quay lại trang danh sách sản phẩm
+            }
+            ViewBag.CategoriesProducts = _context.CategoriesProducts.ToList(); // Nạp lại nếu lỗi
+            return View(model); // Trả về View cùng thông báo lỗi
+        }
+
+        public IActionResult Delete(int id) // Hàm xử lý xóa sản phẩm theo Id
+        {
+            var product = _context.Products.Find(id); // Tìm sản phẩm theo Id
+            if (product != null)
+            {
+                _context.Products.Remove(product); // Xóa sản phẩm khỏi DbContext
+                _context.SaveChanges(); // Lưu thay đổi xuống CSDL
+            }
+            return RedirectToAction("Index"); // Quay lại trang danh sách sản phẩm
         }
     }
 }

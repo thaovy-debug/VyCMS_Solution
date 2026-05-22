@@ -2,35 +2,87 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Thực hiện hiển thị danh sách đơn hàng kèm thông tin khách hàng và chi tiết các sản phẩm được đặt mua, 
+Mo ta: Quản lý các chức năng xem chi tiết đơn hàng, cập nhật trạng thái đơn hàng (Chờ duyệt, Đang giao, Đã xong), xóa đơn hàng, bảo mật Cookie [Authorize], 
 Ngay thuc hien: 15/05/2026
 */
 
-using CMS.Data; // Sử dụng lớp kết nối cơ sở dữ liệu ApplicationDbContext
-using CMS.Data.Entities; // Sử dụng các lớp thực thể (Order, Product...)
-using Microsoft.AspNetCore.Mvc; // Sử dụng các tính năng điều hướng Controller và View
-using Microsoft.EntityFrameworkCore; // Sử dụng Entity Framework Core cho các phương thức nạp chồng liên kết Include
+using CMS.Data; // Sử dụng DbContext kết nối CSDL
+using CMS.Data.Entities; // Sử dụng thực thể Order, OrderDetail...
+using Microsoft.AspNetCore.Mvc; // Sử dụng các lớp điều hướng Controller và View
+using Microsoft.AspNetCore.Authorization; // Sử dụng bảo mật hệ thống
+using Microsoft.EntityFrameworkCore; // Sử dụng các phương thức nạp chồng Include
+using System.Linq; // Sử dụng LINQ
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
 {
-    public class OrderController : Controller // Định nghĩa lớp OrderController kế thừa từ lớp Controller cơ bản
+    [Authorize] // Yêu cầu đăng nhập trước khi truy cập
+    public class OrderController : Controller // Định nghĩa lớp OrderController
     {
-        private readonly ApplicationDbContext _context; // Khai báo đối tượng kết nối CSDL chỉ đọc
+        private readonly ApplicationDbContext _context; // Biến kết nối CSDL
 
-        public OrderController(ApplicationDbContext context) // Phương thức khởi dựng thực hiện tiêm dependency DbContext
+        public OrderController(ApplicationDbContext context) // Phương thức khởi dựng
         {
-            _context = context; // Gán đối tượng kết nối CSDL vào biến _context
+            _context = context; // Gán đối tượng kết nối CSDL
         }
 
-        public IActionResult Index() // Hàm xử lý hiển thị danh sách toàn bộ các đơn đặt hàng
+        public IActionResult Index() // Hàm hiển thị danh sách toàn bộ các đơn hàng
         {
-            var orders = _context.Orders // Truy vấn từ bảng Orders
-                .Include(o => o.Customer) // Nạp kèm theo thông tin của khách hàng (Customer) đặt đơn
-                .Include(o => o.OrderDetails) // Nạp kèm theo thông tin chi tiết đơn hàng (OrderDetails)
-                .ThenInclude(od => od.Product) // Trong từng chi tiết đơn hàng, nạp tiếp thông tin của sản phẩm (Product) tương ứng
-                .ToList(); // Thực thi truy vấn và chuyển đổi toàn bộ kết quả thành List
+            var orders = _context.Orders // Lấy dữ liệu từ bảng Orders
+                .Include(o => o.Customer) // Nạp kèm khách hàng
+                .Include(o => o.OrderDetails) // Nạp kèm chi tiết đơn hàng
+                .ToList();
+            return View(orders); // Trả về View danh sách đơn hàng
+        }
 
-            return View(orders); // Trả về giao diện Index đồng thời truyền danh sách đơn hàng thu được sang View
+        public IActionResult Details(int id) // Hàm hiển thị chi tiết các sản phẩm trong đơn hàng
+        {
+            var order = _context.Orders // Truy vấn đơn hàng theo Id
+                .Include(o => o.Customer) // Nạp thông tin khách hàng
+                .Include(o => o.OrderDetails) // Nạp chi tiết đơn hàng
+                .ThenInclude(od => od.Product) // Nạp thông tin sản phẩm trong chi tiết
+                .FirstOrDefault(o => o.Id == id); // Tìm bản ghi khớp Id
+
+            if (order == null) return NotFound(); // Nếu không thấy đơn hàng, trả về 404
+            return View(order); // Trả về View chi tiết
+        }
+
+        [HttpGet] // Nhận HTTP GET
+        public IActionResult Edit(int id) // Hàm hiển thị giao diện cập nhật trạng thái đơn hàng
+        {
+            var order = _context.Orders.Find(id); // Tìm đơn hàng theo Id
+            if (order == null) return NotFound(); // Trả về 404 nếu không thấy
+            return View(order); // Trả về View chỉnh sửa trạng thái
+        }
+
+        [HttpPost] // Nhận HTTP POST
+        public IActionResult Edit(Order model) // Hàm xử lý cập nhật trạng thái đơn hàng
+        {
+            var order = _context.Orders.Find(model.Id); // Tìm đơn hàng gốc trong CSDL
+            if (order == null) return NotFound();
+
+            order.Status = model.Status; // Cập nhật trạng thái đơn hàng
+            order.Notes = model.Notes; // Cập nhật ghi chú
+
+            _context.SaveChanges(); // Lưu thay đổi xuống CSDL
+            return RedirectToAction("Index"); // Quay lại trang danh sách đơn hàng
+        }
+
+        public IActionResult Delete(int id) // Hàm xử lý xóa đơn hàng theo Id
+        {
+            var order = _context.Orders // Tìm đơn hàng kèm chi tiết
+                .Include(o => o.OrderDetails)
+                .FirstOrDefault(o => o.Id == id);
+
+            if (order != null)
+            {
+                if (order.OrderDetails != null)
+                {
+                    _context.OrderDetails.RemoveRange(order.OrderDetails); // Xóa toàn bộ chi tiết đơn hàng trước để tránh lỗi ràng buộc khóa ngoại
+                }
+                _context.Orders.Remove(order); // Xóa đơn hàng chính
+                _context.SaveChanges(); // Lưu các thay đổi xuống CSDL
+            }
+            return RedirectToAction("Index"); // Quay lại trang danh sách
         }
     }
 }

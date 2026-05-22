@@ -1,0 +1,36 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện chỉnh sửa thông tin loại sản phẩm (Đã áp dụng Layout Admin quản trị), 
+Ngay thuc hien: 15/05/2026
+*@
+@model CMS.Data.Entities.CategoryProduct
+@* Khai báo Model kiểu CategoryProduct *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
+
+<div class="container mt-4"> @* Vùng chứa chính *@
+    <h2 class="text-warning">CHỈNH SỬA LOẠI SẢN PHẨM</h2> @* Tiêu đề chính *@
+    <hr /> @* Đường kẻ phân cách *@
+
+    <form asp-action="Edit" method="post"> @* Form gửi yêu cầu cập nhật POST *@
+        <input type="hidden" asp-for="Id" /> @* Lưu Id ẩn để nhận dạng bản ghi cần sửa *@
+
+        <div class="mb-3"> @* Nhóm nhập tên *@
+            <label class="form-label fw-bold">Tên loại sản phẩm:</label> @* Nhãn nhập *@
+            <input asp-for="Name" class="form-control" required /> @* Ô nhập tên *@
+            <span asp-validation-for="Name" class="text-danger small"></span> @* Hiển thị lỗi hợp lệ *@
+        </div> @* Kết thúc nhóm *@
+
+        <div class="mb-3"> @* Nhóm nhập mô tả *@
+            <label class="form-label fw-bold">Mô tả:</label> @* Nhãn nhập *@
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea> @* Khung văn bản mô tả *@
+            <span asp-validation-for="Description" class="text-danger small"></span> @* Hiển thị lỗi *@
+        </div> @* Kết thúc nhóm *@
+
+        <button type="submit" class="btn btn-warning">Lưu thay đổi</button> @* Nút lưu chỉnh sửa *@
+        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a> @* Nút hủy *@
+    </form> @* Kết thúc form *@
+</div> @* Kết thúc vùng chứa *@

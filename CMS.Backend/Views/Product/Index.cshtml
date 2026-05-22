@@ -1,26 +1,83 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện quản lý danh sách sản phẩm, hiển thị chi tiết hình ảnh, đơn giá, số lượng tồn kho (Đã áp dụng Layout Admin), 
+Ngay thuc hien: 15/05/2026
+*@
 @model IEnumerable<CMS.Data.Entities.Product>
+@* Khai báo Model nhận danh sách thực thể Product *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
 
-<h2 class="text-primary">DANH S�CH S?N PH?M (D? LI?U M?U)</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>T�n s?n ph?m</th>
-            <th>Danh m?c</th>
-            <th>Gi�</th>
-            <th>S? l??ng</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.Name</td>
-                <td>@item.CategoryProduct?.Name</td>
-                <td>@string.Format("{0:N2}", item.Price)</td>
-                <td>@item.StockQuantity</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="py-4"> @* Vùng đệm dọc cho trang *@
+    <div class="d-flex justify-content-between align-items-center mb-3"> @* Bố cục căn ngang hai đầu *@
+        <h2 class="text-primary">QUẢN LÝ SẢN PHẨM</h2> @* Tiêu đề quản lý sản phẩm *@
+        <a asp-action="Create" class="btn btn-success"> @* Nút thêm sản phẩm mới *@
+            <i class="bi bi-plus-circle"></i> Thêm sản phẩm mới
+        </a> @* Kết thúc nút thêm *@
+    </div> @* Kết thúc tiêu đề *@
+
+    <table class="table table-striped table-bordered align-middle"> @* Bảng kẻ sọc, có viền, căn giữa dọc *@
+        <thead class="table-light"> @* Phần đầu bảng *@
+            <tr> @* Dòng tiêu đề *@
+                <th style="width:70px">ID</th> @* Cột ID *@
+                <th style="width:100px">Hình ảnh</th> @* Cột ảnh đại diện *@
+                <th>Tên sản phẩm</th> @* Cột tên sản phẩm *@
+                <th>Loại sản phẩm</th> @* Cột loại danh mục sản phẩm *@
+                <th style="width:150px">Đơn giá (VNĐ)</th> @* Cột đơn giá *@
+                <th style="width:100px">Số lượng</th> @* Cột tồn kho *@
+                <th style="width:180px">Thao tác</th> @* Cột thao tác *@
+            </tr> @* Đóng dòng *@
+        </thead> @* Đóng đầu *@
+        <tbody> @* Phần thân *@
+            @foreach (var item in Model) @* Duyệt danh sách các sản phẩm *@
+            {
+                <tr> @* Dòng dữ liệu *@
+                    <td>@item.Id</td> @* Ô hiển thị mã Id *@
+                    <td class="text-center"> @* Ô hiển thị ảnh đại diện *@
+                        @if (!string.IsNullOrEmpty(item.ImageUrl)) @* Kiểm tra đường dẫn ảnh *@
+                        {
+                            <img src="@item.ImageUrl" alt="@item.Name" class="img-thumbnail" style="max-height: 50px; max-width: 80px;" /> @* Hiển thị ảnh thu nhỏ *@
+                        }
+                        else @* Ngược lại nếu chưa có ảnh *@
+                        {
+                            <span class="text-muted small">No Image</span> @* Hiển thị chữ tạm *@
+                        }
+                    </td>
+                    <td> @* Ô hiển thị tên sản phẩm *@
+                        <div class="fw-bold">@item.Name</div> @* Tên sản phẩm chính *@
+                        @if (!string.IsNullOrEmpty(item.Description)) @* Hiển thị mô tả ngắn ở dưới *@
+                        {
+                            <span class="text-muted small d-inline-block text-truncate" style="max-width: 300px;" title="@item.Description">
+                                @item.Description
+                            </span>
+                        }
+                    </td>
+                    <td>@item.CategoryProduct?.Name</td> @* Ô hiển thị tên loại sản phẩm *@
+                    <td class="text-end fw-semibold text-danger">@item.Price.ToString("N0") đ</td> @* Định dạng tiền tệ VNĐ không chữ thập phân *@
+                    <td class="text-center"> @* Ô hiển thị số lượng kho *@
+                        @if (item.StockQuantity <= 5) @* Nếu tồn kho quá ít dưới 5 cái *@
+                        {
+                            <span class="badge bg-danger">Chỉ còn @item.StockQuantity</span> @* Hiển thị badge màu đỏ cảnh báo *@
+                        }
+                        else @* Ngược lại *@
+                        {
+                            <span class="badge bg-primary">@item.StockQuantity</span> @* Hiển thị badge màu xanh *@
+                        }
+                    </td>
+                    <td> @* Ô chứa các nút thao tác sửa xóa *@
+                        @* Nút sửa *@
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Sửa</a>
+                        
+                        @* Nút xóa *@
+                        <a asp-action="Delete" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm @item.Name không?')">Xóa</a>
+                    </td> @* Đóng ô thao tác *@
+                </tr> @* Đóng dòng *@
+            } @* Đóng vòng lặp *@
+        </tbody> @* Đóng thân *@
+    </table> @* Đóng bảng *@
+</div> @* Đóng khối py-4 *@

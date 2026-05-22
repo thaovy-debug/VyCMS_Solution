@@ -1,0 +1,40 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện cập nhật trạng thái đơn đặt hàng và ghi chú của đơn hàng (Đã áp dụng Layout Admin), 
+Ngay thuc hien: 15/05/2026
+*@
+@model CMS.Data.Entities.Order
+@* Khai báo Model kiểu Order *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
+
+<div class="container mt-4 mb-5"> @* Vùng chứa chính *@
+    <h2 class="text-warning">CẬP NHẬT ĐƠN HÀNG #@Model.Id</h2> @* Tiêu đề *@
+    <hr /> @* Kẻ ngang *@
+
+    <form asp-action="Edit" method="post"> @* Form gửi yêu cầu POST *@
+        <input type="hidden" asp-for="Id" /> @* Lưu Id ẩn để nhận dạng *@
+
+        <div class="mb-3"> @* Trạng thái *@
+            <label class="form-label fw-bold">Trạng thái đơn hàng:</label>
+            <select asp-for="Status" class="form-select" required>
+                <option value="0">Chờ duyệt</option>
+                <option value="1">Đang giao</option>
+                <option value="2">Đã xong</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3"> @* Ghi chú *@
+            <label class="form-label fw-bold">Ghi chú đơn hàng:</label>
+            <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Nhập ghi chú hoặc thông tin giao nhận..."></textarea>
+            <span asp-validation-for="Notes" class="text-danger small"></span>
+        </div>
+
+        <button type="submit" class="btn btn-warning">Lưu cập nhật</button> @* Nút lưu *@
+        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a> @* Nút hủy *@
+    </form>
+</div>

@@ -1,0 +1,83 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện chỉnh sửa thông tin sản phẩm (Đã áp dụng Layout Admin), 
+Ngay thuc hien: 15/05/2026
+*@
+@model CMS.Data.Entities.Product
+@* Khai báo Model kiểu Product *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
+
+<div class="container mt-4 mb-5"> @* Vùng chứa chính, margin-top mt-4, bottom mb-5 *@
+    <h2 class="text-warning">CHỈNH SỬA SẢN PHẨM</h2> @* Tiêu đề *@
+    <hr /> @* Kẻ đường ngang *@
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data"> @* Form gửi yêu cầu POST hỗ trợ upload ảnh *@
+        <input type="hidden" asp-for="Id" /> @* Khóa chính ẩn *@
+        <input type="hidden" asp-for="ImageUrl" /> @* Lưu giữ đường dẫn ảnh hiện tại *@
+
+        <div class="row"> @* Dòng lưới chia hai cột *@
+            <div class="col-md-8"> @* Cột bên trái chiếm 8/12 cột *@
+                <div class="mb-3"> @* Tên sản phẩm *@
+                    <label class="form-label fw-bold">Tên sản phẩm:</label>
+                    <input asp-for="Name" class="form-control" required />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3"> @* Mô tả chi tiết *@
+                    <label class="form-label fw-bold">Mô tả sản phẩm:</label>
+                    <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="col-md-4"> @* Cột bên phải chiếm 4/12 cột *@
+                <div class="mb-3"> @* Loại sản phẩm *@
+                    <label class="form-label fw-bold">Loại sản phẩm:</label>
+                    <select asp-for="CategoryProductId" class="form-select" required>
+                        <option value="">-- Chọn loại sản phẩm --</option>
+                        @if (ViewBag.CategoriesProducts != null)
+                        {
+                            foreach (var cat in (IEnumerable<CMS.Data.Entities.CategoryProduct>)ViewBag.CategoriesProducts)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="CategoryProductId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3"> @* Đơn giá *@
+                    <label class="form-label fw-bold">Đơn giá (VNĐ):</label>
+                    <input asp-for="Price" class="form-control" type="number" step="1000" required />
+                    <span asp-validation-for="Price" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3"> @* Số lượng *@
+                    <label class="form-label fw-bold">Số lượng nhập kho:</label>
+                    <input asp-for="StockQuantity" class="form-control" type="number" required />
+                    <span asp-validation-for="StockQuantity" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3"> @* Ảnh sản phẩm tải từ máy *@
+                    <label class="form-label fw-bold">Hình ảnh sản phẩm:</label>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="mb-2">
+                            <img src="@Model.ImageUrl" alt="@Model.Name" class="img-thumbnail" style="max-height: 120px;" />
+                        </div>
+                    }
+                    <input type="file" name="uploadImage" class="form-control" accept="image/*" />
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3"> @* Các nút thao tác *@
+            <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+            <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
+        </div>
+    </form>
+</div>

@@ -2,7 +2,7 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Quản lý danh sách và chi tiết các bài viết, hỗ trợ lọc bài viết theo từng danh mục cụ thể (Đã thêm chức năng CRUD tạo mới, chỉnh sửa kèm upload ảnh đại diện và xóa bài viết), 
+Mo ta: Quản lý danh sách và chi tiết các bài viết, hỗ trợ lọc bài viết theo từng danh mục cụ thể (Đã thêm chức năng CRUD tạo mới, chỉnh sửa kèm upload ảnh đại diện và xóa bài viết, tích hợp xác thực [Authorize] cho bảo mật), 
 Ngay thuc hien: 15/05/2026
 */
 
@@ -14,9 +14,11 @@ using Microsoft.EntityFrameworkCore; // Sử dụng Entity Framework Core cho c�
 using System.Linq; // Hỗ trợ các phương thức mở rộng LINQ
 using System.IO; // Hỗ trợ các thao tác xử lý tập tin và đường dẫn thư mục
 using Microsoft.AspNetCore.Http; // Hỗ trợ kiểu IFormFile cho việc tải tập tin lên
+using Microsoft.AspNetCore.Authorization; // Sử dụng thư viện bảo mật xác thực danh tính
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
 {
+    [Authorize] // Bắt buộc đăng nhập mới được truy cập các tính năng quản lý bài viết tin tức
     public class PostController : Controller // Định nghĩa lớp PostController kế thừa từ lớp Controller cơ bản
     {
         private readonly ApplicationDbContext _context; // Biến cục bộ lưu trữ kết nối CSDL chỉ đọc

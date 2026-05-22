@@ -27,18 +27,26 @@ Ngay thuc hien: 15/05/2026
                     <div class="card-body"> @* Thân thẻ card *@
                         <span class="badge bg-info text-dark">@item.Category?.Name</span> @* Nhãn hiển thị tên chuyên mục, phòng hờ Category null *@
                         <h5 class="card-title text-primary">@item.Title</h5> @* Tiêu đề bài viết màu xanh *@
-                        <p class="card-text text-truncate">@Html.Raw(item.Content)</p> @* Nội dung bài viết hiển thị thu gọn một dòng *@
+                        @{
+                            // Loại bỏ các thẻ HTML để lấy văn bản thuần túy giúp căn chỉnh hiển thị 1 dòng sạch sẽ
+                            var plainText = !string.IsNullOrEmpty(item.Content) 
+                                ? System.Text.RegularExpressions.Regex.Replace(item.Content, "<.*?>", string.Empty) 
+                                : string.Empty;
+                        }
+                        <p class="card-text text-truncate" title="@plainText">@plainText</p> @* Nội dung bài viết hiển thị thu gọn một dòng *@
                         <p class="text-muted small">Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy")</p> @* Hiển thị ngày đăng định dạng dd/MM/yyyy *@
-                        <a href="/Post/Details/@item.Id" class="btn btn-outline-primary btn-sm">Xem chi tiết</a> @* Nút xem chi tiết bài viết *@
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning"> @* Nút sửa bài viết theo Id *@
-                            Sửa @* Nhãn sửa *@
-                        </a> @* Kết thúc nút sửa *@
+                        @* Nút xem chi tiết bài viết *@
+                        <a href="/Post/Details/@item.Id" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                        
+                        @* Nút sửa bài viết theo Id *@
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Sửa</a>
                             
-                        <a asp-action="Delete" asp-route-id="@item.Id" @* Nút xóa bài viết theo Id *@
-                           class="btn btn-sm btn-outline-danger" @* Màu viền đỏ cảnh báo *@
-                           onclick="return confirm('Chúng ta có chắc chắn muốn xóa bài viết này không?')"> @* Hộp thoại xác nhận trước khi thực hiện xóa *@
-                            <i class="bi bi-trash"></i> Xóa @* Biểu tượng rác và nhãn xóa *@
-                        </a> @* Kết thúc nút xóa *@
+                        @* Nút xóa bài viết theo Id *@
+                        <a asp-action="Delete" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Chúng ta có chắc chắn muốn xóa bài viết này không?')">
+                            <i class="bi bi-trash"></i> Xóa
+                        </a>
                     </div> @* Kết thúc thân thẻ *@
                 </div> @* Kết thúc thẻ *@
             </div> @* Kết thúc cột *@

@@ -1,26 +1,56 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện quản lý danh sách chi tiết đơn hàng (Sản phẩm đặt mua chi tiết), hiển thị số lượng, đơn giá và tính thành tiền (Đã áp dụng Layout Admin), 
+Ngay thuc hien: 15/05/2026
+*@
 @model IEnumerable<CMS.Data.Entities.OrderDetail>
+@* Khai báo Model nhận danh sách thực thể OrderDetail *@
+@{
+    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+}
 
-<h2 class="text-primary">DANH S�CH CHI TI?T ??N H�NG (D? LI?U M?U)</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>??n h�ng</th>
-            <th>S?n ph?m</th>
-            <th>S? l??ng</th>
-            <th>??n gi�</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.OrderId</td>
-                <td>@item.Product?.Name</td>
-                <td>@item.Quantity</td>
-                <td>@string.Format("{0:N2}", item.UnitPrice)</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="py-4"> @* Vùng đệm dọc cho trang *@
+    <div class="d-flex justify-content-between align-items-center mb-3"> @* Bố cục căn ngang hai đầu *@
+        <h2 class="text-primary">QUẢN LÝ CHI TIẾT ĐƠN HÀNG</h2> @* Tiêu đề quản lý *@
+    </div> @* Kết thúc tiêu đề *@
+
+    <table class="table table-striped table-bordered align-middle"> @* Bảng dữ liệu *@
+        <thead class="table-light"> @* Phần đầu bảng *@
+            <tr> @* Dòng tiêu đề *@
+                <th style="width:70px">ID</th> @* Cột ID *@
+                <th style="width:250px">Đơn hàng (Mã - Khách)</th> @* Cột đơn hàng liên kết *@
+                <th>Sản phẩm đặt mua</th> @* Cột tên sản phẩm *@
+                <th style="width:120px" class="text-center">Số lượng</th> @* Cột số lượng *@
+                <th style="width:160px" class="text-end">Đơn giá mua (VNĐ)</th> @* Cột đơn giá *@
+                <th style="width:180px" class="text-end">Thành tiền (VNĐ)</th> @* Cột thành tiền *@
+                <th style="width:120px">Thao tác</th> @* Cột thao tác *@
+            </tr> @* Đóng dòng *@
+        </thead> @* Đóng đầu *@
+        <tbody> @* Phần thân *@
+            @foreach (var item in Model) @* Duyệt danh sách *@
+            {
+                var subtotal = item.UnitPrice * item.Quantity; @* Tính thành tiền dòng sản phẩm *@
+
+                <tr> @* Dòng chứa dữ liệu *@
+                    <td>@item.Id</td> @* Ô hiển thị mã Id *@
+                    <td>
+                        <span class="fw-bold text-primary">Đơn hàng #@item.OrderId</span>
+                        <div class="small text-muted">Khách: @item.Order?.Customer?.FullName</div>
+                    </td>
+                    <td>@item.Product?.Name</td> @* Ô hiển thị tên sản phẩm *@
+                    <td class="text-center font-monospace">@item.Quantity</td> @* Ô hiển thị số lượng *@
+                    <td class="text-end">@item.UnitPrice.ToString("N0") đ</td> @* Ô hiển thị đơn giá *@
+                    <td class="text-end fw-bold text-danger">@subtotal.ToString("N0") đ</td> @* Ô hiển thị thành tiền *@
+                    <td> @* Ô thao tác *@
+                        @* Chỉ hiển thị nút xóa, loại bỏ thêm/sửa trực tiếp *@
+                        <a asp-action="Delete" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa chi tiết đơn hàng này không?')">Xóa</a>
+                    </td> @* Đóng ô thao tác *@
+                </tr> @* Đóng dòng *@
+            } @* Đóng vòng lặp *@
+        </tbody> @* Đóng thân *@
+    </table> @* Đóng bảng *@
+</div> @* Đóng khối py-4 *@

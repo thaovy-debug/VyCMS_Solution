@@ -33,12 +33,13 @@ Ngay thuc hien: 15/05/2026
                 <td>@item.Name</td> @* Ô hiển thị tên danh mục *@
                 <td>@item.Description</td> @* Ô hiển thị mô tả danh mục *@
                 <td> @* Ô chứa các nút chức năng thao tác *@
-                    <a asp-action="Edit" asp-route-id="@item.Id" @* Liên kết tới Action Edit kèm mã id của danh mục đó *@
-                       class="btn btn-sm btn-outline-warning">Sửa</a> @* Nút Sửa màu vàng viền mảnh cỡ nhỏ *@
+                    @* Nút Sửa danh mục *@
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Sửa</a>
 
-                    <a asp-action="Delete" asp-route-id="@item.Id" @* Liên kết tới Action Delete kèm mã id của danh mục đó *@
-                       class="btn btn-sm btn-outline-danger" @* Nút Xóa màu đỏ viền mảnh cỡ nhỏ *@
-                       onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">Xóa</a> @* Hộp thoại xác nhận của JS trước khi xóa thực sự *@
+                    @* Nút Xóa danh mục *@
+                    <a asp-action="Delete" asp-route-id="@item.Id"
+                       class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">Xóa</a>
                 </td> @* Đóng ô thao tác *@
             </tr> @* Đóng dòng *@
         } @* Đóng vòng lặp *@

@@ -2,13 +2,15 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Thực hiện quản lý các chức năng CRUD cho danh mục bài viết (Thêm, Xóa, Sửa, Xem danh sách), 
+Mo ta: Thực hiện quản lý các chức năng CRUD cho danh mục bài viết, tích hợp xác thực người dùng qua Cookie [Authorize], 
 Ngay thuc hien: 15/05/2026
 */
 
 using CMS.Data; // Sử dụng lớp DbContext từ project CMS.Data
 using Microsoft.AspNetCore.Mvc; // Sử dụng các thành phần hỗ trợ ASP.NET MVC Controller và ActionResult
+using Microsoft.AspNetCore.Authorization; // Sử dụng thư viện bảo mật và phân quyền
 
+[Authorize] // Bắt buộc thành viên phải đăng nhập (Authentication) mới được phép truy cập các chức năng quản lý danh mục
 public class CategoryController : Controller // Định nghĩa lớp CategoryController kế thừa từ lớp Controller cơ bản
 {
     private readonly ApplicationDbContext _context; // Biến cục bộ chỉ đọc lưu đối tượng kết nối CSDL
