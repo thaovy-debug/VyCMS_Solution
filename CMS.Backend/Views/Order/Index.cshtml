@@ -1,0 +1,30 @@
+@model IEnumerable<CMS.Data.Entities.Order>
+
+<h2 class="text-primary">DANH SÁCH ??N HÀNG (D? LI?U M?U)</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Khách hàng</th>
+            <th>Ngày ??t</th>
+            <th>T?ng ti?n</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var total = 0m;
+            if (item.OrderDetails != null)
+            {
+                total = item.OrderDetails.Sum(od => od.UnitPrice * od.Quantity);
+            }
+
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Customer?.FullName</td>
+                <td>@item.OrderDate.ToString("dd/MM/yyyy")</td>
+                <td>@string.Format("{0:N2}", total)</td>
+            </tr>
+        }
+    </tbody>
+</table>

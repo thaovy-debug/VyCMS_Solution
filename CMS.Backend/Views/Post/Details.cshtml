@@ -1,0 +1,25 @@
+@model CMS.Data.Entities.Post
+
+<div class="container mt-4">
+    <h2 class="mb-3 text-primary">@Model.Title</h2>
+    
+    <div class="mb-3">
+        <span class="badge bg-info text-dark">Danh mục: @Model.Category?.Name</span>
+        <span class="text-muted small ms-2">Ngày đăng: @Model.CreatedDate.ToString("dd/MM/yyyy")</span>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <div class="mb-4">
+            <img src="@Model.ImageUrl" alt="Thumbnail" class="img-fluid rounded" style="max-height: 400px; object-fit: cover;" />
+        </div>
+    }
+
+    <div class="content mb-5">
+        @Html.Raw(Model.Content)
+    </div>
+
+    <div>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+    </div>
+</div>

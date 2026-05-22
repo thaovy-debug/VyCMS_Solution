@@ -1,0 +1,26 @@
+@model IEnumerable<CMS.Data.Entities.Product>
+
+<h2 class="text-primary">DANH SÁCH S?N PH?M (D? LI?U M?U)</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên s?n ph?m</th>
+            <th>Danh m?c</th>
+            <th>Giá</th>
+            <th>S? l??ng</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>@item.CategoryProduct?.Name</td>
+                <td>@string.Format("{0:N2}", item.Price)</td>
+                <td>@item.StockQuantity</td>
+            </tr>
+        }
+    </tbody>
+</table>

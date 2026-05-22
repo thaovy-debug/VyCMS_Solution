@@ -1,0 +1,31 @@
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện chỉnh sửa thông tin danh mục bài viết, 
+Ngay thuc hien: 15/05/2026
+*@
+@model CMS.Data.Entities.Category
+@* Định nghĩa Model kiểu Category nhận từ Controller *@
+
+<div class="container mt-4"> @* Vùng chứa chính, canh lề trên mt-4 sử dụng Bootstrap *@
+    <h2 class="text-warning">CHỈNH SỬA DANH MỤC</h2> @* Tiêu đề chỉnh sửa danh mục chữ màu cảnh báo (vàng) *@
+    <hr /> @* Thẻ phân cách đường kẻ ngang *@
+
+    <form asp-action="Edit" method="post"> @* Thẻ form gửi yêu cầu POST đến Action Edit của Controller *@
+        <input type="hidden" asp-for="Id" /> @* Thẻ input ẩn chứa mã định danh Id của danh mục cần sửa *@
+
+        <div class="mb-3"> @* Nhóm Bootstrap mb-3 cho ô nhập liệu tên *@
+            <label class="form-label fw-bold">Tên danh mục:</label> @* Nhãn hiển thị cho ô nhập tên danh mục *@
+            <input asp-for="Name" class="form-control" /> @* Ô nhập văn bản liên kết với thuộc tính Name của Model *@
+        </div> @* Đóng nhóm nhập liệu tên *@
+
+        <div class="mb-3"> @* Nhóm Bootstrap mb-3 cho ô nhập liệu mô tả *@
+            <label class="form-label fw-bold">Mô tả:</label> @* Nhãn hiển thị cho ô nhập mô tả danh mục *@
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea> @* Khung văn bản nhiều dòng liên kết với thuộc tính Description *@
+        </div> @* Đóng nhóm nhập liệu mô tả *@
+
+        <button type="submit" class="btn btn-warning">Cập nhật thay đổi</button> @* Nút bấm loại submit gửi form lên máy chủ *@
+        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a> @* Thẻ liên kết chuyển hướng quay lại danh sách danh mục (Action Index) *@
+    </form> @* Đóng thẻ form *@
+</div> @* Đóng thẻ vùng chứa chính *@

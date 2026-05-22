@@ -1,0 +1,26 @@
+@model IEnumerable<CMS.Data.Entities.Customer>
+
+<h2 class="text-primary">DANH SÁCH KHÁCH HÀNG (D? LI?U M?U)</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>H? và tên</th>
+            <th>Email</th>
+            <th>?i?n tho?i</th>
+            <th>??a ch?</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.FullName</td>
+                <td>@item.Email</td>
+                <td>@item.Phone</td>
+                <td>@item.Address</td>
+            </tr>
+        }
+    </tbody>
+</table>

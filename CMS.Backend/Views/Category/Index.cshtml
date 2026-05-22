@@ -1,22 +1,43 @@
-﻿@model IEnumerable<CMS.Data.Entities.Category>
+@*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Giao diện hiển thị danh sách các danh mục bài viết từ cơ sở dữ liệu, 
+Ngay thuc hien: 15/05/2026
+*@
+@model IEnumerable<CMS.Data.Entities.Category>
+@* Khai báo Model nhận danh sách (tập hợp) các thực thể Category *@
 
-<h2 class="text-primary">DANH SÁCH DANH MỤC (DỮ LIỆU MẪU)</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Tên danh mục</th>
-            <th>Mô tả</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+<a asp-action="Create" class="btn btn-success mb-3"> @* Thẻ liên kết mở giao diện thêm danh mục mới (Action Create) *@
+    <i class="bi bi-plus-circle"></i> Thêm danh mục mới @* Biểu tượng dấu cộng từ Bootstrap Icons và nhãn nút *@
+</a> @* Kết thúc thẻ liên kết *@
+
+<h2 class="text-primary">DANH SÁCH DANH MỤC (DỮ LIỆU THẬT LẤY TỪ DATABASE)</h2> @* Tiêu đề danh sách danh mục màu xanh chính *@
+<table class="table table-bordered"> @* Thẻ table với các đường viền khung của Bootstrap *@
+    <thead> @* Vùng chứa phần đầu của bảng *@
+        <tr> @* Dòng đầu tiên trong phần đầu bảng *@
+            <th>ID</th> @* Cột hiển thị mã định danh ID *@
+            <th>Tên danh mục</th> @* Cột hiển thị tên danh mục *@
+            <th>Mô tả</th> @* Cột hiển thị mô tả *@
+            <th style="width:150px">Thao tác</th> @* Cột hiển thị các nút thao tác có độ rộng 150px *@
+        </tr> @* Đóng dòng *@
+    </thead> @* Đóng phần đầu bảng *@
+    <tbody> @* Vùng chứa phần thân hiển thị dữ liệu bảng *@
+        @foreach (var item in Model) @* Vòng lặp duyệt qua từng danh mục (item) trong danh sách Model *@
         {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.Name</td>
-                <td>@item.Description</td>
-            </tr>
-        }
-    </tbody>
-</table>
+            <tr> @* Dòng biểu diễn thông tin của một danh mục *@
+                <td>@item.Id</td> @* Ô hiển thị mã Id danh mục *@
+                <td>@item.Name</td> @* Ô hiển thị tên danh mục *@
+                <td>@item.Description</td> @* Ô hiển thị mô tả danh mục *@
+                <td> @* Ô chứa các nút chức năng thao tác *@
+                    <a asp-action="Edit" asp-route-id="@item.Id" @* Liên kết tới Action Edit kèm mã id của danh mục đó *@
+                       class="btn btn-sm btn-outline-warning">Sửa</a> @* Nút Sửa màu vàng viền mảnh cỡ nhỏ *@
+
+                    <a asp-action="Delete" asp-route-id="@item.Id" @* Liên kết tới Action Delete kèm mã id của danh mục đó *@
+                       class="btn btn-sm btn-outline-danger" @* Nút Xóa màu đỏ viền mảnh cỡ nhỏ *@
+                       onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">Xóa</a> @* Hộp thoại xác nhận của JS trước khi xóa thực sự *@
+                </td> @* Đóng ô thao tác *@
+            </tr> @* Đóng dòng *@
+        } @* Đóng vòng lặp *@
+    </tbody> @* Đóng phần thân bảng *@
+</table> @* Đóng thẻ bảng dữ liệu *@

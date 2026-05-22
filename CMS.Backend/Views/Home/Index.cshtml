@@ -1,8 +1,32 @@
-﻿@{
+@model IEnumerable<CMS.Data.Entities.Post>
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">NGUYỄN QUỲNH THẢO VY</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-danger">TIN TỨC MỚI NHẤT</h2>
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/images/placeholder.png") : item.ImageUrl)" class="card-img-top" alt="Thumbnail" style="object-fit:cover;height:180px">
+                    <div class="card-body">
+                        <span class="badge bg-primary mb-2">@item.Category?.Name</span>
+                        <h5 class="card-title">@item.Title</h5>
+                        <p class="card-text text-truncate" style="max-height:3.6rem;">@Html.Raw(item.Content)</p>
+                        <a href="/Post/Details/@item.Id" class="btn btn-outline-danger btn-sm">Đọc tiếp</a>
+                    </div>
+                    <div class="card-footer text-muted small">
+                        Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy")
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>
