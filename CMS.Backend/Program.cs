@@ -19,14 +19,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Đăng ký dịch vụ cho các Controller hỗ trợ View (MVC) và Web API
 builder.Services.AddControllersWithViews(); // Đăng ký các controller và view cho luồng MVC
 
-// Đăng ký chính sách CORS cho phép tất cả các nguồn truy cập (phục vụ kết nối FrontEnd ReactJS)
-builder.Services.AddCors(options => {
-    options.AddPolicy("AllowAll", policy => {
-        policy.AllowAnyOrigin() // Cho phép mọi nguồn cấp truy cập (Origin)
-              .AllowAnyMethod() // Cho phép mọi phương thức gọi HTTP (GET, POST, PUT, DELETE)
-              .AllowAnyHeader(); // Cho phép mọi thông tin đi kèm trong Header
-    });
-});
+// Đăng ký chính sách CORS cho phép ReactJS truy cập (phục vụ kết nối FrontEnd ReactJS)
+builder.Services.AddCors(options => { // Đăng ký dịch vụ CORS vào DI container
+    options.AddPolicy("AllowReactApp", policy => { // Thiết lập chính sách CORS mang tên AllowReactApp
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175") // Cho phép ReactJS ở cổng 3000, 5173, 5174 hoặc 5175 gọi tới
+              .AllowAnyHeader() // Cho phép mọi loại Header (Content-Type, Authorization...)
+              .AllowAnyMethod() // Cho phép mọi phương thức HTTP (GET, POST, PUT, DELETE)
+              .AllowCredentials(); // Hỗ trợ truyền Cookie/Session nếu cần sau này
+    }); // Kết thúc thiết lập chính sách AllowReactApp
+}); // Kết thúc đăng ký CORS
 
 // Đăng ký dịch vụ lõi giúp hệ thống tự động bóc tách thông tin Endpoint phục vụ Swagger
 builder.Services.AddEndpointsApiExplorer(); // Kích hoạt bộ thăm dò API endpoints
@@ -59,7 +60,7 @@ if (!app.Environment.IsDevelopment()) // Kiểm tra nếu không phải môi tr�
     app.UseHsts(); // Sử dụng HTTP Strict Transport Security để bắt buộc kết nối HTTPS bảo mật
 }
 
-app.UseHttpsRedirection(); // Tự động chuyển hướng các yêu cầu HTTP sang HTTPS
+// app.UseHttpsRedirection(); // Tạm thời tắt chuyển hướng HTTPS ở local để tránh lỗi CORS khi gọi API từ HTTP ReactJS và tránh lỗi chứng chỉ SSL tự ký
 app.UseStaticFiles(); // Cho phép ứng dụng phục vụ các tệp tĩnh (CSS, JS, hình ảnh) từ thư mục wwwroot
 
 // Kích hoạt sinh tài liệu và giao diện Swagger UI
@@ -73,7 +74,7 @@ app.UseSwaggerUI(c => // Cấu hình giao diện Swagger UI để kiểm thử t
 app.UseRouting(); // Kích hoạt định tuyến để ánh xạ URL đến Endpoint tương ứng
 
 // [VỊ TRÍ ĐẶT CORS]: Phải nằm ngay giữa UseRouting và UseAuthentication / UseAuthorization
-app.UseCors("AllowAll"); // Áp dụng chính sách CORS "AllowAll" cho mọi HTTP request đi qua pipeline
+app.UseCors("AllowReactApp"); // Áp dụng chính sách CORS "AllowReactApp" cho mọi HTTP request đi qua pipeline
 
 app.UseAuthentication(); // Kích hoạt cơ chế xác thực danh tính người dùng (Authentication) - Kiểm tra "Bạn là ai?"
 app.UseAuthorization(); // Kích hoạt cơ chế phân quyền (Authorization) - Kiểm tra "Bạn được làm gì?"

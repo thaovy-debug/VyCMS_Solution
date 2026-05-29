@@ -1,111 +1,67 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Hệ thống CSS Token toàn cục định vị màu sắc chủ đạo, font chữ phong cách Thiều Hoa và căn chỉnh bố cục
+Ngay thuc hien: 15/05/2026
+*/
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+:root { /* Khai báo các biến CSS Custom Properties toàn cục dùng chung cho dự án */
+  --thieuhoa-primary: #531E18; /* Màu đỏ nâu trầm truyền thống đặc trưng của thương hiệu Thiều Hoa */
+  --thieuhoa-primary-hover: #732a21; /* Màu đỏ nâu sáng hơn một chút khi người dùng di chuột (hover) */
+  --thieuhoa-gold: #D4AF37; /* Màu vàng kim loại sang trọng tạo điểm nhấn trên menu và viền nút */
+  --thieuhoa-light-gold: #FDE579; /* Màu vàng sáng cho các nhãn và badge nổi bật */
+  --thieuhoa-bg: #FCFBF9; /* Màu nền kem sữa nhã nhặn giúp làm dịu mắt người đọc */
+  --thieuhoa-card-bg: #FFFFFF; /* Màu nền trắng tinh khiết cho các khung thẻ sản phẩm và tin tức */
+  --thieuhoa-text: #333333; /* Màu chữ đen xám nhẹ tránh hiện tượng tương phản quá gắt */
+  --thieuhoa-text-light: #777777; /* Màu chữ xám nhạt cho các thông tin phụ, ngày đăng và tồn kho */
+  --thieuhoa-border: #E8E5DF; /* Màu viền ngăn cách giữa các cột và danh sách sản phẩm */
+  --thieuhoa-shadow: rgba(83, 30, 24, 0.08) 0px 8px 24px; /* Đổ bóng nhẹ mang sắc tố đỏ nâu đặc trưng */
+  
+  --sans-serif: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif; /* Khai báo font chữ không chân hiện đại, sang trọng */
+} /* Kết thúc khai báo biến CSS */
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+* { /* Áp dụng cấu hình định dạng cơ bản cho toàn bộ các phần tử trên trang */
+  box-sizing: border-box; /* Thiết lập cách tính kích thước phần tử bao gồm cả đường viền và khoảng đệm */
+  margin: 0; /* Xóa sạch khoảng cách lề ngoài mặc định của trình duyệt */
+  padding: 0; /* Xóa sạch khoảng đệm lề trong mặc định của trình duyệt */
+} /* Kết thúc cấu hình cơ bản */
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
+body { /* Định dạng chi tiết cho thẻ body bao ngoài ứng dụng */
+  font-family: var(--sans-serif); /* Áp dụng font chữ không chân đã cấu hình ở phần root */
+  background-color: var(--thieuhoa-bg); /* Sử dụng màu nền kem sữa toàn trang */
+  color: var(--thieuhoa-text); /* Sử dụng màu chữ xám đậm cho toàn bộ văn bản */
+  line-height: 1.6; /* Đặt khoảng cách giãn dòng hợp lý giúp đọc văn bản dễ dàng */
+  overflow-x: hidden; /* Ẩn thanh cuộn ngang để tránh lỗi vỡ khung giao diện trên thiết bị di động */
+} /* Kết thúc cấu hình body */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+#root { /* Khớp cấu hình ID root của ReactJS để phân bổ giao diện full-width rộng rãi */
+  width: 100%; /* Chiều rộng chiếm tối đa 100% màn hình thiết bị */
+  min-height: 100vh; /* Đảm bảo ứng dụng luôn có chiều cao tối thiểu bằng màn hình trình duyệt */
+  display: flex; /* Sử dụng bố cục Flexbox */
+  flex-direction: column; /* Sắp xếp các phần tử con theo chiều dọc */
+} /* Kết thúc cấu hình root */
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
+a { /* Định dạng cấu trúc cho tất cả các đường liên kết anchor */
+  color: inherit; /* Thừa hưởng màu sắc từ phần tử cha chứa nó */
+  text-decoration: none; /* Xóa bỏ đường gạch chân mặc định của thẻ liên kết */
+  transition: all 0.3s ease; /* Tạo hiệu ứng chuyển cảnh mượt mà khi tương tác */
+} /* Kết thúc cấu hình thẻ a */
 
-body {
-  margin: 0;
-}
+/* Các định nghĩa class tiện ích hỗ trợ nhanh cho việc dàn trang */
+.transition-all { /* Class hỗ trợ tạo hiệu ứng chuyển động mượt mà cho mọi thuộc tính */
+  transition: all 0.3s ease-in-out; /* Hiệu ứng chuyển động mượt mà thời gian 0.3 giây */
+} /* Kết thúc class transition-all */
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
+.hover-zoom:hover { /* Class tạo hiệu ứng phóng to ảnh khi di chuột vào */
+  transform: scale(1.06); /* Phóng to ảnh thêm 6% so với kích thước gốc */
+} /* Kết thúc class hover-zoom */
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
+.hover-card { /* Class cấu hình hiệu ứng tương tác cho các thẻ sản phẩm/tin tức */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Chuyển tiếp mượt cho dịch chuyển và đổ bóng */
+} /* Kết thúc class hover-card */
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
+.hover-card:hover { /* Khi người dùng di chuột vào thẻ có class hover-card */
+  transform: translateY(-6px); /* Nâng nhẹ thẻ lên trên 6px tạo cảm giác nổi 3D */
+  box-shadow: var(--thieuhoa-shadow) !important; /* Kích hoạt đổ bóng màu đỏ nâu sang trọng */
+} /* Kết thúc hover-card:hover */

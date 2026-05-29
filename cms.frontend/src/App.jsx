@@ -1,122 +1,766 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+/*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Component chính App tích hợp toàn bộ giao diện Thiều Hoa kết nối Database API, đảm bảo giao diện sang trọng, chuyên nghiệp
+Ngay thuc hien: 15/05/2026
+*/
 
-function App() {
-  const [count, setCount] = useState(0)
+import React, { useState, useEffect } from 'react'; // Nhập React và các hooks quản lý trạng thái
+import CategoryProductList from './components/CategoryProductList'; // Nhập component danh sách danh mục sản phẩm từ CSDL
+import ProductList from './components/ProductList'; // Nhập component danh sách sản phẩm thời trang từ CSDL
+import PostList from './components/PostList'; // Nhập component danh sách bài viết blog từ CSDL
+import categoryProductService from './services/categoryProductService'; // Nhập dịch vụ lấy danh mục sản phẩm từ Backend
+import productService from './services/productService'; // Nhập dịch vụ lấy sản phẩm từ Backend CSDL
+import './App.css'; // Nhập tệp cấu hình CSS giao diện bổ trợ của Thiều Hoa
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+function App() { // Định nghĩa component chính App của dự án
+    // Khai báo state để chứa danh mục phục vụ hiển thị trên Menu ngang
+    const [categories, setCategories] = useState([]); // Khởi tạo state categories và hàm setCategories
+    const [cartCount, setCartCount] = useState(0); // Khởi tạo state số lượng sản phẩm trong giỏ hàng mẫu
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Khai báo state selectedCategoryId lưu trữ mã danh mục đang lọc (mặc định null hiển thị tất cả)
+    const [customFilterType, setCustomFilterType] = useState(null); // Bộ lọc loại danh mục tự định nghĩa (new, sale, hot, gift)
+    const [allProducts, setAllProducts] = useState([]); // Lưu trữ danh sách toàn bộ sản phẩm phục vụ hiển thị trang chủ theo cụm
+    const [loadingAll, setLoadingAll] = useState(false); // Quản lý trạng thái tải toàn bộ sản phẩm
 
-      <div className="ticks"></div>
+    useEffect(() => { // Tự động chạy tải danh mục để hiển thị lên thanh điều hướng chính
+        const loadMenuCategories = async () => { // Định nghĩa hàm bất đồng bộ loadMenuCategories
+            try { // Khối bắt đầu try
+                const data = await categoryProductService.getAllCategoryProducts(); // Chờ lấy dữ liệu danh mục từ API service
+                setCategories(data); // Đưa danh mục lấy được vào state categories
+            } catch (error) { // Bắt lỗi trong khối catch nếu xảy ra sự cố
+                console.error("Lỗi khi tải danh mục làm menu:", error); // In lỗi chi tiết ra console phục vụ kiểm tra
+            } // Kết thúc khối try-catch
+        }; // Kết thúc định nghĩa hàm loadMenuCategories
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        const loadAllProducts = async () => { // Định nghĩa hàm tải toàn bộ sản phẩm thời trang
+            try { // Khối bắt đầu try
+                setLoadingAll(true); // Đặt trạng thái tải là true
+                const data = await productService.getAllProducts(); // Gọi API lấy toàn bộ sản phẩm
+                setAllProducts(data); // Lưu dữ liệu vào state allProducts
+            } catch (error) { // Bắt lỗi
+                console.error("Lỗi khi tải toàn bộ sản phẩm:", error); // In ra console
+            } finally { // Khối luôn chạy
+                setLoadingAll(false); // Đặt trạng thái tải là false
+            } // Kết thúc khối finally
+        }; // Kết thúc định nghĩa hàm loadAllProducts
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+        loadMenuCategories(); // Thực thi hàm tải danh mục làm menu
+        loadAllProducts(); // Thực thi tải sản phẩm
+    }, []); // Chỉ chạy 1 lần khi render
 
-export default App
+    const handleCategoryClick = (keyword) => { // Định nghĩa hàm chuyển bộ lọc khi click danh mục phụ trong mega menu
+        if (!keyword) { // Nếu không có từ khóa danh mục
+            setSelectedCategoryId(null); // Trở về xem tất cả
+            setCustomFilterType(null); // Tắt bộ lọc đặc biệt
+        } else { // Ngược lại nếu có từ khóa
+            const cat = categories.find(c => c.name.toLowerCase().includes(keyword.toLowerCase())); // Tìm danh mục khớp với từ khóa
+            if (cat) { // Nếu tìm thấy danh mục
+                setSelectedCategoryId(cat.id); // Chọn danh mục đó
+                setCustomFilterType(null); // Tắt bộ lọc đặc biệt
+            } else { // Nếu không tìm thấy
+                setSelectedCategoryId(null); // Mặc định về null
+                setCustomFilterType(null); // Mặc định tắt bộ lọc đặc biệt
+            } // Kết thúc kiểm tra
+        } // Kết thúc kiểm tra keyword
+    }; // Kết thúc định nghĩa hàm handleCategoryClick
+
+    const getCategoryBannerInfo = () => { // Hàm trả về thông tin banner của danh mục
+        let bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/04/web.webp"; // Link banner mặc định
+        let title = "Thời Trang Trung Niên"; // Tiêu đề mặc định
+        let desc = "Xu hướng thời trang trung niên cao cấp, tôn vinh vẻ đẹp mặn mà của phái đẹp Việt."; // Mô tả mặc định
+
+        if (selectedCategoryId !== null) { // Nếu đang chọn một danh mục cụ thể từ database
+            const catName = categories.find(c => c.id === selectedCategoryId)?.name || ""; // Tìm tên danh mục
+            title = catName; // Gán tiêu đề bằng tên danh mục
+            if (catName.includes("Đầm")) { // Nếu là đầm
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp";
+                desc = "Bộ sưu tập đầm trung niên dáng suông, đầm xòe, đầm dự tiệc thêu hoa sang trọng che khuyết điểm.";
+            } else if (catName.includes("Áo")) { // Nếu là áo
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/01/ao-kieu-trung-nien.webp";
+                desc = "Các thiết kế áo kiểu trung niên, áo thun in, áo sơ mi lụa mềm mại mang lại sự thoải mái tự tin.";
+            } else if (catName.includes("Bộ")) { // Nếu là đồ bộ
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/do-bo-trung-nien-thieu-hoa.webp";
+                desc = "Thiết kế đồ bộ mặc nhà, dạo phố rộng rãi mát mẻ từ chất liệu thun cotton, lụa satin tơ tằm.";
+            } else if (catName.includes("Túi")) { // Nếu là túi xách
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/tui-xach-camie-thieu-hoa.webp";
+                desc = "Dòng túi xách Camie thiết kế thanh lịch, phụ kiện hoàn hảo cho set đồ trung niên quý phái.";
+            } else if (catName.includes("Khăn")) { // Nếu là khăn
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/khan-choang-co-thieu-hoa.webp";
+                desc = "Khăn choàng cổ lụa tơ tằm, khăn len cashmere giữ ấm và làm điểm nhấn quý phái cho trang phục.";
+            } // Kết thúc lọc danh mục
+        } else { // Ngược lại nếu là bộ lọc đặc biệt
+            if (customFilterType === "new") { // Nếu là mới
+                title = "HÀNG MỚI VỀ"; // Đặt tiêu đề
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp"; // Banner cho hàng mới
+                desc = "Khám phá ngay các mẫu thiết kế quần áo, váy trung niên mới nhất vừa lên kệ của Thiều Hoa."; // Mô tả
+            } else if (customFilterType === "sale") { // Nếu là sale
+                title = "SALE - OFF"; // Tiêu đề
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/01/ao-kieu-trung-nien.webp"; // Banner sale
+                desc = "Ưu đãi cực khủng lên đến 50% dành cho các sản phẩm thời trang trung niên thiết kế độc quyền."; // Mô tả
+            } else if (customFilterType === "hot") { // Nếu là bán chạy
+                title = "BÁN CHẠY"; // Tiêu đề
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/tui-xach-camie-thieu-hoa.webp"; // Banner hot
+                desc = "Tổng hợp những mẫu đầm suông, áo kiểu được hàng ngàn khách hàng yêu thích và săn lùng."; // Mô tả
+            } else if (customFilterType === "gift") { // Nếu là quà tặng mẹ
+                title = "QUÀ TẶNG MẸ"; // Tiêu đề
+                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/khan-choang-co-thieu-hoa.webp"; // Banner quà tặng
+                desc = "Gợi ý những set quà tặng ý nghĩa, tinh tế nhất gửi gắm tình yêu kính đến những người mẹ thân thương."; // Mô tả
+            } // Kết thúc kiểm tra bộ lọc đặc biệt
+        } // Kết thúc kiểm tra danh mục
+
+        return { bannerUrl, title, desc }; // Trả về thông tin banner
+    };
+
+    const renderHomepageProductGrid = (productsToRender) => { // Định nghĩa hàm hỗ trợ hiển thị lưới sản phẩm trang chủ
+        if (!productsToRender || productsToRender.length === 0) { // Nếu không có sản phẩm
+            return ( // Trả về thông báo trống
+                <div className="col-12 text-center py-4 text-muted"> {/* Căn giữa */}
+                    Hiện chưa có sản phẩm mẫu nào trong danh mục này. {/* Nội dung */}
+                </div> // Kết thúc
+            ); // Kết thúc trả về
+        } // Kết thúc kiểm tra
+        return productsToRender.map((item) => ( // Lặp hiển thị các thẻ card sản phẩm
+            <div className="col-lg-3 col-md-4 col-sm-6 mb-4" key={item.id}> {/* 4 sản phẩm trên 1 dòng ở màn hình desktop */}
+                <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--thieuhoa-card-bg)' }}> {/* Card bo tròn */}
+                    {/* Khung chứa ảnh */}
+                    <div className="position-relative overflow-hidden" style={{ height: '260px', backgroundColor: '#F8F6F2' }}> {/* Khung giới hạn chiều cao */}
+                        {item.imageUrl ? ( // Kiểm tra đường dẫn hình ảnh
+                            <img 
+                                src={item.imageUrl} // Nguồn ảnh
+                                className="w-100 h-100 hover-zoom" // Phóng to khi hover
+                                alt={item.name} // Nhãn
+                                style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} // Tỷ lệ phủ ảnh
+                            />
+                        ) : ( // Fallback
+                            <div className="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                <i className="fa-regular fa-image" style={{ fontSize: '3rem', opacity: 0.3 }}></i>
+                            </div>
+                        )}
+                        <span className="position-absolute badge badge-dark px-2 py-1 small font-weight-bold text-uppercase" style={{ top: '10px', left: '10px', backgroundColor: '#111111', fontSize: '0.65rem', letterSpacing: '0.5px' }}>NEW</span>
+                        {item.discountPercent > 0 && (
+                            <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: '10px', right: '10px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem', borderRadius: '4px' }}>-{item.discountPercent}%</span>
+                        )}
+                    </div>
+
+                    {/* Thân card chứa thông tin */}
+                    <div className="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div className="small text-uppercase font-weight-bold text-muted mb-1" style={{ fontSize: '0.68rem', letterSpacing: '1px' }}>THIỀU HOA DESIGN</div>
+                            <h5 className="card-title font-weight-bold text-dark mb-2" style={{ fontSize: '0.88rem', lineHeight: '1.4', height: '38px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{item.name}</h5>
+                            
+                            <div className="d-flex align-items-center mb-2" style={{ gap: '8px' }}>
+                                <span className="font-weight-bold" style={{ fontSize: '1.05rem', color: 'var(--thieuhoa-primary)' }}>
+                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.discountPercent > 0 ? item.price * (1 - item.discountPercent / 100) : item.price)}
+                                </span>
+                                {item.discountPercent > 0 && (
+                                    <span className="text-muted text-decoration-line-through small" style={{ fontSize: '0.85rem', textDecoration: 'line-through' }}>
+                                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="d-flex align-items-center mb-2" style={{ gap: '5px' }}>
+                                <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#e28743', cursor: 'pointer' }} title="Màu cam đất"></span>
+                                <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#1e3d59', cursor: 'pointer' }} title="Màu xanh navy"></span>
+                                <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#111111', cursor: 'pointer' }} title="Màu đen sang trọng"></span>
+                            </div>
+                        </div>
+                        <p className="card-text small text-muted mt-2 mb-0" style={{ fontSize: '0.78rem' }}>
+                            <i className="fa-solid fa-boxes-stacked mr-1"></i> Số lượng tồn kho: {item.stockQuantity ?? item.stock} sản phẩm
+                        </p>
+                    </div>
+
+                    {/* Chân card */}
+                    <div className="card-footer bg-transparent border-top-0 px-3 pb-3 pt-0">
+                        <button className="btn btn-outline-thieuhoa btn-block btn-sm rounded-pill font-weight-bold transition-all" onClick={() => setCartCount(prev => prev + 1)}>
+                            <i className="fa-solid fa-cart-plus mr-1"></i> Mua ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        ));
+    };
+
+    return ( // Trả về cấu trúc giao diện JSX của website
+        <div className="w-100 min-vh-100 d-flex flex-column" style={{ backgroundColor: 'var(--thieuhoa-bg)' }}> {/* Thẻ bao bọc toàn bộ trang web full-width */}
+            
+            {/* PHẦN 1: THANH THÔNG BÁO KHUYẾN MÃI TRÊN CÙNG (TOP BAR) */}
+            <div className="thieuhoa-topbar text-center"> {/* Thanh thông báo đỏ nâu chữ trắng nhỏ */}
+                <div className="container"> {/* Khung container căn chỉnh lề */}
+                    <span className="font-weight-bold"><i className="fa-solid fa-truck mr-2"></i> MIỄN PHÍ VẬN CHUYỂN CHO ĐƠN HÀNG TỪ 200K | ĐƯỢC KIỂM TRA HÀNG TRƯỚC KHI THANH TOÁN</span> {/* Nội dung khuyến mãi chuẩn Thiều Hoa */}
+                </div> {/* Kết thúc container */}
+            </div> {/* Kết thúc thieuhoa-topbar */}
+
+            {/* PHẦN 2: ĐẦU TRANG CHÍNH (HEADER) */}
+            <header className="bg-white py-3 shadow-sm" style={{ borderBottom: '1px solid var(--thieuhoa-border)' }}> {/* Khung header trắng bóng mờ */}
+                <div className="container"> {/* Khung container căn chỉnh */}
+                    <div className="row align-items-center"> {/* Hàng ngang đầu tiên chứa các thành phần chính */}
+                        
+                        {/* Cột trái: Cửa hàng & Hotline chăm sóc khách hàng */}
+                        <div className="col-md-4 d-none d-md-flex align-items-center" style={{ gap: '20px' }}> {/* Chiếm 4/12 lưới, ẩn trên mobile */}
+                            {/* Hệ thống cửa hàng */}
+                            <a href="/he-thong-cua-hang" className="d-flex align-items-center text-secondary text-decoration-none hover-link" style={{ fontSize: '0.85rem' }}> {/* Liên kết cửa hàng */}
+                                <i className="fa-solid fa-location-dot mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon định vị */}
+                                <span className="font-weight-bold">Cửa hàng</span> {/* Nhãn chữ */}
+                            </a> {/* Kết thúc liên kết */}
+
+                            {/* Hotline hỗ trợ miễn phí */}
+                            <div className="d-flex align-items-center text-secondary" style={{ fontSize: '0.85rem' }}> {/* Hotline */}
+                                <i className="fa-solid fa-headset mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon tai nghe */}
+                                <span className="font-weight-bold">Hotline: <span style={{ color: 'var(--thieuhoa-primary)' }}>1800 6246</span> (Miễn Phí)</span> {/* Số điện thoại */}
+                            </div> {/* Kết thúc hotline */}
+                        </div> {/* Kết thúc cột trái */}
+
+                        {/* Cột giữa: Logo thương hiệu Thiều Hoa chính thức */}
+                        <div className="col-md-4 col-6 text-center"> {/* Chiếm 4/12 trên desktop, 6/12 trên mobile */}
+                            <a href="/" className="d-inline-block text-decoration-none"> {/* Liên kết trang chủ */}
+                                <div className="d-flex flex-column align-items-center"> {/* Sắp xếp logo theo cột dọc */}
+                                    <span className="thieuhoa-logo-text mb-0" style={{ color: '#000000', fontWeight: '800', letterSpacing: '3px', fontSize: '1.9rem' }}>THIỀU HOA</span> {/* Tên logo chính màu đen */}
+                                    <span className="thieuhoa-logo-sub" style={{ color: 'var(--thieuhoa-gold)', letterSpacing: '4px', fontSize: '0.62rem' }}>XU HƯỚNG PHÁI ĐẸP</span> {/* Tên logo phụ vàng kim */}
+                                </div> {/* Kết thúc sắp xếp */}
+                            </a> {/* Kết thúc liên kết */}
+                        </div> {/* Kết thúc cột giữa */}
+
+                        {/* Cột phải: Tài khoản & Giỏ hàng */}
+                        <div className="col-md-4 col-6 d-flex align-items-center justify-content-end" style={{ gap: '20px', fontSize: '0.85rem' }}> {/* Chiếm 4/12 trên desktop, 6/12 trên mobile */}
+                            {/* Đăng nhập tài khoản thành viên */}
+                            <a href="/login" className="d-flex align-items-center text-secondary text-decoration-none hover-link"> {/* Nút liên kết đăng nhập */}
+                                <i className="fa-regular fa-user mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon người dùng */}
+                                <span className="d-none d-md-inline font-weight-bold">Tài khoản</span> {/* Nhãn chữ */}
+                            </a> {/* Kết thúc liên kết */}
+
+                            {/* Giỏ hàng mua sắm */}
+                            <a href="/gio-hang" className="d-flex align-items-center text-dark text-decoration-none hover-link position-relative"> {/* Nút liên kết giỏ hàng */}
+                                <i className="fa-solid fa-bag-shopping text-danger" style={{ fontSize: '1.3rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon túi xách */}
+                                <span className="position-absolute badge badge-danger badge-pill font-weight-bold" style={{ top: '-8px', right: '-8px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.65rem' }}>{cartCount}</span> {/* Số lượng sản phẩm */}
+                            </a> {/* Kết thúc liên kết */}
+                        </div> {/* Kết thúc cột phải */}
+                        
+                    </div> {/* Kết thúc row */}
+                </div> {/* Kết thúc container */}
+            </header> {/* Kết thúc header */}
+
+            {/* PHẦN 3: THANH NAVBAR ĐIỀU HƯỚNG CHÍNH VÀ Ô TÌM KIẾM (HORIZONTAL NAVBAR & SEARCH ROW) */}
+            <nav className="thieuhoa-navbar sticky-top"> {/* Thanh menu ngang dính sát khi cuộn */}
+                <div className="container"> {/* Khung container */}
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-center py-1 py-md-0" style={{ gap: '15px' }}> {/* Flexbox bố trí ngang trên desktop, dọc trên mobile */}
+                        
+                        {/* Khu vực bên trái: Các danh mục/liên kết điều hướng */}
+                        <div className="d-flex align-items-center overflow-visible navbar-links-container" style={{ whiteSpace: 'nowrap' }}> {/* Khung flexbox cho phép menu tràn ra ngoài để hiện dropdown */}
+                            
+                            {/* 1. TẤT CẢ SẢN PHẨM (Có chứa Mega Menu hover như ảnh 1) */}
+                            <div className="mega-menu-hover"> {/* Lớp cha hover */}
+                                <button 
+                                    type="button" // Nút bấm
+                                    onClick={() => {
+                                        setSelectedCategoryId(null); // Đặt danh mục lọc về null
+                                        setCustomFilterType(null); // Đặt bộ lọc đặc biệt về null
+                                    }}
+                                    className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${selectedCategoryId === null && customFilterType === null ? 'active' : ''}`} // Kích hoạt class active nếu xem tất cả
+                                    style={{ outline: 'none', padding: '14px 15px !important' }} // Loại bỏ viền
+                                >
+                                    Tất Cả Sản Phẩm <i className="fa-solid fa-chevron-down ml-1" style={{ fontSize: '0.7rem' }}></i> {/* Nhãn kèm mũi tên trỏ xuống */}
+                                </button> {/* Kết thúc nút */}
+                                
+                                {/* Cấu trúc Mega Menu Dropdown hiển thị danh mục từ DATABASE */}
+                                <div className="thieuhoa-mega-menu-dropdown bg-white shadow"> {/* Khung dropdown nền trắng đổ bóng */}
+                                    <div className="container py-4"> {/* Khung đệm phía trong */}
+                                        <div className="row text-left"> {/* Dòng cột */}
+                                            {/* Lặp qua từng danh mục sản phẩm từ CSDL để tạo các cột menu động */}
+                                            {categories.map((cat) => (
+                                                <div className="col-md col-6 mb-3" key={cat.id}> {/* Ô cột tự chia đều */}
+                                                    <h6 className="font-weight-bold text-dark mb-3 text-uppercase" style={{ fontSize: '0.82rem', borderBottom: '2px solid var(--thieuhoa-primary)', paddingBottom: '5px' }}>{cat.name}</h6> {/* Tiêu đề lấy từ DB */}
+                                                    <p className="small text-muted mb-2" style={{ fontSize: '0.75rem', whiteSpace: 'normal' }}>{cat.description}</p> {/* Mô tả danh mục */}
+                                                    <button 
+                                                        type="button" 
+                                                        className="btn-link-menu font-weight-bold" 
+                                                        onClick={() => { setSelectedCategoryId(cat.id); setCustomFilterType(null); }}
+                                                    >
+                                                        Xem tất cả →
+                                                    </button> {/* Nút xem tất cả sản phẩm của danh mục */}
+                                                </div> /* Kết thúc cột danh mục */
+                                            ))} {/* Kết thúc lặp danh mục */}
+                                        </div> {/* Kết thúc row */}
+                                    </div> {/* Kết thúc container */}
+                                </div> {/* Kết thúc mega dropdown */}
+                            </div> {/* Kết thúc mega hover block */}
+
+                            {/* 2. MỚI */}
+                            <button 
+                                type="button" // Kiểu nút bấm
+                                onClick={() => {
+                                    setSelectedCategoryId(null); // Reset category
+                                    setCustomFilterType("new"); // Set bộ lọc sản phẩm mới
+                                }}
+                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${customFilterType === 'new' ? 'active' : ''}`} // Active nếu là new
+                                style={{ outline: 'none', padding: '14px 15px !important' }} // Thiết lập đệm
+                            >
+                                Mới {/* Hiển thị chữ Mới */}
+                            </button> {/* Kết thúc nút */}
+
+                            {/* 3. BÁN CHẠY */}
+                            <button 
+                                type="button" // Kiểu nút
+                                onClick={() => {
+                                    setSelectedCategoryId(null); // Reset category
+                                    setCustomFilterType("hot"); // Set bộ lọc bán chạy
+                                }}
+                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${customFilterType === 'hot' ? 'active' : ''}`} // Active nếu là hot
+                                style={{ outline: 'none', padding: '14px 15px !important' }} // Thiết lập đệm
+                            >
+                                Bán Chạy {/* Hiển thị chữ Bán Chạy */}
+                            </button> {/* Kết thúc nút */}
+
+                            {/* 4. SALE - OFF */}
+                            <button 
+                                type="button" // Kiểu nút
+                                onClick={() => {
+                                    setSelectedCategoryId(null); // Reset category
+                                    setCustomFilterType("sale"); // Set bộ lọc giảm giá
+                                }}
+                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${customFilterType === 'sale' ? 'active' : ''}`} // Active nếu là sale
+                                style={{ outline: 'none', padding: '14px 15px !important' }} // Thiết lập đệm
+                            >
+                                Sale - Off {/* Hiển thị chữ Sale - Off */}
+                            </button> {/* Kết thúc nút */}
+
+                            {/* 5. BLOG */}
+                            <a href="#tin-tuc-cam-nang" className="thieuhoa-nav-link text-decoration-none mr-1" style={{ padding: '14px 15px !important' }}>Blog</a> {/* Link tĩnh blog */}
+
+                            {/* 6. GIỚI THIỆU */}
+                            <a href="#thong-tin-thuong-hieu" className="thieuhoa-nav-link text-decoration-none mr-1" style={{ padding: '14px 15px !important' }}>Giới Thiệu</a> {/* Link tĩnh giới thiệu */}
+
+                            {/* 7. QUÀ TẶNG MẸ */}
+                            <button 
+                                type="button" // Kiểu nút
+                                onClick={() => {
+                                    setSelectedCategoryId(null); // Reset category
+                                    setCustomFilterType("gift"); // Set bộ lọc quà tặng mẹ
+                                }}
+                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${customFilterType === 'gift' ? 'active' : ''}`} // Active nếu là gift
+                                style={{ outline: 'none', padding: '14px 15px !important' }} // Thiết lập đệm
+                            >
+                                Quà Tặng Mẹ {/* Hiển thị chữ Quà Tặng Mẹ */}
+                            </button> {/* Kết thúc nút */}
+
+                        </div> {/* Kết thúc menu */}
+
+                        {/* Khu vực bên phải: Ô tìm kiếm sản phẩm thời trang thiết kế bo tròn */}
+                        <div className="my-2 my-md-0" style={{ width: '280px', maxWidth: '100%' }}> {/* Chiều rộng thanh tìm kiếm */}
+                            <div className="input-group" style={{ height: '36px' }}> {/* Nhóm ô nhập liệu và nút bấm */}
+                                <input // Ô nhập liệu tìm kiếm
+                                    type="text" // Kiểu nhập chữ
+                                    className="form-control shadow-none" // Ô nhập liệu
+                                    placeholder="Tìm kiếm sản phẩm..." // Gợi ý nhập liệu
+                                    style={{
+                                        borderRadius: '50px 0 0 50px', // Bo tròn hai góc bên trái
+                                        border: '1.5px solid var(--thieuhoa-border)', // Viền xám kem
+                                        borderRight: 'none', // Bỏ viền phải
+                                        fontSize: '0.85rem', // Chữ nhỏ gọn
+                                        paddingLeft: '15px', // Đệm lề trái
+                                        height: '100%' // Chiều cao full
+                                    }}
+                                /> {/* Kết thúc input */}
+                                <div className="input-group-append"> {/* Khung ghép nút tìm kiếm phía sau */}
+                                    <button 
+                                        className="btn d-flex align-items-center justify-content-center" 
+                                        type="button"
+                                        style={{
+                                            backgroundColor: 'var(--thieuhoa-primary)', // Nền đỏ nâu
+                                            borderColor: 'var(--thieuhoa-primary)', // Viền đỏ nâu
+                                            borderRadius: '0 50px 50px 0', // Bo tròn hai góc bên phải
+                                            padding: '0 16px', // Khoảng đệm ngang vừa vặn
+                                            height: '100%' // Chiều cao full
+                                        }}
+                                    > {/* Nút bấm tìm kiếm màu đỏ đô */}
+                                        <i className="fa-solid fa-magnifying-glass text-white" style={{ fontSize: '0.85rem' }}></i> {/* Icon kính lúp màu trắng */}
+                                    </button> {/* Kết thúc button */}
+                                </div> {/* Kết thúc append */}
+                            </div> {/* Kết thúc input-group */}
+                        </div> {/* Kết thúc cột tìm kiếm */}
+
+                    </div> {/* Kết thúc flexbox */}
+                </div> {/* Kết thúc container */}
+            </nav> {/* Kết thúc navbar */}
+
+            {/* HIỂN THỊ CÁC THÀNH PHẦN QUẢNG CÁO TRANG CHỦ CHỈ KHI KHÔNG LỌC DANH MỤC HOẶC LỌC ĐẶC BIỆT */}
+            {selectedCategoryId === null && customFilterType === null && (
+                <>
+                    {/* PHẦN 4: BANNER QUẢNG CÁO LỚN TRANG CHỦ (HERO BANNER SLIDER) */}
+                    <div className="thieuhoa-hero-banner" style={{ backgroundImage: "url('https://thieuhoa.com.vn/wp-content/uploads/2026/04/web.webp')" }}> {/* Banner nền ảnh chính thức của website thieuhoa.com.vn */}
+                <div className="thieuhoa-hero-overlay"></div> {/* Lớp phủ màu đỏ nâu mờ */}
+                <div className="container"> {/* Khung container */}
+                    <div className="thieuhoa-hero-content text-left"> {/* Khối nội dung quảng cáo căn lề trái */}
+                        <span className="badge badge-warning px-3 py-2 font-weight-bold text-uppercase rounded-pill mb-3" style={{ backgroundColor: 'var(--thieuhoa-gold)', color: '#333333', fontSize: '0.75rem' }}>BST Mới Nhất 2026</span> {/* Badge BST mới */}
+                        <h1 className="display-4 font-weight-bold mb-3" style={{ fontSize: '2.5rem', lineHeight: '1.2' }}>Thời Trang Thiết Kế Quý Phái</h1> {/* Tiêu đề chính */}
+                        <p className="lead mb-4" style={{ fontSize: '1rem', opacity: 0.9 }}>Tôn vinh vẻ đẹp dịu dàng và thanh lịch của phụ nữ Việt Nam ở mọi độ tuổi. Chất liệu lụa cao cấp, đường may tỉ mỉ.</p> {/* Mô tả sản phẩm */}
+                        <a href="/xem-bo-suu-tap" className="btn btn-thieuhoa px-4 py-3 text-uppercase font-weight-bold">Khám phá ngay</a> {/* Nút xem bộ sưu tập */}
+                    </div> {/* Kết thúc thieuhoa-hero-content */}
+                </div> {/* Kết thúc container */}
+            </div> {/* Kết thúc thieuhoa-hero-banner */}
+
+            {/* PHẦN 5: CHÍNH SÁCH CAM KẾT THƯƠNG HIỆU (BRAND COMMITMENT) */}
+            <section className="py-4 shadow-sm" style={{ backgroundColor: '#f5f5f5', borderBottom: '1px solid var(--thieuhoa-border)' }}> {/* Phần cam kết nền xám nhạt tăng uy tín */}
+                <div className="container"> {/* Khung container */}
+                    <div className="row text-center"> {/* Hàng ngang chứa các cam kết */}
+                        
+                        {/* Cam kết 1: Giá tốt nhất */}
+                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--thieuhoa-border)' }}> {/* Cột cam kết 1 */}
+                            <div className="d-flex align-items-center justify-content-center text-left px-2"> {/* Căn lề */}
+                                <i className="fa-solid fa-tags text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon thẻ giá */}
+                                <div> {/* Thẻ bao */}
+                                    <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.88rem' }}>Giá tốt nhất</h6> {/* Tiêu đề */}
+                                    <p className="small text-muted mb-0" style={{ fontSize: '0.78rem' }}>Giảm 15% đơn hàng đầu tiên</p> {/* Mô tả */}
+                                </div> {/* Kết thúc bao */}
+                            </div> {/* Kết thúc d-flex */}
+                        </div> {/* Kết thúc cột cam kết 1 */}
+
+                        {/* Cam kết 2: 100% Made in Viet Nam */}
+                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--thieuhoa-border)' }}> {/* Cột cam kết 2 */}
+                            <div className="d-flex align-items-center justify-content-center text-left px-2"> {/* Căn lề */}
+                                <i className="fa-solid fa-hand-holding-heart text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon trái tim nâng niu */}
+                                <div> {/* Thẻ bao */}
+                                    <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.88rem' }}>100% Made in Viet Nam</h6> {/* Tiêu đề */}
+                                    <p className="small text-muted mb-0" style={{ fontSize: '0.78rem' }}>Thử hàng và thanh toán khi nhận</p> {/* Mô tả */}
+                                </div> {/* Kết thúc bao */}
+                            </div> {/* Kết thúc d-flex */}
+                        </div> {/* Kết thúc cột cam kết 2 */}
+
+                        {/* Cam kết 3: Cam kết 1 đổi 1 */}
+                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--thieuhoa-border)' }}> {/* Cột cam kết 3 */}
+                            <div className="d-flex align-items-center justify-content-center text-left px-2"> {/* Căn lề */}
+                                <i className="fa-solid fa-shield-halved text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon bảo vệ */}
+                                <div> {/* Thẻ bao */}
+                                    <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.88rem' }}>Cam kết 1 đổi 1</h6> {/* Tiêu đề */}
+                                    <p className="small text-muted mb-0" style={{ fontSize: '0.78rem' }}>Trong vòng 7 ngày đổi mẫu thoải mái</p> {/* Mô tả */}
+                                </div> {/* Kết thúc bao */}
+                            </div> {/* Kết thúc d-flex */}
+                        </div> {/* Kết thúc cột cam kết 3 */}
+
+                        {/* Cam kết 4: Giao hàng 4H */}
+                        <div className="col-lg-3 col-sm-6"> {/* Cột cam kết 4 */}
+                            <div className="d-flex align-items-center justify-content-center text-left px-2"> {/* Căn lề */}
+                                <i className="fa-solid fa-clock text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon đồng hồ */}
+                                <div> {/* Thẻ bao */}
+                                    <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.88rem' }}>Giao hàng nhanh 4H</h6> {/* Tiêu đề */}
+                                    <p className="small text-muted mb-0" style={{ fontSize: '0.78rem' }}>Nội thành Tp.HCM và Hà Nội</p> {/* Mô tả */}
+                                </div> {/* Kết thúc bao */}
+                            </div> {/* Kết thúc d-flex */}
+                        </div> {/* Kết thúc cột cam kết 4 */}
+
+                    </div> {/* Kết thúc row */}
+                </div> {/* Kết thúc container */}
+            </section> {/* Kết thúc chính sách cam kết */}
+
+            {/* PHẦN DANH MỤC THỜI TRANG TRUNG NIÊN - 10 HỘP ĐẶC TRƯNG PHONG CÁCH THIỀU HOA */}
+            <section className="py-5" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--thieuhoa-border)' }}> {/* Vùng danh mục nền trắng */}
+                <div className="container"> {/* Khung container */}
+                    <div className="text-center mb-4"> {/* Căn giữa tiêu đề */}
+                        <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1px', fontSize: '1.4rem' }}>Thời Trang Trung Niên</h3> {/* Tiêu đề chính */}
+                        <div className="mx-auto" style={{ width: '60px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div> {/* Dòng gạch dưới đỏ nâu */}
+                    </div> {/* Kết thúc tiêu đề */}
+
+                    <div className="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3 justify-content-center"> {/* Lưới 5 cột trên máy tính, 2 cột trên điện thoại */}
+                        {categories.map((cat, index) => {
+                            // Tạo mảng icon cố định để trang trí các thẻ
+                            const icons = [
+                                "fa-solid fa-person-dress",
+                                "fa-solid fa-shirt",
+                                "fa-solid fa-people-roof",
+                                "fa-solid fa-bag-shopping",
+                                "fa-solid fa-scroll",
+                                "fa-solid fa-venus-mars",
+                                "fa-solid fa-scissors",
+                                "fa-solid fa-champagne-glasses",
+                                "fa-solid fa-vest",
+                                "fa-solid fa-socks"
+                            ];
+                            const iconClass = icons[index % icons.length]; // Chọn icon xoay vòng
+
+                            return (
+                                <div className="col mb-3" key={cat.id}> {/* Ô cột */}
+                                    <button 
+                                        onClick={() => {
+                                            setSelectedCategoryId(cat.id);
+                                            setCustomFilterType(null);
+                                        }}
+                                        className="w-100 btn p-3 d-flex align-items-center rounded-lg border-0 shadow-sm transition-all text-left" 
+                                        style={{ backgroundColor: '#f5f5f5', gap: '15px' }}
+                                    > {/* Nút bấm liên kết danh mục */}
+                                        <i className={`${iconClass} text-danger`} style={{ fontSize: '1.5rem', color: 'var(--thieuhoa-primary)', opacity: 0.85 }}></i> {/* Icon */}
+                                        <span className="font-weight-bold text-dark" style={{ fontSize: '0.88rem' }}>{cat.name}</span> {/* Nhãn chữ động */}
+                                    </button> {/* Kết thúc nút */}
+                                </div> /* Kết thúc cột */
+                            );
+                        })}
+                    </div> {/* Kết thúc row */}
+                </div> {/* Kết thúc container */}
+            </section> {/* Kết thúc phần danh mục */}
+                </>
+            )}
+
+            {/* PHẦN 6: BỐ CỤC CHÍNH HIỂN THỊ DỮ LIỆU CSDL (MAIN CONTENT) */}
+            <main className="container py-5 flex-grow-1"> {/* Khung chứa nội dung chính padding 5 */}
+                
+                {/* HIỂN THỊ TRANG DANH MỤC (BREADCRUMB & BANNER LỚN DÀNH CHO TRANG CHI TIẾT DANH MỤC HOẶC BỘ LỌC) */}
+                {(selectedCategoryId !== null || customFilterType !== null) && (
+                    <div className="mb-4">
+                        {/* Breadcrumbs điều hướng */}
+                        <nav aria-label="breadcrumb">
+                            <ol className="breadcrumb bg-transparent px-0 mb-3" style={{ fontSize: '0.88rem' }}>
+                                <li className="breadcrumb-item">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => { setSelectedCategoryId(null); setCustomFilterType(null); }}
+                                        className="btn btn-link p-0 text-muted font-weight-bold text-decoration-none"
+                                        style={{ fontSize: '0.88rem' }}
+                                    >
+                                        Trang chủ
+                                    </button>
+                                </li>
+                                <li className="breadcrumb-item active text-dark font-weight-bold" aria-current="page">
+                                    {getCategoryBannerInfo().title}
+                                </li>
+                            </ol>
+                        </nav>
+
+                        {/* Banner danh mục thời trang lớn tương ứng */}
+                        <div className="card border-0 rounded-lg overflow-hidden mb-4 shadow-sm" style={{ backgroundColor: '#F8F6F2' }}>
+                            <div className="row no-gutters align-items-center">
+                                <div className="col-md-7 p-5 text-left">
+                                    <span className="badge badge-danger text-uppercase px-3 py-1 font-weight-bold mb-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem' }}>
+                                        Bộ Sưu Tập
+                                    </span>
+                                    <h2 className="font-weight-bold text-dark mb-3" style={{ fontSize: '2rem' }}>{getCategoryBannerInfo().title}</h2>
+                                    <p className="text-muted leading-relaxed mb-0" style={{ fontSize: '0.95rem' }}>{getCategoryBannerInfo().desc}</p>
+                                </div>
+                                <div className="col-md-5" style={{ height: '240px' }}>
+                                    <img 
+                                        src={getCategoryBannerInfo().bannerUrl} 
+                                        alt={getCategoryBannerInfo().title} 
+                                        className="w-100 h-100" 
+                                        style={{ objectFit: 'cover' }} 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* 1. CHẾ ĐỘ TRANG CHỦ: HIỂN THỊ CỤM SẢN PHẨM MỚI, SALE OFF VÀ CỤM THEO DANH MỤC */}
+                {selectedCategoryId === null && customFilterType === null ? (
+                    <div className="w-100">
+                        
+                        {/* CỤM 1: HÀNG MỚI VỀ */}
+                        <section id="hang-moi-ve-sec" className="mb-5 pb-3">
+                            <div className="text-center mb-4">
+                                <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem' }}>HÀNG MỚI VỀ</h3>
+                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
+                            </div>
+                            <div className="row">
+                                {renderHomepageProductGrid([...allProducts].sort((a, b) => b.id - a.id).slice(0, 4))}
+                            </div>
+                            <div className="text-center mt-3">
+                                <button 
+                                    onClick={() => setCustomFilterType("new")} 
+                                    className="btn btn-thieuhoa px-4 py-2 text-uppercase font-weight-bold text-white rounded-pill shadow-sm"
+                                    style={{ fontSize: '0.82rem' }}
+                                >
+                                    Xem Thêm
+                                </button>
+                            </div>
+                        </section>
+
+                        {/* CỤM 2: SALE OFF */}
+                        <section className="mb-5 pb-3" style={{ backgroundColor: '#FDFBF7', padding: '30px 15px', borderRadius: '12px' }}>
+                            <div className="text-center mb-4">
+                                <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem', color: 'var(--thieuhoa-primary)' }}>SALE OFF</h3>
+                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
+                            </div>
+                            <div className="row">
+                                {renderHomepageProductGrid(allProducts.filter(p => p.discountPercent && p.discountPercent > 0).slice(0, 4))}
+                            </div>
+                            <div className="text-center mt-3">
+                                <button 
+                                    onClick={() => setCustomFilterType("sale")} 
+                                    className="btn btn-thieuhoa px-4 py-2 text-uppercase font-weight-bold text-white rounded-pill shadow-sm"
+                                    style={{ fontSize: '0.82rem' }}
+                                >
+                                    Xem Thêm
+                                </button>
+                            </div>
+                        </section>
+
+                        {/* CỤM THEO TỪNG DANH MỤC THỰC TẾ TRONG DATABASE */}
+                        {categories.map((cat) => {
+                            const catProducts = allProducts.filter(p => p.categoryProductId === cat.id);
+                            return (
+                                <section key={cat.id} className="mb-5 pb-3">
+                                    <div className="text-center mb-4">
+                                        <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem' }}>{cat.name}</h3>
+                                        <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
+                                    </div>
+                                    <div className="row">
+                                        {catProducts.length > 0 ? (
+                                            renderHomepageProductGrid(catProducts.slice(0, 4))
+                                        ) : (
+                                            <div className="col-12 text-center py-4 text-muted bg-light rounded">
+                                                <i className="fa-solid fa-circle-info mr-2"></i> Danh mục này hiện chưa có sản phẩm.
+                                            </div>
+                                        )}
+                                    </div>
+                                    {catProducts.length > 0 && (
+                                        <div className="text-center mt-3">
+                                            <button 
+                                                onClick={() => setSelectedCategoryId(cat.id)} 
+                                                className="btn btn-thieuhoa px-4 py-2 text-uppercase font-weight-bold text-white rounded-pill shadow-sm"
+                                                style={{ fontSize: '0.82rem' }}
+                                            >
+                                                Xem Thêm
+                                            </button>
+                                        </div>
+                                    )}
+                                </section>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    /* 2. CHẾ ĐỘ TRANG DANH MỤC: HIỂN THỊ SIDEBAR BỘ LỌC BÊN TRÁI VÀ DANH SÁCH SẢN PHẨM BÊN PHẢI */
+                    <div className="row">
+                        {/* Cột bên trái: Sidebar danh mục (CategoryProductList) */}
+                        <aside className="col-lg-3 col-md-4 mb-4 mb-lg-0">
+                            <CategoryProductList 
+                                selectedCategoryId={selectedCategoryId} 
+                                onSelectCategory={(id) => {
+                                    setSelectedCategoryId(id);
+                                    setCustomFilterType(null); // Reset bộ lọc đặc biệt khi click chọn danh mục bên trái
+                                }} 
+                            />
+                            
+                            {/* Banner quảng cáo nhỏ thanh bên trái */}
+                            <div className="card shadow-sm border-0 rounded-lg overflow-hidden mt-4 d-none d-md-block">
+                                <div className="position-relative" style={{ height: '340px' }}>
+                                    <img 
+                                        src="https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp" 
+                                        className="w-100 h-100" 
+                                        alt="Khuyến mãi" 
+                                        style={{ objectFit: 'cover' }}
+                                    />
+                                    <div className="position-absolute w-100 h-100 d-flex flex-column justify-content-end p-4 text-white" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', top: 0, left: 0 }}>
+                                        <h6 className="font-weight-bold text-uppercase mb-1" style={{ color: 'var(--thieuhoa-light-gold)' }}>Đầm Thiết Kế Cao Cấp</h6>
+                                        <p className="small mb-2" style={{ opacity: 0.85 }}>Tôn vinh vóc dáng ngọc ngà của quý cô</p>
+                                        <button onClick={() => handleCategoryClick("Đầm")} className="btn btn-sm btn-thieuhoa font-weight-bold text-uppercase rounded-pill text-center py-2" style={{ fontSize: '0.75rem' }}>Xem ngay</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Cột bên phải: Danh sách sản phẩm của danh mục được chọn (ProductList) */}
+                        <section className="col-lg-9 col-md-8">
+                            <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                                <h4 className="text-uppercase font-weight-bold text-dark m-0" style={{ letterSpacing: '0.5px', fontSize: '1.2rem', color: 'var(--thieuhoa-primary)' }}>
+                                    {getCategoryBannerInfo().title}
+                                </h4>
+                                <span className="small text-muted font-weight-bold">
+                                    Tìm thấy trong danh mục
+                                </span>
+                            </div>
+                            <ProductList selectedCategoryId={selectedCategoryId} customFilterType={customFilterType} />
+                        </section>
+                    </div>
+                )}
+
+                {/* PHẦN 7: TIN TỨC & CẨM NANG MẶC ĐẸP (Dữ liệu CSDL) */}
+                <div className="border-top mt-5 pt-4">
+                    <PostList />
+                </div>
+                
+            </main> {/* Kết thúc main content */}
+
+            {/* PHẦN 8: CHÂN TRANG THƯƠNG HIỆU THIỀU HOA (FOOTER) */}
+            <footer className="thieuhoa-footer pt-5 pb-4 mt-auto"> {/* Chân trang màu đen đỏ nâu, viền vàng kim */}
+                <div className="container"> {/* Khung container */}
+                    <div className="row text-left"> {/* Hàng ngang căn lề trái */}
+                        
+                        {/* Cột 1: Thông tin liên hệ và cơ quan chủ quản */}
+                        <div className="col-lg-4 col-md-6 mb-4 mb-lg-0"> {/* Cột 1 chiếm 4/12 */}
+                            <h5 className="thieuhoa-footer-title">THỜI TRANG THIỀU HOA</h5> {/* Tiêu đề cột */}
+                            <div className="small" style={{ lineHeight: '1.8' }}> {/* Khối nhỏ giãn dòng */}
+                                <p className="mb-2"><strong className="text-white">CÔNG TY CỔ PHẦN THỜI TRANG THIỀU HOA</strong></p> {/* Tên công ty */}
+                                <p className="mb-2"><i className="fa-solid fa-location-dot mr-2"></i> Văn phòng: 254 Nguyễn Đình Chiểu, Phường 6, Quận 3, TP. Hồ Chí Minh</p> {/* Địa chỉ văn phòng */}
+                                <p className="mb-2"><i className="fa-solid fa-phone mr-2"></i> Hotline đặt hàng: 1800 6246 (Miễn phí)</p> {/* Hotline */}
+                                <p className="mb-2"><i className="fa-solid fa-envelope mr-2"></i> Email: hotro@thieuhoa.com.vn</p> {/* Email công ty */}
+                                <p className="mb-3"><i className="fa-solid fa-code-branch mr-2"></i> GPKD số: 0316123456 do Sở KH&ĐT TP.HCM cấp</p> {/* Giấy phép đăng ký kinh doanh */}
+                                
+                                {/* Huy hiệu Bộ Công Thương (Thiều Hoa luôn có huy hiệu Đã đăng ký ở footer) */}
+                                <a href="http://online.gov.vn/" target="_blank" rel="noreferrer"> {/* Liên kết ngoài đến trang bộ công thương */}
+                                    <img // Ảnh huy hiệu đăng ký bộ công thương
+                                        src="https://images.unsplash.com/photo-1557200134-90327ee9fafa?w=200" // Ảnh giả lập huy hiệu Bộ Công Thương (mẫu icon check)
+                                        alt="Đã thông báo Bộ Công Thương" // Nhãn
+                                        className="mt-2" // Khoảng cách trên
+                                        style={{ height: '40px', width: 'auto', backgroundColor: '#FFFFFF', padding: '4px', borderRadius: '4px' }} // Chiều cao 40px nền trắng
+                                    /> {/* Kết thúc img */}
+                                </a> {/* Kết thúc liên kết */}
+                            </div> {/* Kết thúc khối nhỏ */}
+                        </div> {/* Kết thúc cột 1 */}
+
+                        {/* Cột 2: Danh sách các Showroom đại lý của Thiều Hoa */}
+                        <div className="col-lg-3 col-md-6 mb-4 mb-lg-0"> {/* Cột 2 chiếm 3/12 */}
+                            <h5 className="thieuhoa-footer-title">HỆ THỐNG CỬA HÀNG</h5> {/* Tiêu đề cột */}
+                            <ul className="list-unstyled small" style={{ lineHeight: '1.8' }}> {/* Danh sách không đầu dòng */}
+                                <li className="mb-2"><strong className="text-white">TP. Hồ Chí Minh:</strong></li> {/* Nhãn TP.HCM */}
+                                <li className="mb-2"><i className="fa-solid fa-shop mr-2 text-warning"></i> 254 Nguyễn Đình Chiểu, P.6, Q.3</li> {/* Showroom Quận 3 */}
+                                <li className="mb-2"><i className="fa-solid fa-shop mr-2 text-warning"></i> 422 Quang Trung, P.10, Q.Gò Vấp</li> {/* Showroom Gò Vấp */}
+                                <li className="mb-3"><i className="fa-solid fa-shop mr-2 text-warning"></i> 631 Lũy Bán Bích, P.Phú Thạnh, Q.Tân Phú</li> {/* Showroom Tân Phú */}
+                                <li className="mb-2"><strong className="text-white">Hà Nội:</strong></li> {/* Nhãn Hà Nội */}
+                                <li className="mb-2"><i className="fa-solid fa-shop mr-2 text-warning"></i> 50 Láng Hạ, Q.Đống Đa</li> {/* Showroom Hà Nội */}
+                                <li><i className="fa-solid fa-shop mr-2 text-warning"></i> 172 Cầu Giấy, Q.Cầu Giấy</li> {/* Showroom Cầu Giấy */}
+                            </ul> {/* Kết thúc danh sách */}
+                        </div> {/* Kết thúc cột 2 */}
+
+                        {/* Cột 3: Chính sách mua sắm bảo mật */}
+                        <div className="col-lg-3 col-md-6 mb-4 mb-md-0"> {/* Cột 3 chiếm 3/12 */}
+                            <h5 className="thieuhoa-footer-title">CHÍNH SÁCH MUA HÀNG</h5> {/* Tiêu đề cột */}
+                            <ul className="list-unstyled d-flex flex-column" style={{ gap: '10px' }}> {/* Sắp xếp cột dọc */}
+                                <li><a href="/chinh-sach-bao-mat" className="thieuhoa-footer-link text-decoration-none">Chính sách bảo mật thông tin</a></li> {/* Liên kết chính sách bảo mật */}
+                                <li><a href="/chinh-sach-doi-tra" className="thieuhoa-footer-link text-decoration-none">Chính sách đổi trả sản phẩm</a></li> {/* Liên kết chính sách đổi trả */}
+                                <li><a href="/chinh-sach-bao-hanh" className="thieuhoa-footer-link text-decoration-none">Chính sách bảo hành sản phẩm</a></li> {/* Liên kết chính sách bảo hành */}
+                                <li><a href="/chinh-sach-van-chuyen" className="thieuhoa-footer-link text-decoration-none">Chính sách giao hàng toàn quốc</a></li> {/* Liên kết chính sách vận chuyển */}
+                                <li><a href="/dieu-khoan-dich-vu" className="thieuhoa-footer-link text-decoration-none">Điều khoản & Điều kiện dịch vụ</a></li> {/* Liên kết điều khoản */}
+                                <li><a href="/cau-hoi-thuong-gap" className="thieuhoa-footer-link text-decoration-none">Câu hỏi thường gặp (FAQs)</a></li> {/* Liên kết FAQs */}
+                            </ul> {/* Kết thúc danh sách */}
+                        </div> {/* Kết thúc cột 3 */}
+
+                        {/* Cột 4: Kết nối với chúng tôi */}
+                        <div className="col-lg-2 col-md-6"> {/* Cột 4 chiếm 2/12 */}
+                            <h5 className="thieuhoa-footer-title">MẠNG XÃ HỘI</h5> {/* Tiêu đề cột */}
+                            <div className="d-flex mb-3" style={{ gap: '10px' }}> {/* Nhóm các nút mạng xã hội nằm ngang */}
+                                <a href="https://facebook.com/" className="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px' }}><i className="fa-brands fa-facebook-f"></i></a> {/* Nút Facebook */}
+                                <a href="https://youtube.com/" className="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px' }}><i className="fa-brands fa-youtube"></i></a> {/* Nút Youtube */}
+                                <a href="https://instagram.com/" className="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px' }}><i className="fa-brands fa-instagram"></i></a> {/* Nút Instagram */}
+                            </div> {/* Kết thúc nhóm mạng xã hội */}
+                            <p className="small text-muted mb-2" style={{ fontSize: '0.78rem' }}>Đăng ký nhận tin tức khuyến mãi mới nhất từ Thiều Hoa:</p> {/* Lời khuyên đăng ký email */}
+                            <div className="input-group"> {/* Nhóm đăng ký email */}
+                                <input type="email" className="form-control form-control-sm rounded-left border-0" placeholder="Email của bạn..." style={{ fontSize: '0.8rem' }} /> {/* Input email */}
+                                <div className="input-group-append"> {/* Khung ghép nút đăng ký */}
+                                    <button className="btn btn-sm btn-warning font-weight-bold" type="button" style={{ backgroundColor: 'var(--thieuhoa-gold)', border: 'none', color: '#333333' }}><i className="fa-solid fa-paper-plane"></i></button> {/* Nút gửi */}
+                                </div> {/* Kết thúc ghép */}
+                            </div> {/* Kết thúc nhóm đăng ký */}
+                        </div> {/* Kết thúc cột 4 */}
+
+                    </div> {/* Kết thúc row chân trang */}
+
+                    {/* Dòng bản quyền dưới cùng footer */}
+                    <div className="border-top mt-4 pt-3 text-center text-muted small" style={{ borderColor: '#531E18' }}> {/* Đường phân cách ngang màu đỏ nâu sẫm */}
+                        <p className="mb-0">© 2026 THỜI TRANG THIỀU HOA. Bản quyền thuộc về Nguyễn Quỳnh Thảo Vy - Mã SV: 2123110158.</p> {/* Bản quyền */}
+                    </div> {/* Kết thúc dòng bản quyền */}
+
+                </div> {/* Kết thúc container */}
+            </footer> {/* Kết thúc footer */}
+
+        </div> // Kết thúc div wrapper
+    ); // Kết thúc hàm return giao diện App
+} // Kết thúc component App
+
+export default App; // Xuất mặc định component App

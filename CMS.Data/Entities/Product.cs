@@ -29,6 +29,9 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         public string? ImageUrl { get; set; } // Thuộc tính lưu đường dẫn ảnh đại diện sản phẩm (cho phép null)
 
+        [Range(0, 100)] // Ràng buộc giá trị phần trăm giảm giá từ 0 đến 100
+        public int DiscountPercent { get; set; } = 0; // Thuộc tính lưu phần trăm giảm giá (mặc định 0 = không giảm giá)
+
         public int CategoryProductId { get; set; } // Thuộc tính khóa ngoại liên kết tới bảng danh mục sản phẩm (CategoryProduct)
 
         [ForeignKey("CategoryProductId")] // Chỉ định CategoryProductId làm khóa ngoại liên kết đến bảng CategoryProduct

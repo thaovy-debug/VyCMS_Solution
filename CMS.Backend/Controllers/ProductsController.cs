@@ -36,6 +36,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.Price, // Lấy đơn giá sản phẩm
                     p.ImageUrl, // Lấy đường dẫn hình ảnh của sản phẩm
                     p.StockQuantity, // Lấy số lượng hàng còn trong kho
+                    p.DiscountPercent, // Lấy phần trăm giảm giá của sản phẩm (0 = không giảm)
                     p.CategoryProductId // Lấy mã danh mục sản phẩm liên kết
                 }) // Kết thúc biểu thức Select gọt tỉa
                 .ToListAsync(); // Chuyển đổi bất đồng bộ kết quả truy vấn thành danh sách List
@@ -54,6 +55,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.Price, // Lấy đơn giá sản phẩm
                     p.ImageUrl, // Lấy đường dẫn hình ảnh của sản phẩm
                     p.StockQuantity, // Lấy số lượng hàng còn trong kho
+                    p.DiscountPercent, // Lấy phần trăm giảm giá của sản phẩm (0 = không giảm)
                     p.CategoryProductId // Lấy mã danh mục sản phẩm liên kết
                 }) // Kết thúc biểu thức Select gọt tỉa
                 .ToListAsync(); // Chuyển kết quả sang danh sách bất đồng bộ

@@ -1,184 +1,252 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+/*
+Sinh vien:Nguyễn Quỳnh Thảo Vy
+Ma sv: 2123110158
+Lop:CCQ2311E
+Mo ta: Định nghĩa các CSS class tùy biến bổ sung cho giao diện Thiều Hoa (Header, Menu điều hướng, Button và Footer)
+Ngay thuc hien: 15/05/2026
+*/
 
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
+/* Thiết lập thanh thông báo khuyến mãi trên cùng */
+.thieuhoa-topbar { /* Định dạng thanh thông báo khuyến mãi */
+  background: linear-gradient(90deg, #FDE579 0%, #D4AF37 100%); /* Nền vàng cam gradient nổi bật của Thiều Hoa */
+  color: #333333; /* Đặt màu chữ đen xám nhẹ nổi bật dễ đọc trên nền vàng */
+  font-size: 0.8rem; /* Đặt cỡ chữ nhỏ nhắn, tinh tế */
+  letter-spacing: 1px; /* Tạo khoảng cách giữa các chữ cái rộng rãi dễ đọc */
+  font-weight: 600; /* Thiết lập độ đậm hơn để chữ rõ ràng trên nền sáng */
+  padding: 8px 0; /* Đặt khoảng đệm lề trên và dưới 8px */
+} /* Kết thúc thieuhoa-topbar */
 
-.hero {
-  position: relative;
 
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
+/* Thiết lập phong cách cho logo chữ Thiều Hoa sang trọng */
+.thieuhoa-logo-text { /* Định dạng kiểu chữ cho logo thương hiệu */
+  font-size: 1.8rem; /* Đặt kích thước chữ logo lớn và nổi bật */
+  font-weight: 800; /* Thiết lập độ đậm tối đa (Extra Bold) */
+  color: var(--thieuhoa-primary); /* Sử dụng màu đỏ nâu chủ đạo */
+  letter-spacing: 2px; /* Tạo khoảng cách chữ rộng mang tính nghệ thuật cao */
+} /* Kết thúc thieuhoa-logo-text */
 
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
+.thieuhoa-logo-sub { /* Định dạng chữ phụ nhỏ dưới logo */
+  font-size: 0.6rem; /* Cỡ chữ siêu nhỏ */
+  letter-spacing: 4px; /* Khoảng cách chữ giãn rộng */
+  color: var(--thieuhoa-gold); /* Sử dụng màu vàng kim làm điểm nhấn */
+  text-transform: uppercase; /* Tự động viết hoa toàn bộ chữ cái */
+} /* Kết thúc thieuhoa-logo-sub */
 
-  .framework,
-  .vite {
-    position: absolute;
-  }
+/* Thiết lập thanh tìm kiếm bo tròn và nút bấm */
+.thieuhoa-search-input { /* Định dạng ô nhập liệu tìm kiếm */
+  border: 1.5px solid var(--thieuhoa-border); /* Thiết lập viền xám kem mỏng */
+  border-right: none; /* Xóa viền bên phải để nối liền với nút tìm kiếm */
+  border-radius: 50px 0 0 50px; /* Bo tròn hai góc bên trái kiểu viên thuốc */
+  padding-left: 20px; /* Thêm khoảng đệm bên trái cho văn bản nhập */
+  font-size: 0.9rem; /* Cỡ chữ vừa phải dễ nhìn */
+} /* Kết thúc thieuhoa-search-input */
 
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
+.thieuhoa-search-input:focus { /* Khi người dùng nhấn chuột vào ô tìm kiếm */
+  border-color: var(--thieuhoa-primary); /* Đổi màu viền thành màu đỏ nâu */
+  box-shadow: none; /* Loại bỏ hiệu ứng bóng mặc định của Bootstrap */
+} /* Kết thúc thieuhoa-search-input:focus */
 
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
+.thieuhoa-search-btn { /* Định dạng nút bấm tìm kiếm đi kèm ô nhập */
+  border: 1.5px solid var(--thieuhoa-primary); /* Viền đỏ nâu tương ứng */
+  background-color: var(--thieuhoa-primary); /* Nền đỏ nâu chủ đạo */
+  color: #FFFFFF; /* Chữ trắng hoặc icon màu trắng */
+  border-radius: 0 50px 50px 0; /* Bo tròn hai góc bên phải */
+  padding: 0 24px; /* Khoảng đệm chiều ngang rộng rãi */
+  transition: all 0.3s ease; /* Chuyển tiếp hiệu ứng mượt mà */
+} /* Kết thúc thieuhoa-search-btn */
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
+.thieuhoa-search-btn:hover { /* Khi di chuột qua nút tìm kiếm */
+  background-color: var(--thieuhoa-primary-hover); /* Đổi sang màu đỏ nâu sáng hơn */
+  border-color: var(--thieuhoa-primary-hover); /* Đổi viền sáng tương ứng */
+} /* Kết thúc thieuhoa-search-btn:hover */
 
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
-}
+/* Thiết lập Menu ngang điều hướng chính (Navbar) */
+.thieuhoa-navbar { /* Thiết lập thanh điều hướng chính của website */
+  border-top: 1px solid var(--thieuhoa-border); /* Đường gạch phân cách mỏng trên */
+  border-bottom: 1px solid var(--thieuhoa-border); /* Đường gạch phân cách mỏng dưới */
+  background-color: #FFFFFF; /* Nền trắng sạch sẽ làm nổi bật chữ */
+} /* Kết thúc thieuhoa-navbar */
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
+.thieuhoa-nav-link { /* Định dạng các liên kết trong menu chính */
+  font-size: 0.9rem; /* Cỡ chữ chuẩn menu */
+  font-weight: 600; /* Độ đậm bán đậm (Semi Bold) */
+  color: #444444; /* Màu chữ xám đậm */
+  text-transform: uppercase; /* Tự động viết hoa toàn bộ chữ cái */
+  padding: 14px 20px !important; /* Khoảng cách đệm tạo khoảng trống bấm rộng rãi */
+  position: relative; /* Cần thiết để tạo đường gạch dưới hiệu ứng */
+} /* Kết thúc thieuhoa-nav-link */
 
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
+.thieuhoa-nav-link::after { /* Định nghĩa đường gạch dưới giả lập */
+  content: ''; /* Nội dung trống */
+  position: absolute; /* Định vị tuyệt đối */
+  bottom: 0; /* Dính sát dưới đáy menu */
+  left: 50%; /* Đặt từ tâm giữa dòng */
+  width: 0; /* Chiều rộng ban đầu bằng 0 */
+  height: 2px; /* Độ dày đường gạch dưới là 2px */
+  background-color: var(--thieuhoa-primary); /* Sử dụng màu đỏ nâu chủ đạo */
+  transition: all 0.3s ease; /* Chuyển tiếp phóng to mượt mà */
+  transform: translateX(-50%); /* Căn đều sang hai bên */
+} /* Kết thúc thieuhoa-nav-link::after */
 
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
+.thieuhoa-nav-link:hover { /* Khi di chuột qua liên kết menu */
+  color: var(--thieuhoa-primary) !important; /* Đổi màu chữ sang màu đỏ nâu */
+} /* Kết thúc thieuhoa-nav-link:hover */
 
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
+.thieuhoa-nav-link:hover::after { /* Khi di chuột qua thì đường gạch dưới xuất hiện */
+  width: 70%; /* Mở rộng chiếm 70% độ rộng của nút liên kết */
+} /* Kết thúc thieuhoa-nav-link:hover::after */
 
-#docs {
-  border-right: 1px solid var(--border);
+.thieuhoa-nav-link.active { /* Định dạng khi danh mục được chọn */
+  color: var(--thieuhoa-primary) !important; /* Đổi màu chữ sang màu đỏ nâu chính */
+} /* Kết thúc thieuhoa-nav-link.active */
 
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
+.thieuhoa-nav-link.active::after { /* Hiển thị đường gạch dưới khi được chọn */
+  width: 70%; /* Mở rộng chiếm 70% độ rộng của liên kết */
+} /* Kết thúc thieuhoa-nav-link.active::after */
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
 
-  .logo {
-    height: 18px;
-  }
+/* Định dạng cho Banner Hero chính hiển thị hình ảnh thời trang quý phái */
+.thieuhoa-hero-banner { /* Định dạng khung banner quảng cáo */
+  background-size: cover; /* Ảnh bao phủ toàn bộ khung chứa */
+  background-position: center; /* Ảnh căn giữa khung */
+  min-height: 480px; /* Chiều cao tối thiểu 480px tạo ấn tượng thị giác mạnh */
+  display: flex; /* Sử dụng flexbox */
+  align-items: center; /* Căn nội dung ở giữa theo chiều dọc */
+  position: relative; /* Cần thiết cho các lớp phủ */
+} /* Kết thúc thieuhoa-hero-banner */
 
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
+.thieuhoa-hero-overlay { /* Lớp phủ tối mỏng giúp chữ hiển thị rõ nét hơn */
+  position: absolute; /* Định vị tuyệt đối bao phủ banner */
+  top: 0; /* Bắt đầu từ đỉnh */
+  left: 0; /* Bắt đầu từ lề trái */
+  width: 100%; /* Chiều rộng 100% */
+  height: 100%; /* Chiều cao 100% */
+  background: linear-gradient(90deg, rgba(83,30,24,0.7) 0%, rgba(83,30,24,0.1) 100%); /* Hiệu ứng màu chuyển dần đỏ nâu sang trong suốt */
+  z-index: 1; /* Nằm trên hình ảnh gốc */
+} /* Kết thúc thieuhoa-hero-overlay */
 
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
+.thieuhoa-hero-content { /* Vùng chứa văn bản quảng cáo trong banner */
+  position: relative; /* Định vị tương đối nằm trên lớp phủ */
+  z-index: 2; /* Nằm trên lớp phủ overlay */
+  color: #FFFFFF; /* Đặt chữ màu trắng nổi bật trên nền đỏ nâu */
+  max-width: 500px; /* Giới hạn chiều rộng chữ */
+} /* Kết thúc thieuhoa-hero-content */
 
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
+/* Nút bấm thiết kế chuẩn Thiều Hoa */
+.btn-thieuhoa { /* Nút bấm nền đỏ nâu chữ trắng */
+  background-color: var(--thieuhoa-primary); /* Nền màu đỏ nâu chủ đạo */
+  color: #FFFFFF !important; /* Chữ màu trắng */
+  border: 1.5px solid var(--thieuhoa-primary); /* Viền màu đỏ nâu tương ứng */
+  border-radius: 50px; /* Bo tròn viên thuốc mềm mại */
+  padding: 10px 28px; /* Khoảng đệm rộng thoải mái */
+  font-weight: 600; /* Chữ in đậm */
+  font-size: 0.9rem; /* Cỡ chữ chuẩn nút bấm */
+} /* Kết thúc btn-thieuhoa */
 
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
+.btn-thieuhoa:hover { /* Khi di chuột qua nút */
+  background-color: var(--thieuhoa-primary-hover); /* Đổi màu nền sáng hơn */
+  border-color: var(--thieuhoa-primary-hover); /* Đổi viền sáng tương ứng */
+} /* Kết thúc btn-thieuhoa:hover */
 
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
+.btn-outline-thieuhoa { /* Nút bấm dạng viền đỏ nâu nền trắng */
+  background-color: transparent; /* Nền trong suốt */
+  color: var(--thieuhoa-primary) !important; /* Chữ đỏ nâu chủ đạo */
+  border: 1.5px solid var(--thieuhoa-primary); /* Viền đỏ nâu tương ứng */
+  border-radius: 50px; /* Bo tròn viên thuốc */
+  padding: 10px 28px; /* Khoảng đệm rộng */
+  font-weight: 600; /* Chữ in đậm */
+  font-size: 0.9rem; /* Cỡ chữ chuẩn */
+} /* Kết thúc btn-outline-thieuhoa */
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
+.btn-outline-thieuhoa:hover { /* Khi di chuột qua nút viền */
+  background-color: var(--thieuhoa-primary); /* Đổi nền thành đỏ nâu */
+  color: #FFFFFF !important; /* Chữ đổi thành màu trắng */
+} /* Kết thúc btn-outline-thieuhoa:hover */
 
-.ticks {
-  position: relative;
-  width: 100%;
+/* Phong cách cho chân trang (Footer) */
+.thieuhoa-footer { /* Khung chứa chân trang */
+  background-color: #f9fafb; /* Màu xám/xanh dương cực nhạt giống hệt website gốc của Thiều Hoa */
+  color: #444444; /* Màu chữ xám đậm dễ đọc trên nền sáng */
+  font-size: 0.9rem; /* Cỡ chữ nhỏ thích hợp cho footer */
+  border-top: 4px solid var(--thieuhoa-primary); /* Viền trên bằng màu đỏ nâu thương hiệu thay vì màu vàng kim */
+} /* Kết thúc thieuhoa-footer */
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
+.thieuhoa-footer-title { /* Tiêu đề các cột ở chân trang */
+  color: #111111; /* Đặt chữ tiêu đề màu đen nổi bật */
+  font-weight: 700; /* Chữ in đậm dày */
+  font-size: 1.05rem; /* Cỡ chữ tiêu đề hơi lớn hơn chữ thân một chút */
+  margin-bottom: 20px; /* Cách nội dung bên dưới 20px */
+  position: relative; /* Cần thiết để vẽ thanh gạch dưới trang trí */
+  padding-bottom: 8px; /* Chừa khoảng trống dưới tiêu đề */
+} /* Kết thúc thieuhoa-footer-title */
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
-}
+.thieuhoa-footer-title::after { /* Dòng gạch dưới trang trí cho tiêu đề footer */
+  content: ''; /* Nội dung trống */
+  position: absolute; /* Định vị tuyệt đối dưới tiêu đề */
+  bottom: 0; /* Dính đáy tiêu đề */
+  left: 0; /* Dính lề trái */
+  width: 40px; /* Đường kẻ rộng 40px */
+  height: 2px; /* Độ dày đường kẻ 2px */
+  background-color: var(--thieuhoa-primary); /* Sử dụng màu đỏ nâu chủ đạo */
+} /* Kết thúc thieuhoa-footer-title::after */
+
+.thieuhoa-footer-link { /* Các liên kết ở chân trang */
+  color: #555555; /* Màu chữ xám đậm vừa phải */
+  font-size: 0.85rem; /* Cỡ chữ liên kết nhỏ tinh tế */
+} /* Kết thúc thieuhoa-footer-link */
+
+.thieuhoa-footer-link:hover { /* Khi di chuột qua liên kết chân trang */
+  color: var(--thieuhoa-primary) !important; /* Đổi sang màu đỏ nâu thương hiệu */
+  padding-left: 5px; /* Dịch nhẹ sang phải tạo hiệu ứng tương tác động */
+} /* Kết thúc thieuhoa-footer-link:hover */
+
+/* Thiết lập cho Mega Menu Dropdown */
+.mega-menu-hover {
+  position: relative; /* Cần thiết cho định vị con */
+} /* Kết thúc mega-menu-hover */
+
+.thieuhoa-mega-menu-dropdown {
+  position: absolute; /* Định vị tuyệt đối */
+  top: 100%; /* Dính sát dưới lề của navbar */
+  left: 0; /* Căn từ lề trái */
+  width: 900px; /* Độ rộng định hình */
+  max-width: 95vw; /* Tránh tràn màn hình thiết bị di động */
+  background-color: #FFFFFF; /* Nền trắng */
+  z-index: 9999; /* Đảm bảo nổi bật lên trên tất cả */
+  border-top: 3px solid var(--thieuhoa-primary); /* Đường kẻ viền màu đỏ nâu thương hiệu */
+  opacity: 0; /* Ẩn mờ */
+  visibility: hidden; /* Ẩn đi */
+  transform: translateY(10px); /* Dịch chuyển nhẹ xuống để tạo hiệu ứng */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Hiệu ứng xuất hiện mượt mà */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important; /* Đổ bóng sâu */
+  border-radius: 0 0 8px 8px; /* Bo nhẹ góc dưới */
+  padding: 20px; /* Khoảng đệm bên trong dropdown */
+} /* Kết thúc thieuhoa-mega-menu-dropdown */
+
+.mega-menu-hover:hover .thieuhoa-mega-menu-dropdown {
+  opacity: 1; /* Hiện rõ khi hover */
+  visibility: visible; /* Cho phép tương tác */
+  transform: translateY(0); /* Đưa về vị trí chuẩn */
+} /* Kết thúc mega-menu-hover:hover .thieuhoa-mega-menu-dropdown */
+
+.btn-link-menu {
+  background: none; /* Không nền */
+  border: none; /* Không viền */
+  padding: 0; /* Không đệm */
+  text-align: left; /* Căn lề trái */
+  font-weight: 500; /* Chữ đậm vừa */
+  color: #666666 !important; /* Màu chữ xám */
+  transition: all 0.2s ease; /* Hiệu ứng hover mượt */
+  width: 100%; /* Rộng tối đa */
+  display: block; /* Dạng khối */
+  font-size: 0.8rem; /* Cỡ chữ nhỏ */
+  text-transform: none; /* Không viết hoa toàn bộ */
+  margin-bottom: 6px; /* Cách dòng dưới */
+} /* Kết thúc btn-link-menu */
+
+.btn-link-menu:hover {
+  color: var(--thieuhoa-primary) !important; /* Đổi sang màu đỏ nâu thương hiệu */
+  padding-left: 5px; /* Dịch nhẹ tạo hiệu ứng động */
+  text-decoration: none; /* Không gạch chân */
+} /* Kết thúc btn-link-menu:hover */
+
