@@ -63,14 +63,34 @@ Ngay thuc hien: 15/05/2026
                 </div>
 
                 <div class="mb-3"> @* Ảnh sản phẩm tải từ máy *@
-                    <label class="form-label fw-bold">Hình ảnh sản phẩm:</label>
+                    <label class="form-label fw-bold">Hình ảnh sản phẩm (có thể chọn nhiều ảnh thay thế):</label>
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
-                        <div class="mb-2">
-                            <img src="@Model.ImageUrl" alt="@Model.Name" class="img-thumbnail" style="max-height: 120px;" />
+                        <div class="mb-2 d-flex flex-wrap" style="gap: 10px;">
+                            @foreach(var img in Model.ImageUrl.Split(','))
+                            {
+                                <img src="@img" alt="@Model.Name" class="img-thumbnail" style="max-height: 120px;" />
+                            }
                         </div>
                     }
-                    <input type="file" name="uploadImage" class="form-control" accept="image/*" />
+                    <input type="file" name="uploadImages" class="form-control" accept="image/*" multiple />
+                </div>
+
+                <div class="mb-3"> @* Bảng size / Mô tả *@
+                    <label class="form-label fw-bold">Ảnh bảng size / Mô tả thêm:</label>
+                    @if (!string.IsNullOrEmpty(Model.SizeGuideImageUrl))
+                    {
+                        <div class="mb-2">
+                            <img src="@Model.SizeGuideImageUrl" class="img-thumbnail" style="max-height: 120px;" />
+                        </div>
+                    }
+                    <input type="file" name="uploadSizeGuide" class="form-control" accept="image/*" />
+                </div>
+
+                <div class="mb-3"> @* Phân loại Size *@
+                    <label class="form-label fw-bold">Các Size hiện có (cách nhau bởi dấu phẩy):</label>
+                    <input asp-for="Sizes" class="form-control" placeholder="VD: S, M, L, XL" />
+                    <span asp-validation-for="Sizes" class="text-danger small"></span>
                 </div>
             </div>
         </div>

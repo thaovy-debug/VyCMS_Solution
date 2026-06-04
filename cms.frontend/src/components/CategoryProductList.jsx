@@ -35,15 +35,10 @@ const CategoryProductList = ({ selectedCategoryId, onSelectCategory }) => { // �
     } // Kết thúc kiểm tra loading
 
     return ( // Trả về giao diện cấu trúc danh mục sản phẩm
-        <div className="card shadow-sm border-0 rounded-lg overflow-hidden mb-4" style={{ borderLeft: '4px solid var(--thieuhoa-primary)' }}> {/* Khung thẻ card bo góc có viền trái màu đỏ nâu nổi bật */}
-            {/* Tiêu đề danh mục sản phẩm phong cách Thiều Hoa */}
-            <div className="card-header bg-white border-bottom-0 pt-4 pb-2 px-4"> {/* Phần đầu card màu trắng không viền */}
-                <h5 className="card-title text-uppercase font-weight-bold text-dark d-flex align-items-center mb-0" style={{ letterSpacing: '1px', fontSize: '1.05rem', color: 'var(--thieuhoa-primary)' }}> {/* Định dạng font in đậm viết hoa */}
-                    <i className="fa-solid fa-shirt mr-2" style={{ color: 'var(--thieuhoa-primary)' }}></i> Danh mục sản phẩm {/* Icon áo sơ mi đi kèm nhãn tiêu đề đỏ nâu */}
-                </h5> {/* Kết thúc tiêu đề card */}
-            </div> {/* Kết thúc phần header card */}
-
-            {/* Thân card chứa danh sách danh mục */}
+        <div className="card border-0 shadow-sm mb-4">
+            <div className="card-header bg-white font-weight-bold text-uppercase py-3" style={{ color: 'var(--thieuhoa-primary)', borderBottom: '2px solid var(--thieuhoa-primary)' }}>
+                <i className="fa-solid fa-shirt mr-2"></i> Danh mục sản phẩm
+            </div>
             <div className="card-body p-0"> {/* Thân card không sử dụng padding mặc định */}
                 <div className="list-group list-group-flush"> {/* Tạo nhóm danh sách viền phẳng sạch sẽ */}
                     

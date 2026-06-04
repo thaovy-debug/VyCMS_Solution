@@ -19,7 +19,12 @@ const blogService = { // Khai báo đối tượng dịch vụ chứa các phư�
     getAllPosts: () => { // Định nghĩa hàm gọi API lấy danh sách bài viết thời trang
         const url = '/Posts'; // Khai báo đường dẫn tương đối khớp với PostsController ở Backend
         return axiosClient.get(url); // Thực hiện yêu cầu HTTP GET và trả về danh sách bài viết nhận được từ CSDL
-    } // Kết thúc phương thức getAllPosts
+    },
+
+    getPostById: (id) => {
+        const url = `/Posts/${id}`;
+        return axiosClient.get(url);
+    }
 }; // Kết thúc đối tượng dịch vụ blogService
 
 export default blogService; // Xuất đối tượng dịch vụ blogService để các component khác import sử dụng

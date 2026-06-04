@@ -60,8 +60,19 @@ Ngay thuc hien: 15/05/2026
                 </div>
 
                 <div class="mb-3"> @* Tải lên hình ảnh *@
-                    <label class="form-label fw-bold">Hình ảnh sản phẩm (tải từ máy):</label>
-                    <input type="file" name="uploadImage" class="form-control" accept="image/*" />
+                    <label class="form-label fw-bold">Hình ảnh sản phẩm (có thể chọn nhiều ảnh):</label>
+                    <input type="file" name="uploadImages" class="form-control" accept="image/*" multiple />
+                </div>
+
+                <div class="mb-3"> @* Bảng size hoặc ảnh mô tả *@
+                    <label class="form-label fw-bold">Ảnh bảng size / Mô tả (tải từ máy):</label>
+                    <input type="file" name="uploadSizeGuide" class="form-control" accept="image/*" />
+                </div>
+
+                <div class="mb-3"> @* Phân loại Size *@
+                    <label class="form-label fw-bold">Các Size hiện có (cách nhau bởi dấu phẩy):</label>
+                    <input asp-for="Sizes" class="form-control" placeholder="VD: S, M, L, XL" />
+                    <span asp-validation-for="Sizes" class="text-danger small"></span>
                 </div>
             </div>
         </div>

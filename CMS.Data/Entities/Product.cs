@@ -21,6 +21,10 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         public string? Description { get; set; } // Thuộc tính lưu mô tả chi tiết của sản phẩm (cho phép null)
 
+        public string? Sizes { get; set; } // Danh sách size sản phẩm, phân cách bằng dấu phẩy (vd: S,M,L,XL)
+
+        public string? SizeGuideImageUrl { get; set; } // Ảnh mô tả thêm hoặc bảng size
+
         [Range(0, double.MaxValue)] // Ràng buộc giá trị nhập vào phải từ 0 trở lên
         [Column(TypeName = "decimal(18,2)")] // Xác định kiểu dữ liệu trong SQL Server là decimal(18,2)
         public decimal Price { get; set; } // Thuộc tính lưu đơn giá sản phẩm

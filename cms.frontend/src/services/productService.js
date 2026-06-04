@@ -17,9 +17,14 @@ const productService = { // Khai báo đối tượng dịch vụ chứa các h�
 
     // Hàm gọi API lấy danh sách sản phẩm theo mã danh mục sản phẩm cụ thể
     getProductsByCategory: (categoryId) => { // Định nghĩa phương thức lấy sản phẩm theo danh mục
-        const url = `/Products/categoryproduct/${categoryId}`; // Đường dẫn phụ chứa tham số categoryId khớp với Backend
+        const url = `/Products/category/${categoryId}`; // Đường dẫn phụ chứa tham số categoryId khớp với Backend
         return axiosClient.get(url); // Thực hiện phương thức HTTP GET và trả về một Promise chứa dữ liệu sản phẩm đã lọc
-    } // Kết thúc phương thức getProductsByCategory
+    },
+
+    getProductById: (id) => {
+        const url = `/Products/${id}`;
+        return axiosClient.get(url);
+    }
 }; // Kết thúc định nghĩa đối tượng productService
 
 export default productService; // Xuất đối tượng dịch vụ để các component có thể import sử dụng

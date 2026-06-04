@@ -1,0 +1,66 @@
+@model CMS.Data.Entities.Banner
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Banner";
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3">
+        <h4 class="text-primary font-weight-bold m-0"><i class="fa-solid fa-pen-to-square mr-2"></i>CHỈNH SỬA BANNER</h4>
+    </div>
+    <div class="card-body p-4">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label fw-bold">Tiêu đề Banner <span class="text-danger">*</span></label>
+                        <input asp-for="Title" class="form-control form-control-lg" required />
+                        <span asp-validation-for="Title" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Hình ảnh hiện tại</label>
+                        <div class="mb-3">
+                            <img src="@Model.ImageUrl" alt="@Model.Title" class="img-thumbnail shadow-sm" style="max-height: 200px;" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-primary">Thay đổi hình ảnh mới (Tùy chọn)</label>
+                        <div class="card border-primary p-3 bg-light">
+                            <p class="small text-muted mb-2">Để giữ nguyên ảnh cũ, bạn không cần nhập gì vào khung này.</p>
+                            
+                            <div class="mb-3">
+                                <label class="form-label font-weight-bold text-dark">1. Tải ảnh mới từ máy:</label>
+                                <input type="file" name="uploadImage" class="form-control" accept="image/*" />
+                            </div>
+                            
+                            <div class="text-center my-2 text-muted fw-bold">HOẶC</div>
+                            
+                            <div>
+                                <label class="form-label font-weight-bold text-dark">2. Thay bằng link ảnh (URL) mới:</label>
+                                <input asp-for="ImageUrl" class="form-control" />
+                            </div>
+                        </div>
+                        <span asp-validation-for="ImageUrl" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mt-5">
+                        <button type="submit" class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm mr-2">
+                            <i class="fa-solid fa-floppy-disk mr-2"></i>Cập nhật Banner
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 font-weight-bold">
+                            <i class="fa-solid fa-arrow-left mr-2"></i>Hủy bỏ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -7,6 +7,7 @@ Ngay thuc hien: 15/05/2026
 */
 
 import React, { useState, useEffect } from 'react'; // Nhập React và các Hooks useState, useEffect
+import { Link } from 'react-router-dom';
 import blogService from '../services/blogService'; // Nhập lớp dịch vụ blogService để gọi API bài viết từ Backend
 
 const PostList = () => { // Định nghĩa component chức năng PostList
@@ -66,9 +67,9 @@ const PostList = () => { // Định nghĩa component chức năng PostList
                                                 <span className="badge px-2 py-1 rounded font-weight-bold text-uppercase" style={{ backgroundColor: '#F8F6F2', color: 'var(--thieuhoa-primary)', fontSize: '0.68rem', letterSpacing: '0.5px' }}>{post.categoryName}</span> {/* Badge danh mục */}
                                             </div> {/* Kết thúc nhóm danh mục */}
                                             <h5 className="card-title font-weight-bold mb-2" style={{ fontSize: '0.98rem', lineHeight: '1.4' }}> {/* Tiêu đề bài viết */}
-                                                <a href={`/post/${post.id}`} className="text-dark text-decoration-none hover-link" style={{ transition: 'color 0.2s' }}> {/* Liên kết dẫn tới trang chi tiết bài viết */}
+                                                <Link to={`/post/${post.id}`} className="text-dark text-decoration-none hover-link" style={{ transition: 'color 0.2s' }}> {/* Liên kết dẫn tới trang chi tiết bài viết */}
                                                     {post.title} {/* Hiển thị tiêu đề bài viết */}
-                                                </a> {/* Kết thúc thẻ liên kết */}
+                                                </Link> {/* Kết thúc thẻ liên kết */}
                                             </h5> {/* Kết thúc tiêu đề */}
                                             <p className="card-text text-muted small mb-0" style={{ fontSize: '0.78rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}> {/* Đoạn tóm tắt bài viết giới hạn 2 dòng */}
                                                 {post.shortDescription || 'Đọc cẩm nang thời trang Thiều Hoa để cập nhật những mẹo phối đồ sang trọng, giúp tôn vinh vẻ đẹp của phụ nữ Việt Nam...'} {/* Hiển thị mô tả hoặc text thay thế nếu rỗng */}
@@ -80,7 +81,7 @@ const PostList = () => { // Định nghĩa component chức năng PostList
                                                 {/* Chuyển định dạng ngày giờ của .NET thô thành cấu trúc ngày/tháng/năm của Việt Nam */}
                                                 {new Date(post.createdDate).toLocaleDateString('vi-VN')} {/* Ngày đăng thuần Việt */}
                                             </span> {/* Kết thúc thẻ bao ngày đăng */}
-                                            <a href={`/post/${post.id}`} className="font-weight-bold text-uppercase" style={{ color: 'var(--thieuhoa-primary)', fontSize: '0.72rem', letterSpacing: '0.5px' }}>Chi tiết <i className="fa-solid fa-arrow-right-long ml-1"></i></a> {/* Nút liên kết chi tiết */}
+                                            <Link to={`/post/${post.id}`} className="font-weight-bold text-uppercase" style={{ color: 'var(--thieuhoa-primary)', fontSize: '0.72rem', letterSpacing: '0.5px' }}>Chi tiết <i className="fa-solid fa-arrow-right-long ml-1"></i></Link> {/* Nút liên kết chi tiết */}
                                         </div> {/* Kết thúc khối thông tin chân bài viết */}
                                     </div> {/* Kết thúc phần cột thông tin */}
                                 </div> {/* Kết thúc dòng ngang */}

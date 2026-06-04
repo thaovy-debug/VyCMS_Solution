@@ -44,7 +44,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
             return Ok(products); // Trả về kết quả cho Frontend kèm mã trạng thái HTTP 200 OK
         }
 
-        [HttpGet("categoryproduct/{categoryProductId}")] // Định nghĩa đường dẫn nhận tham số categoryProductId trên URL
+        [HttpGet("category/{categoryProductId}")] // Định nghĩa đường dẫn nhận tham số categoryProductId trên URL
         public async Task<IActionResult> GetByCategoryProduct(int categoryProductId) // Định nghĩa hàm lọc sản phẩm theo danh mục
         {
             var products = await _context.Products // Truy vấn bảng Products từ cơ sở dữ liệu

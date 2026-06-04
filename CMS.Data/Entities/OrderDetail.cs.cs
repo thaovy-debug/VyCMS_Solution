@@ -30,6 +30,8 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
         [Column(TypeName = "decimal(18,2)")] // Ánh xạ kiểu dữ liệu trong SQL Server là decimal với độ chính xác (18, 2)
         public decimal UnitPrice { get; set; } // Thuộc tính lưu trữ giá của sản phẩm tại thời điểm mua hàng
 
+        public string? Size { get; set; } // Size khách hàng đã chọn (S, M, L, XL...)
+
         [ForeignKey("OrderId")] // Chỉ định OrderId làm khóa ngoại liên kết tới bảng Order
         public virtual Order? Order { get; set; } // Khai báo đối tượng tham chiếu đến thực thể Order liên quan
 

@@ -7,6 +7,7 @@ Ngay thuc hien: 15/05/2026
 */
 
 import React, { useState, useEffect } from 'react'; // Nhập React và các hooks useState, useEffect từ React
+import { Link } from 'react-router-dom';
 import productService from '../services/productService'; // Nhập lớp dịch vụ gọi API sản phẩm từ Backend
 
 const ProductList = ({ selectedCategoryId, customFilterType }) => { // Định nghĩa component nhận prop selectedCategoryId và customFilterType từ component cha
@@ -59,15 +60,18 @@ const ProductList = ({ selectedCategoryId, customFilterType }) => { // Định n
                     <div className="col-lg-3 col-md-4 col-sm-6 mb-4" key={item.id}> {/* Mỗi dòng hiển thị 4 sản phẩm trên màn hình máy tính */}
                         <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--thieuhoa-card-bg)' }}> {/* Thẻ card bo góc, đổ bóng mờ, nền trắng */}
                             {/* Khung chứa ảnh sản phẩm thời trang thiết kế */}
-                            <div className="position-relative overflow-hidden" style={{ height: '260px', backgroundColor: '#F8F6F2' }}> {/* Khung giới hạn chiều cao ảnh nền xám kem */}
-                                {item.imageUrl ? ( // Nếu sản phẩm có chứa đường dẫn hình ảnh từ CSDL
-                                    <img // Ảnh chính sản phẩm
-                                        src={item.imageUrl} // Gán đường dẫn ảnh lấy được từ API
-                                        className="w-100 h-100 hover-zoom" // Ảnh rộng 100%, tự động phóng to mượt mà khi di chuột
-                                        alt={item.name} // Nhãn mô tả ảnh bằng tên sản phẩm
-                                        style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} // Ảnh vừa khít khung, hiệu ứng phóng to chậm 0.4 giây
-                                    /> // Kết thúc thẻ img
-                                ) : ( // Ngược lại nếu không có ảnh từ cơ sở dữ liệu
+                            <Link to={`/product/${item.id}`} className="position-relative overflow-hidden d-block text-decoration-none" style={{ height: '260px', backgroundColor: '#F8F6F2' }}> {/* Khung giới hạn chiều cao ảnh nền xám kem */}
+                                {item.imageUrl ? (() => { 
+                                    const firstImg = item.imageUrl.split(',')[0];
+                                    return (
+                                        <img // Ảnh chính sản phẩm
+                                            src={firstImg.startsWith('http') ? firstImg : `http://localhost:5244${firstImg}`} // Gán đường dẫn ảnh lấy được từ API
+                                            className="w-100 h-100 hover-zoom" // Ảnh rộng 100%, tự động phóng to mượt mà khi di chuột
+                                            alt={item.name} // Nhãn mô tả ảnh bằng tên sản phẩm
+                                            style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} // Ảnh vừa khít khung, hiệu ứng phóng to chậm 0.4 giây
+                                        /> 
+                                    );
+                                })() : ( // Ngược lại nếu không có ảnh từ cơ sở dữ liệu
                                     <div className="w-100 h-100 d-flex align-items-center justify-content-center text-muted"> {/* Tạo khung trống thông báo không có hình ảnh */}
                                         <i className="fa-regular fa-image" style={{ fontSize: '3rem', opacity: 0.3 }}></i> {/* Biểu tượng ảnh trống */}
                                     </div> // Kết thúc khung trống
@@ -78,14 +82,16 @@ const ProductList = ({ selectedCategoryId, customFilterType }) => { // Định n
                                 {item.discountPercent > 0 && (
                                     <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: '10px', right: '10px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem', borderRadius: '4px' }}>-{item.discountPercent}%</span>
                                 )}
-                            </div> {/* Kết thúc khung chứa ảnh */}
+                            </Link> {/* Kết thúc khung chứa ảnh */}
 
                             {/* Thân card chứa thông tin sản phẩm */}
                             <div className="card-body p-3 d-flex flex-column justify-content-between"> {/* Card-body phân bổ không gian đều */}
                                 <div> {/* Nhóm tiêu đề và giá sản phẩm */}
                                     {/* Nhãn hiệu phụ nhỏ đặc trưng của Thiều Hoa phía trên tiêu đề */}
                                     <div className="small text-uppercase font-weight-bold text-muted mb-1" style={{ fontSize: '0.68rem', letterSpacing: '1px', color: 'var(--thieuhoa-gold) !important' }}>THIỀU HOA DESIGN</div> {/* Nhãn hiệu phụ */}
-                                    <h5 className="card-title font-weight-bold text-dark mb-2" style={{ fontSize: '0.92rem', lineHeight: '1.4', height: '38px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{item.name}</h5> {/* Tên sản phẩm giới hạn 2 dòng tránh vỡ khung */}
+                                    <Link to={`/product/${item.id}`} className="text-decoration-none hover-link">
+                                        <h5 className="card-title font-weight-bold text-dark mb-2" style={{ fontSize: '0.92rem', lineHeight: '1.4', height: '38px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{item.name}</h5> {/* Tên sản phẩm giới hạn 2 dòng tránh vỡ khung */}
+                                    </Link>
                                     {/* Hiển thị giá khuyến mãi và giá gốc gạch ngang nếu có giảm giá */}
                                     <div className="d-flex align-items-center mb-2" style={{ gap: '8px' }}> {/* Căn hàng ngang giá cũ và mới */}
                                         <span className="font-weight-bold" style={{ fontSize: '1.05rem', color: 'var(--thieuhoa-primary)' }}> {/* Giá hiển thị */}
@@ -112,7 +118,21 @@ const ProductList = ({ selectedCategoryId, customFilterType }) => { // Định n
 
                             {/* Chân card chứa nút bấm */}
                             <div className="card-footer bg-transparent border-top-0 px-3 pb-3 pt-0"> {/* Phần chân thẻ card không viền */}
-                                <button className="btn btn-outline-thieuhoa btn-block btn-sm rounded-pill font-weight-bold transition-all"> {/* Nút bấm mua hàng bo tròn kiểu pill viền đỏ nâu */}
+                                <button 
+                                    className="btn btn-outline-thieuhoa btn-block btn-sm rounded-pill font-weight-bold transition-all"
+                                    onClick={() => {
+                                        const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+                                        const existing = currentCart.find(cartItem => cartItem.id === item.id);
+                                        if (existing) {
+                                            existing.quantity += 1;
+                                        } else {
+                                            currentCart.push({ ...item, quantity: 1 });
+                                        }
+                                        localStorage.setItem('cart', JSON.stringify(currentCart));
+                                        window.dispatchEvent(new Event('cartUpdated'));
+                                        alert(`Đã thêm ${item.name} vào giỏ hàng!`);
+                                    }}
+                                > {/* Nút bấm mua hàng bo tròn kiểu pill viền đỏ nâu */}
                                     <i className="fa-solid fa-cart-plus mr-1"></i> Thêm vào giỏ {/* Icon thêm vào giỏ và nhãn nút */}
                                 </button> {/* Kết thúc button */}
                             </div> {/* Kết thúc card-footer */}

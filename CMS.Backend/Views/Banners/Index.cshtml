@@ -1,0 +1,73 @@
+@model IEnumerable<CMS.Data.Entities.Banner>
+
+@{
+    ViewData["Title"] = "Quản lý Banner";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary font-weight-bold m-0"><i class="fa-solid fa-images mr-2"></i>QUẢN LÝ BANNER</h2>
+    <a asp-action="Create" class="btn btn-success font-weight-bold shadow-sm">
+        <i class="fa-solid fa-plus mr-2"></i>Thêm Banner Mới
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check mr-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th class="py-3 px-4">#</th>
+                        <th class="py-3 px-4">Hình ảnh</th>
+                        <th class="py-3 px-4">Tiêu đề Banner</th>
+                        <th class="py-3 px-4 text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="fa-regular fa-image fa-3x mb-3 opacity-50"></i>
+                                <p class="mb-0">Chưa có banner nào trong hệ thống.</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int index = 1;
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-4 fw-bold text-muted">@index</td>
+                                <td class="px-4">
+                                    <img src="@item.ImageUrl" alt="@item.Title" class="img-thumbnail shadow-sm" style="height: 80px; object-fit: cover;" />
+                                </td>
+                                <td class="px-4 fw-bold">@item.Title</td>
+                                <td class="px-4 text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary shadow-sm mr-2" title="Chỉnh sửa">
+                                        <i class="fa-solid fa-pen-to-square"></i> Sửa
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa banner này?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="Xóa">
+                                            <i class="fa-solid fa-trash-can"></i> Xóa
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

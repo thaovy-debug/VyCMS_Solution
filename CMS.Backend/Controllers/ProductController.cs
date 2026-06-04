@@ -44,24 +44,32 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         }
 
         [HttpPost] // Nhận HTTP POST
-        public IActionResult Create(Product model, IFormFile? uploadImage) // Hàm xử lý lưu thông tin sản phẩm mới kèm ảnh upload
+        public IActionResult Create(Product model, List<IFormFile> uploadImages, IFormFile? uploadSizeGuide) // Hàm xử lý lưu thông tin sản phẩm mới kèm ảnh upload
         {
             if (ModelState.IsValid) // Kiểm tra tính hợp lệ của dữ liệu form
             {
-                if (uploadImage != null && uploadImage.Length > 0) // Nếu người dùng tải file lên
+                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"); // Định nghĩa thư mục lưu ảnh
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder); // Tạo thư mục nếu chưa tồn tại
+
+                if (uploadImages != null && uploadImages.Count > 0) // Nếu người dùng tải nhiều file lên
                 {
-                    string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"); // Định nghĩa thư mục lưu ảnh
-                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder); // Tạo thư mục nếu chưa tồn tại
-
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName); // Tạo tên file ảnh ngẫu nhiên duy nhất
-                    string filePath = Path.Combine(folder, fileName); // Đường dẫn lưu vật lý
-
-                    using (var stream = new FileStream(filePath, FileMode.Create)) // Mở luồng lưu file
+                    List<string> filePaths = new List<string>();
+                    foreach (var uploadImage in uploadImages)
                     {
-                        uploadImage.CopyTo(stream); // Thực hiện sao chép file
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName); // Tạo tên file ảnh ngẫu nhiên duy nhất
+                        string filePath = Path.Combine(folder, fileName); // Đường dẫn lưu vật lý
+                        using (var stream = new FileStream(filePath, FileMode.Create)) { uploadImage.CopyTo(stream); }
+                        filePaths.Add("/uploads/" + fileName);
                     }
+                    model.ImageUrl = string.Join(",", filePaths); // Gán chuỗi đường dẫn tương đối của các ảnh ngăn cách bằng dấu phẩy
+                }
 
-                    model.ImageUrl = "/uploads/" + fileName; // Gán đường dẫn tương đối của ảnh
+                if (uploadSizeGuide != null && uploadSizeGuide.Length > 0)
+                {
+                    string sizeFileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadSizeGuide.FileName);
+                    string sizeFilePath = Path.Combine(folder, sizeFileName);
+                    using (var stream = new FileStream(sizeFilePath, FileMode.Create)) { uploadSizeGuide.CopyTo(stream); }
+                    model.SizeGuideImageUrl = "/uploads/" + sizeFileName;
                 }
 
                 _context.Products.Add(model); // Thêm sản phẩm vào DbContext
@@ -82,33 +90,42 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         }
 
         [HttpPost] // Nhận HTTP POST
-        public IActionResult Edit(Product model, IFormFile? uploadImage) // Hàm xử lý cập nhật thay đổi sản phẩm kèm ảnh mới
+        public IActionResult Edit(Product model, List<IFormFile> uploadImages, IFormFile? uploadSizeGuide) // Hàm xử lý cập nhật thay đổi sản phẩm kèm ảnh mới
         {
             if (ModelState.IsValid) // Kiểm tra tính hợp lệ
             {
-                if (uploadImage != null && uploadImage.Length > 0) // Nếu người dùng có chọn file ảnh mới
+                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"); // Thư mục lưu ảnh
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder); // Tạo nếu chưa có
+                
+                var oldProduct = _context.Products.AsNoTracking().FirstOrDefault(p => p.Id == model.Id);
+
+                if (uploadImages != null && uploadImages.Count > 0) // Nếu người dùng có chọn file ảnh mới
                 {
-                    string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"); // Thư mục lưu ảnh
-                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder); // Tạo nếu chưa có
-
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName); // Tạo tên file duy nhất
-                    string filePath = Path.Combine(folder, fileName); // Đường dẫn vật lý
-
-                    using (var stream = new FileStream(filePath, FileMode.Create)) // Lưu file
+                    List<string> filePaths = new List<string>();
+                    foreach (var uploadImage in uploadImages)
                     {
-                        uploadImage.CopyTo(stream);
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName); // Tạo tên file duy nhất
+                        string filePath = Path.Combine(folder, fileName); // Đường dẫn vật lý
+                        using (var stream = new FileStream(filePath, FileMode.Create)) { uploadImage.CopyTo(stream); }
+                        filePaths.Add("/uploads/" + fileName);
                     }
-
-                    model.ImageUrl = "/uploads/" + fileName; // Lưu đường dẫn ảnh mới
+                    model.ImageUrl = string.Join(",", filePaths); // Lưu chuỗi đường dẫn các ảnh mới
                 }
-                else // Nếu giữ nguyên ảnh cũ
+                else if (oldProduct != null && string.IsNullOrEmpty(model.ImageUrl))
                 {
-                    // Lấy thông tin sản phẩm gốc để giữ nguyên ImageUrl cũ
-                    var oldProduct = _context.Products.AsNoTracking().FirstOrDefault(p => p.Id == model.Id);
-                    if (oldProduct != null && string.IsNullOrEmpty(model.ImageUrl))
-                    {
-                        model.ImageUrl = oldProduct.ImageUrl; // Giữ lại ảnh cũ
-                    }
+                    model.ImageUrl = oldProduct.ImageUrl; // Giữ lại ảnh cũ
+                }
+
+                if (uploadSizeGuide != null && uploadSizeGuide.Length > 0)
+                {
+                    string sizeFileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadSizeGuide.FileName);
+                    string sizeFilePath = Path.Combine(folder, sizeFileName);
+                    using (var stream = new FileStream(sizeFilePath, FileMode.Create)) { uploadSizeGuide.CopyTo(stream); }
+                    model.SizeGuideImageUrl = "/uploads/" + sizeFileName;
+                }
+                else if (oldProduct != null && string.IsNullOrEmpty(model.SizeGuideImageUrl))
+                {
+                    model.SizeGuideImageUrl = oldProduct.SizeGuideImageUrl;
                 }
 
                 _context.Products.Update(model); // Cập nhật thông tin sản phẩm

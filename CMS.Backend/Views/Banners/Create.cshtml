@@ -1,0 +1,65 @@
+@model CMS.Data.Entities.Banner
+
+@{
+    ViewData["Title"] = "Thêm Banner Mới";
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3">
+        <h4 class="text-primary font-weight-bold m-0"><i class="fa-solid fa-plus-circle mr-2"></i>THÊM BANNER MỚI</h4>
+    </div>
+    <div class="card-body p-4">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label fw-bold">Tiêu đề Banner <span class="text-danger">*</span></label>
+                        <input asp-for="Title" class="form-control form-control-lg" placeholder="Nhập tiêu đề banner..." required />
+                        <span asp-validation-for="Title" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Hình ảnh Banner <span class="text-danger">*</span></label>
+                        <div class="card bg-light border-0 p-3">
+                            <p class="small text-muted mb-2">Bạn có thể <strong>tải ảnh lên từ máy</strong> HOẶC <strong>nhập link ảnh trực tiếp</strong>.</p>
+                            
+                            <div class="mb-3">
+                                <label class="form-label font-weight-bold text-dark">1. Tải ảnh từ máy:</label>
+                                <input type="file" name="uploadImage" class="form-control" accept="image/*" />
+                            </div>
+                            
+                            <div class="text-center my-2 text-muted fw-bold">HOẶC</div>
+                            
+                            <div>
+                                <label class="form-label font-weight-bold text-dark">2. Dán link ảnh (URL):</label>
+                                <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
+                            </div>
+                        </div>
+                        <span asp-validation-for="ImageUrl" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mt-5">
+                        <button type="submit" class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm mr-2">
+                            <i class="fa-solid fa-floppy-disk mr-2"></i>Lưu Banner
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 font-weight-bold">
+                            <i class="fa-solid fa-arrow-left mr-2"></i>Quay lại
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 d-none d-md-block">
+                    <div class="alert alert-info border-0 shadow-sm">
+                        <h6 class="alert-heading font-weight-bold"><i class="fa-solid fa-circle-info mr-2"></i>Hướng dẫn</h6>
+                        <hr>
+                        <p class="mb-0 small">Tiêu đề giúp bạn quản lý banner dễ dàng hơn. Kích thước ảnh khuyên dùng là <strong>1920x800px</strong> để hiển thị đẹp nhất trên màn hình máy tính.</p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
