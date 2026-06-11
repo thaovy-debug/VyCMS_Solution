@@ -175,5 +175,28 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             }
             return RedirectToAction("Index"); // Quay về giao diện danh sách bài viết Index
         }
+        // Action xử lý tải ảnh lên từ CKEditor
+        [HttpPost]
+        public IActionResult UploadImage(IFormFile upload)
+        {
+            if (upload != null && upload.Length > 0)
+            {
+                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(upload.FileName);
+                string filePath = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    upload.CopyTo(stream);
+                }
+
+                var url = "/uploads/" + fileName;
+                // CKEditor mong đợi một JSON có thuộc tính "url"
+                return Json(new { uploaded = true, url = url });
+            }
+            return Json(new { uploaded = false, error = new { message = "Lỗi tải ảnh lên" } });
+        }
     }
 }

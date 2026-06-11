@@ -7,7 +7,7 @@ Ngay thuc hien: 15/05/2026
 */
 
 import React, { useState, useEffect } from 'react'; // Nhập React và các hooks quản lý trạng thái
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Cart from './pages/Cart';
@@ -59,6 +59,16 @@ function App() { // Định nghĩa component chính App của dự án
     const [loadingAll, setLoadingAll] = useState(false); // Quản lý trạng thái tải toàn bộ sản phẩm
     const [banners, setBanners] = useState([]); // State lưu danh sách banners
     const [customer, setCustomer] = useState(() => JSON.parse(localStorage.getItem('customer')) || null); // Tài khoản đăng nhập
+    const [searchInput, setSearchInput] = useState('');
+    const navigate = useNavigate();
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchInput.trim()) {
+            navigate(`/san-pham?search=${encodeURIComponent(searchInput.trim())}`);
+            setSearchInput('');
+        }
+    };
 
     useEffect(() => { // Tự động chạy tải danh mục để hiển thị lên thanh điều hướng chính
         const loadMenuCategories = async () => { // Định nghĩa hàm bất đồng bộ loadMenuCategories
@@ -172,21 +182,29 @@ function App() { // Định nghĩa component chính App của dự án
                 <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--thieuhoa-card-bg)' }}> {/* Card bo tròn */}
                     {/* Khung chứa ảnh */}
                     <Link to={`/product/${item.id}`} className="position-relative overflow-hidden d-block text-decoration-none" style={{ height: '260px', backgroundColor: '#F8F6F2' }}> {/* Khung giới hạn chiều cao */}
-                        {item.imageUrl ? ( // Kiểm tra đường dẫn hình ảnh
-                            <img 
-                                src={item.imageUrl} // Nguồn ảnh
-                                className="w-100 h-100 hover-zoom" // Phóng to khi hover
-                                alt={item.name} // Nhãn
-                                style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} // Tỷ lệ phủ ảnh
-                            />
-                        ) : ( // Fallback
+                        {item.imageUrl ? (() => {
+                            const firstImg = item.imageUrl.split(',')[0];
+                            return (
+                                <img 
+                                    src={firstImg.startsWith('http') ? firstImg : `${import.meta.env.VITE_API_URL}${firstImg}`} // Nguồn ảnh
+                                    className="w-100 h-100 hover-zoom" // Phóng to khi hover
+                                    alt={item.name} // Nhãn
+                                    style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} // Tỷ lệ phủ ảnh
+                                />
+                            );
+                        })() : ( // Fallback
                             <div className="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
                                 <i className="fa-regular fa-image" style={{ fontSize: '3rem', opacity: 0.3 }}></i>
                             </div>
                         )}
-                        <span className="position-absolute badge badge-dark px-2 py-1 small font-weight-bold text-uppercase" style={{ top: '10px', left: '10px', backgroundColor: '#111111', fontSize: '0.65rem', letterSpacing: '0.5px' }}>NEW</span>
+                        {item.stockQuantity === 0 && (
+                            <div className="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(255,255,255,0.6)', zIndex: 10, top: 0, left: 0 }}>
+                                <span className="badge badge-dark px-3 py-2 font-weight-bold" style={{ fontSize: '1rem', letterSpacing: '1px' }}>HẾT HÀNG</span>
+                            </div>
+                        )}
+                        <span className="position-absolute badge badge-dark px-2 py-1 small font-weight-bold text-uppercase" style={{ top: '10px', left: '10px', backgroundColor: '#111111', fontSize: '0.65rem', letterSpacing: '0.5px', zIndex: 11 }}>NEW</span>
                         {item.discountPercent > 0 && (
-                            <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: '10px', right: '10px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem', borderRadius: '4px' }}>-{item.discountPercent}%</span>
+                            <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: '10px', right: '10px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem', borderRadius: '4px', zIndex: 11 }}>-{item.discountPercent}%</span>
                         )}
                     </Link>
 
@@ -222,9 +240,15 @@ function App() { // Định nghĩa component chính App của dự án
 
                     {/* Chân card */}
                     <div className="card-footer bg-transparent border-top-0 px-3 pb-3 pt-0">
-                        <button className="btn btn-outline-thieuhoa btn-block btn-sm rounded-pill font-weight-bold transition-all" onClick={() => handleAddToCart(item)}>
-                            <i className="fa-solid fa-cart-plus mr-1"></i> Mua ngay
-                        </button>
+                        {item.stockQuantity === 0 ? (
+                            <button className="btn btn-secondary btn-block btn-sm rounded-pill font-weight-bold" disabled>
+                                Hết hàng
+                            </button>
+                        ) : (
+                            <button className="btn btn-outline-thieuhoa btn-block btn-sm rounded-pill font-weight-bold transition-all" onClick={() => handleAddToCart(item)}>
+                                <i className="fa-solid fa-cart-plus mr-1"></i> Mua ngay
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -401,9 +425,11 @@ function App() { // Định nghĩa component chính App của dự án
 
                         {/* Khu vực bên phải: Ô tìm kiếm sản phẩm thời trang thiết kế bo tròn */}
                         <div className="my-2 my-md-0" style={{ width: '280px', maxWidth: '100%' }}> {/* Chiều rộng thanh tìm kiếm */}
-                            <div className="input-group" style={{ height: '36px' }}> {/* Nhóm ô nhập liệu và nút bấm */}
+                            <form className="input-group" style={{ height: '36px' }} onSubmit={handleSearch}> {/* Nhóm ô nhập liệu và nút bấm */}
                                 <input // Ô nhập liệu tìm kiếm
                                     type="text" // Kiểu nhập chữ
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
                                     className="form-control shadow-none" // Ô nhập liệu
                                     placeholder="Tìm kiếm sản phẩm..." // Gợi ý nhập liệu
                                     style={{
@@ -418,7 +444,7 @@ function App() { // Định nghĩa component chính App của dự án
                                 <div className="input-group-append"> {/* Khung ghép nút tìm kiếm phía sau */}
                                     <button 
                                         className="btn d-flex align-items-center justify-content-center" 
-                                        type="button"
+                                        type="submit"
                                         style={{
                                             backgroundColor: 'var(--thieuhoa-primary)', // Nền đỏ nâu
                                             borderColor: 'var(--thieuhoa-primary)', // Viền đỏ nâu
@@ -430,7 +456,7 @@ function App() { // Định nghĩa component chính App của dự án
                                         <i className="fa-solid fa-magnifying-glass text-white" style={{ fontSize: '0.85rem' }}></i> {/* Icon kính lúp màu trắng */}
                                     </button> {/* Kết thúc button */}
                                 </div> {/* Kết thúc append */}
-                            </div> {/* Kết thúc input-group */}
+                            </form> {/* Kết thúc input-group */}
                         </div> {/* Kết thúc cột tìm kiếm */}
 
                     </div> {/* Kết thúc flexbox */}
@@ -465,7 +491,7 @@ function App() { // Định nghĩa component chính App của dự án
                                     <div key={banner.id} className={`carousel-item ${idx === 0 ? 'active' : ''}`}>
                                         <a href="/san-pham" className="d-block" style={{ backgroundColor: '#f9fafb', textAlign: 'center' }}>
                                             <img 
-                                                src={banner.imageUrl.startsWith('http') ? banner.imageUrl : `http://localhost:5244${banner.imageUrl}`} 
+                                                src={banner.imageUrl.startsWith('http') ? banner.imageUrl : `${import.meta.env.VITE_API_URL}${banner.imageUrl}`} 
                                                 className="d-inline-block" 
                                                 alt={banner.title} 
                                                 style={{ objectFit: 'contain', width: '100%', maxHeight: '480px' }} 

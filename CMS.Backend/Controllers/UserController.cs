@@ -12,6 +12,9 @@ using CMS.Data.Entities; // Sử dụng lớp thực thể User từ namespace C
 using Microsoft.EntityFrameworkCore; // Hỗ trợ AsNoTracking và các thao tác nâng cao
 using System.Linq; // Sử dụng các phương thức mở rộng LINQ để xử lý dữ liệu
 using Microsoft.AspNetCore.Authorization; // Sử dụng phân quyền và xác thực người dùng
+using System.Security.Cryptography; // Hỗ trợ mã hóa
+using System.Text; // Hỗ trợ xử lý văn bản
+using System; // Thư viện cơ bản
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
 {
@@ -23,6 +26,16 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         public UserController(ApplicationDbContext context) // Phương thức khởi dựng nạp đối tượng DbContext thông qua DI
         {
             _context = context; // Gán đối tượng kết nối vào biến cục bộ
+        }
+
+        private string HashPassword(string password)
+        {
+            if (string.IsNullOrEmpty(password)) return password;
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            }
         }
 
         public IActionResult Index() // Hàm xử lý hiển thị danh sách người dùng hệ thống
@@ -62,6 +75,9 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                 return View(model); // Trả về giao diện cùng thông tin đã điền và thông báo lỗi tương ứng
             }
 
+            // Mã hóa mật khẩu trước khi lưu
+            model.PasswordHash = HashPassword(model.PasswordHash);
+
             // 2. Lưu thành viên mới vào Cơ sở dữ liệu SQL Server
             _context.Users.Add(model); // Thêm User mới vào DbContext ở trạng thái chờ
             _context.SaveChanges(); // Lưu các thay đổi thực sự xuống CSDL
@@ -91,7 +107,7 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             // 2. Xử lý mật khẩu: Nếu người dùng nhập mật khẩu mới thì gán, ngược lại giữ nguyên mật khẩu cũ
             if (!string.IsNullOrEmpty(NewPassword)) // Nếu ô mật khẩu mới không trống
             {
-                model.PasswordHash = NewPassword; // Gán mật khẩu mới cho tài khoản (ở buổi 5 sẽ học mã hóa băm)
+                model.PasswordHash = HashPassword(NewPassword); // Gán mật khẩu mới đã được mã hóa
             }
             else // Nếu để trống ô mật khẩu mới
             {

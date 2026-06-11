@@ -14,6 +14,9 @@ using CMS.Data; // Sử dụng lớp kết nối cơ sở dữ liệu chính App
 using System.Collections.Generic; // Sử dụng kiểu dữ liệu danh sách List
 using System.Linq; // Sử dụng LINQ truy vấn dữ liệu từ DB
 using System.Threading.Tasks; // Sử dụng lập trình bất đồng bộ Task
+using System.Security.Cryptography; // Hỗ trợ mã hóa
+using System.Text; // Hỗ trợ xử lý văn bản
+using System; // Thư viện cơ bản
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
 {
@@ -24,6 +27,15 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         public AccountController(ApplicationDbContext context) // Phương thức khởi dựng tiêm DbContext
         {
             _context = context; // Gán đối tượng kết nối vào biến cục bộ
+        }
+
+        private string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            }
         }
 
         // GET: Hiển thị giao diện đăng nhập hệ thống
@@ -41,8 +53,9 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         [HttpPost] // Tiếp nhận yêu cầu gửi thông tin từ form biểu mẫu
         public async Task<IActionResult> Login(string username, string password) // Nhận tham số tên tài khoản và mật khẩu
         {
-            // 1. Kiểm tra tài khoản và mật khẩu trực tiếp trong Database (Bảng Users)
-            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.PasswordHash == password); // Truy vấn đối soát dữ liệu
+            // 1. Kiểm tra tài khoản và mật khẩu trực tiếp trong Database (Bảng Users) có mã hóa
+            var hashedPassword = HashPassword(password);
+            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.PasswordHash == hashedPassword); // Truy vấn đối soát dữ liệu
 
             if (user != null) // Nếu tìm thấy người dùng trùng khớp thông tin tài khoản và mật khẩu
             {

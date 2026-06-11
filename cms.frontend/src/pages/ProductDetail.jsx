@@ -36,6 +36,13 @@ export default function ProductDetail() {
         }
         const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
         const existing = currentCart.find(item => item.id === product.id && item.size === selectedSize);
+        
+        const nextQuantity = existing ? existing.quantity + 1 : 1;
+        if (product.stockQuantity < nextQuantity) {
+            alert('Số lượng sản phẩm trong kho không đủ!');
+            return;
+        }
+
         if (existing) {
             existing.quantity += 1;
         } else {
@@ -49,6 +56,10 @@ export default function ProductDetail() {
     const handleBuyNow = () => {
         if (product.sizes && !selectedSize) {
             alert('Vui lòng chọn size trước khi mua!');
+            return;
+        }
+        if (product.stockQuantity < 1) {
+            alert('Số lượng sản phẩm trong kho không đủ!');
             return;
         }
         const directProduct = { ...product, quantity: 1, size: selectedSize };
@@ -91,7 +102,7 @@ export default function ProductDetail() {
                                         {images.map((img, idx) => (
                                             <div key={idx} className={`carousel-item h-100 ${idx === 0 ? 'active' : ''}`}>
                                                 <img 
-                                                    src={img.startsWith('http') ? img : `http://localhost:5244${img}`} 
+                                                    src={img.startsWith('http') ? img : `${import.meta.env.VITE_API_URL}${img}`} 
                                                     alt={`${product.name} - ${idx}`} 
                                                     className="d-block w-100 h-100" 
                                                     style={{ objectFit: 'cover' }} 
@@ -162,17 +173,18 @@ export default function ProductDetail() {
 
                     <div className="mb-4">
                         <p className="font-weight-bold mb-2 text-dark">Tình trạng kho:</p>
-                        <p className="text-muted">
-                            <i className="fa-solid fa-boxes-stacked mr-2"></i> Còn lại {product.stockQuantity ?? 0} sản phẩm
+                        <p className={product.stockQuantity === 0 ? "text-danger font-weight-bold" : "text-muted"}>
+                            <i className="fa-solid fa-boxes-stacked mr-2"></i> 
+                            {product.stockQuantity === 0 ? "Hết hàng" : `Còn lại ${product.stockQuantity ?? 0} sản phẩm`}
                         </p>
                     </div>
 
                     <div className="d-flex" style={{ gap: '15px' }}>
-                        <button onClick={handleAddToCart} className="btn btn-outline-thieuhoa px-5 py-3 font-weight-bold rounded-pill text-uppercase">
-                            <i className="fa-solid fa-cart-plus mr-2"></i> Thêm vào giỏ hàng
+                        <button onClick={handleAddToCart} disabled={product.stockQuantity === 0} className={`btn ${product.stockQuantity === 0 ? 'btn-secondary' : 'btn-outline-thieuhoa'} px-5 py-3 font-weight-bold rounded-pill text-uppercase`}>
+                            <i className="fa-solid fa-cart-plus mr-2"></i> {product.stockQuantity === 0 ? "Đã hết hàng" : "Thêm vào giỏ hàng"}
                         </button>
-                        <button onClick={handleBuyNow} className="btn btn-thieuhoa px-5 py-3 font-weight-bold text-white rounded-pill text-uppercase flex-grow-1" style={{ backgroundColor: 'var(--thieuhoa-primary)' }}>
-                            Mua ngay
+                        <button onClick={handleBuyNow} disabled={product.stockQuantity === 0} className={`btn ${product.stockQuantity === 0 ? 'btn-secondary' : 'btn-thieuhoa text-white'} px-5 py-3 font-weight-bold rounded-pill text-uppercase flex-grow-1`} style={product.stockQuantity === 0 ? {} : { backgroundColor: 'var(--thieuhoa-primary)' }}>
+                            {product.stockQuantity === 0 ? "Hết hàng" : "Mua ngay"}
                         </button>
                     </div>
 
@@ -204,7 +216,7 @@ export default function ProductDetail() {
                     {product.sizeGuideImageUrl && (
                         <div className="mb-4">
                             <h5 className="font-weight-bold mb-4 text-dark">Bảng size / Mô tả thêm:</h5>
-                            <img src={product.sizeGuideImageUrl.startsWith('http') ? product.sizeGuideImageUrl : `http://localhost:5244${product.sizeGuideImageUrl}`} alt="Bảng size" className="img-fluid rounded border shadow-sm" style={{ maxWidth: '100%' }} />
+                            <img src={product.sizeGuideImageUrl.startsWith('http') ? product.sizeGuideImageUrl : `${import.meta.env.VITE_API_URL}${product.sizeGuideImageUrl}`} alt="Bảng size" className="img-fluid rounded border shadow-sm" style={{ maxWidth: '100%' }} />
                         </div>
                     )}
                 </div>

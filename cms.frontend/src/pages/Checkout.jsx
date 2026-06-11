@@ -58,7 +58,7 @@ export default function Checkout() {
         };
 
         try {
-            const res = await axios.post('http://localhost:5244/api/Orders', orderData);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Orders`, orderData);
             if (res.status === 200 || res.status === 201) {
                 alert("Đặt hàng thành công! Đơn hàng của bạn đang được chờ xử lý.");
                 if (!isDirectBuy) {
@@ -101,7 +101,7 @@ export default function Checkout() {
                             </div>
                             <div className="form-group mb-3">
                                 <label className="font-weight-bold">Số điện thoại</label>
-                                <input name="phone" type="text" className="form-control" value={formData.phone} onChange={handleChange} required placeholder="Số điện thoại liên hệ..." />
+                                <input name="phone" type="tel" pattern="[0-9]{10,11}" title="Vui lòng nhập số điện thoại hợp lệ từ 10 đến 11 chữ số" className="form-control" value={formData.phone} onChange={handleChange} required placeholder="Số điện thoại liên hệ..." />
                             </div>
                             <div className="form-group mb-3">
                                 <label className="font-weight-bold">Địa chỉ giao hàng</label>
@@ -122,7 +122,7 @@ export default function Checkout() {
                             {cart.map(item => (
                                 <div className="d-flex align-items-center mb-3 pb-3 border-bottom" key={`${item.id}-${item.size || 'default'}`}>
                                     {item.imageUrl ? (
-                                        <img src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5244${item.imageUrl}`} alt={item.name} style={{ width: '60px', height: '75px', objectFit: 'cover', borderRadius: '4px' }} className="mr-3 shadow-sm" />
+                                        <img src={item.imageUrl.startsWith('http') ? item.imageUrl : `${import.meta.env.VITE_API_URL}${item.imageUrl}`} alt={item.name} style={{ width: '60px', height: '75px', objectFit: 'cover', borderRadius: '4px' }} className="mr-3 shadow-sm" />
                                     ) : (
                                         <div className="bg-light mr-3 d-flex align-items-center justify-content-center shadow-sm" style={{ width: '60px', height: '75px', borderRadius: '4px' }}>
                                             <i className="fa-regular fa-image text-muted"></i>

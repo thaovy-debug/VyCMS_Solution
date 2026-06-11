@@ -54,7 +54,7 @@ const PostList = () => { // Định nghĩa component chức năng PostList
                                     {post.imageUrl && ( // Nếu bài viết có chứa đường dẫn ảnh đại diện
                                         <div className="col-sm-4 position-relative overflow-hidden" style={{ minHeight: '160px' }}> {/* Cột chứa ảnh chiếm 4/12 chiều rộng card */}
                                             <img // Thẻ ảnh bài viết blog
-                                                src={post.imageUrl} // Gán đường dẫn ảnh từ API
+                                                src={post.imageUrl.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL || 'https://localhost:7030'}${post.imageUrl}` : post.imageUrl} // Gán đường dẫn ảnh từ API
                                                 className="w-100 h-100 hover-zoom" // Ảnh rộng dài 100%, hiệu ứng phóng to
                                                 alt={post.title} // Nhãn mô tả ảnh là tiêu đề bài viết
                                                 style={{ objectFit: 'cover', transition: 'transform 0.4s ease', position: 'absolute', top: 0, left: 0 }} // Định dạng ảnh vừa khít khung

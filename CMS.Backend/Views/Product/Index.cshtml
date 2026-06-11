@@ -80,4 +80,19 @@ Ngay thuc hien: 15/05/2026
             } @* Đóng vòng lặp *@
         </tbody> @* Đóng thân *@
     </table> @* Đóng bảng *@
+    
+    @* Phân trang *@
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
 </div> @* Đóng khối py-4 *@

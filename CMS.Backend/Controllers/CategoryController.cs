@@ -45,6 +45,13 @@ public class CategoryController : Controller // Định nghĩa lớp CategoryCon
         var category = _context.Categories.Find(id); // Tìm kiếm danh mục tương ứng trong database theo Id
         if (category != null) // Nếu tìm thấy danh mục hợp lệ
         {
+            bool hasPosts = _context.Posts.Any(p => p.CategoryId == id);
+            if (hasPosts)
+            {
+                TempData["ErrorMessage"] = "Không thể xóa danh mục này vì đang chứa bài viết!";
+                return RedirectToAction("Index");
+            }
+
             _context.Categories.Remove(category); // Thực hiện xóa danh mục đó khỏi DbContext
             _context.SaveChanges(); // Lưu các thay đổi này xuống cơ sở dữ liệu vật lý
         }

@@ -11,7 +11,7 @@ export default function Register() {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://localhost:5244/api/Auth/CustomerRegister', formData);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerRegister`, formData);
             if (res.status === 201) {
                 alert("Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
                 navigate('/login');

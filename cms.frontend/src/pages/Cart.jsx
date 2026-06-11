@@ -12,6 +12,10 @@ export default function Cart() {
         const newCart = cart.map(item => {
             if (item.id === id && item.size === size) {
                 const newQuantity = item.quantity + delta;
+                if (delta > 0 && item.stockQuantity !== undefined && newQuantity > item.stockQuantity) {
+                    alert('Số lượng sản phẩm trong kho không đủ!');
+                    return item;
+                }
                 return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
             }
             return item;
@@ -45,7 +49,7 @@ export default function Cart() {
                             <div className="card shadow-sm border-0 mb-3" key={`${item.id}-${item.size || 'default'}`}>
                                 <div className="card-body d-flex align-items-center">
                                     {item.imageUrl ? (
-                                        <img src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5244${item.imageUrl}`} alt={item.name} style={{ width: '80px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} className="mr-3" />
+                                        <img src={item.imageUrl.startsWith('http') ? item.imageUrl : `${import.meta.env.VITE_API_URL}${item.imageUrl}`} alt={item.name} style={{ width: '80px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} className="mr-3" />
                                     ) : (
                                         <div className="bg-light mr-3 d-flex align-items-center justify-content-center" style={{ width: '80px', height: '100px', borderRadius: '8px' }}>
                                             <i className="fa-regular fa-image text-muted"></i>

@@ -22,10 +22,12 @@ namespace CMS.Backend.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly CMS.Backend.Services.IEmailService _emailService;
 
-        public OrdersController(ApplicationDbContext context)
+        public OrdersController(ApplicationDbContext context, CMS.Backend.Services.IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         [HttpPost]
@@ -82,6 +84,24 @@ namespace CMS.Backend.Controllers
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                // Gửi email xác nhận
+                var customer = await _context.Customers.FindAsync(input.CustomerId);
+                if (customer != null && !string.IsNullOrEmpty(customer.Email))
+                {
+                    string subject = $"Xác nhận đơn hàng #{newOrder.Id} từ ZEY CHÍC";
+                    string body = $@"
+                        <h3>Cảm ơn {customer.FullName} đã đặt hàng tại ZEY CHÍC!</h3>
+                        <p>Đơn hàng <strong>#{newOrder.Id}</strong> của bạn đã được hệ thống ghi nhận thành công.</p>
+                        <p>Chúng tôi sẽ sớm liên hệ để giao hàng.</p>
+                        <p>Trân trọng,<br/>Đội ngũ ZEY CHÍC</p>
+                    ";
+                    try {
+                        await _emailService.SendEmailAsync(customer.Email, subject, body);
+                    } catch {
+                        // Log lỗi gửi mail nhưng không làm lỗi đơn hàng
+                    }
+                }
 
                 return StatusCode(201, new {
                     message = "Đặt hàng thành công!",

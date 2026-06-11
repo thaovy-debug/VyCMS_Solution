@@ -10,7 +10,7 @@ import axios from 'axios'; // Nhập thư viện axios để thực hiện các 
 
 // Khởi tạo một thực thể axios với cấu hình base chung
 const axiosClient = axios.create({ // Tạo thực thể axios mới bằng hàm axios.create
-    baseURL: 'http://localhost:5244/api', // Thiết lập đường dẫn cơ sở của Web API Backend (cổng http 5244)
+    baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:5244/api', // Lấy từ file .env
     headers: { // Cấu hình các HTTP Headers mặc định cho tất cả các yêu cầu
         'Content-Type': 'application/json', // Định dạng dữ liệu truyền và nhận là kiểu JSON
     }, // Kết thúc định nghĩa cấu hình headers

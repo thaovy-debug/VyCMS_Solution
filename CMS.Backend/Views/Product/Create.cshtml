@@ -53,6 +53,12 @@ Ngay thuc hien: 15/05/2026
                     <span asp-validation-for="Price" class="text-danger small"></span>
                 </div>
 
+                <div class="mb-3"> @* Giảm giá *@
+                    <label class="form-label fw-bold">Phần trăm giảm giá (%):</label>
+                    <input asp-for="DiscountPercent" class="form-control" type="number" min="0" max="100" />
+                    <span asp-validation-for="DiscountPercent" class="text-danger small"></span>
+                </div>
+
                 <div class="mb-3"> @* Số lượng *@
                     <label class="form-label fw-bold">Số lượng nhập kho:</label>
                     <input asp-for="StockQuantity" class="form-control" type="number" value="10" required />

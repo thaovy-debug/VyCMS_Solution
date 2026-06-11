@@ -73,6 +73,13 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             var category = _context.CategoriesProducts.Find(id); // Tìm loại sản phẩm theo Id
             if (category != null)
             {
+                bool hasProducts = _context.Products.Any(p => p.CategoryProductId == id);
+                if (hasProducts)
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa loại sản phẩm này vì đang có sản phẩm thuộc danh mục!";
+                    return RedirectToAction("Index");
+                }
+
                 _context.CategoriesProducts.Remove(category); // Xóa khỏi DbContext
                 _context.SaveChanges(); // Lưu thay đổi xuống CSDL
             }

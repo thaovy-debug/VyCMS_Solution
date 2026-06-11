@@ -9,6 +9,7 @@ Ngay thuc hien: 15/05/2026
 using Microsoft.EntityFrameworkCore; // Sử dụng Entity Framework Core cho cấu hình CSDL
 using CMS.Data; // Tham chiếu đến tầng dữ liệu (CMS.Data) chứa DbContext
 using Microsoft.AspNetCore.Authentication.Cookies; // Sử dụng xác thực bằng Cookie
+using CMS.Backend.Services; // Thêm namespace chứa IEmailService
 
 var builder = WebApplication.CreateBuilder(args); // Khởi tạo trình xây dựng ứng dụng web builder
 
@@ -18,6 +19,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Đăng ký dịch vụ cho các Controller hỗ trợ View (MVC) và Web API
 builder.Services.AddControllersWithViews(); // Đăng ký các controller và view cho luồng MVC
+
+// Đăng ký dịch vụ Email
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Đăng ký chính sách CORS cho phép ReactJS truy cập (phục vụ kết nối FrontEnd ReactJS)
 builder.Services.AddCors(options => { // Đăng ký dịch vụ CORS vào DI container

@@ -10,7 +10,7 @@ export default function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://localhost:5244/api/Auth/CustomerLogin', { email, password });
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerLogin`, { email, password });
             if (res.status === 200) {
                 alert("Đăng nhập thành công!");
                 localStorage.setItem('customer', JSON.stringify(res.data.customer));
@@ -18,6 +18,19 @@ export default function Login() {
             }
         } catch (err) {
             alert(err.response?.data?.message || "Lỗi đăng nhập. Vui lòng thử lại.");
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        if (!email) {
+            alert("Vui lòng nhập Email của bạn vào ô Email trước khi bấm Quên mật khẩu.");
+            return;
+        }
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerForgotPassword`, { email });
+            alert(res.data.message || "Đã gửi mật khẩu mới đến email của bạn.");
+        } catch (err) {
+            alert(err.response?.data?.message || "Lỗi gửi yêu cầu khôi phục mật khẩu.");
         }
     };
 
@@ -31,10 +44,18 @@ export default function Login() {
                         <input type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} required placeholder="Nhập email..." />
                     </div>
                     <div className="form-group mb-4">
-                        <label className="font-weight-bold">Mật khẩu</label>
-                        <input type="password" className="form-control" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Nhập mật khẩu..." />
+                        <div className="d-flex justify-content-between align-items-center">
+                            <label className="font-weight-bold mb-0">Mật khẩu</label>
+                            <span 
+                                onClick={handleForgotPassword} 
+                                style={{ cursor: 'pointer', color: 'var(--thieuhoa-primary)', fontSize: '0.9rem' }}
+                            >
+                                Quên mật khẩu?
+                            </span>
+                        </div>
+                        <input type="password" className="form-control mt-2" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Nhập mật khẩu..." />
                     </div>
-                    <button type="submit" className="btn btn-block text-white font-weight-bold py-2 mb-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }}>ĐĂNG NHẬP</button>
+                    <button type="submit" className="btn btn-block text-white font-weight-bold py-2 mb-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px', width: '100%' }}>ĐĂNG NHẬP</button>
                     <div className="text-center">
                         <span className="text-muted">Chưa có tài khoản? </span>
                         <Link to="/register" style={{ color: 'var(--thieuhoa-primary)', fontWeight: 'bold' }}>Đăng ký ngay</Link>

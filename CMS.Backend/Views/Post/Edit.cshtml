@@ -88,7 +88,11 @@ Ngay thuc hien: 15/05/2026
     <script>
         // Kích hoạt trình soạn thảo giàu tính năng (Rich Text Editor) cho thẻ textarea có id là 'Content'
         ClassicEditor
-            .create(document.querySelector('#Content')) // Khởi tạo CKEditor 5 trên phần tử có id là Content
+            .create(document.querySelector('#Content'), {
+                ckfinder: {
+                    uploadUrl: '/Post/UploadImage'
+                }
+            })
             .catch(error => {
                 console.error(error); // Ghi nhận lỗi ra console của trình duyệt nếu có lỗi xảy ra
             });

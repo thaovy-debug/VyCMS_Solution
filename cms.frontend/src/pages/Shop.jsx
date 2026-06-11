@@ -7,9 +7,15 @@ export default function Shop() {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const categoryParam = queryParams.get('category');
+    const searchParam = queryParams.get('search');
 
     const [selectedCategoryId, setSelectedCategoryId] = useState(categoryParam ? parseInt(categoryParam) : null);
     const [customFilterType, setCustomFilterType] = useState(null);
+    const [searchQuery, setSearchQuery] = useState(searchParam || '');
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
+    const [appliedMinPrice, setAppliedMinPrice] = useState(null);
+    const [appliedMaxPrice, setAppliedMaxPrice] = useState(null);
 
     useEffect(() => {
         if (categoryParam) {
@@ -18,7 +24,13 @@ export default function Shop() {
         } else {
             setSelectedCategoryId(null);
         }
-    }, [categoryParam]);
+        setSearchQuery(searchParam || '');
+    }, [categoryParam, searchParam]);
+
+    const handleApplyPriceFilter = () => {
+        setAppliedMinPrice(minPrice !== '' ? parseInt(minPrice) : null);
+        setAppliedMaxPrice(maxPrice !== '' ? parseInt(maxPrice) : null);
+    };
 
     return (
         <main className="container py-5 flex-grow-1">
@@ -55,16 +67,52 @@ export default function Shop() {
                             setCustomFilterType(null);
                         }} 
                     />
+                    
+                    {/* Filter theo giá */}
+                    <div className="card border-0 shadow-sm mt-4 mb-4">
+                        <div className="card-header bg-white font-weight-bold py-3" style={{ borderBottom: '1px solid var(--thieuhoa-border)' }}>
+                            Lọc theo giá
+                        </div>
+                        <div className="card-body p-3">
+                            <div className="d-flex align-items-center mb-2" style={{ gap: '10px' }}>
+                                <input 
+                                    type="number" 
+                                    className="form-control form-control-sm" 
+                                    placeholder="Tối thiểu" 
+                                    value={minPrice} 
+                                    onChange={(e) => setMinPrice(e.target.value)} 
+                                />
+                                <span>-</span>
+                                <input 
+                                    type="number" 
+                                    className="form-control form-control-sm" 
+                                    placeholder="Tối đa" 
+                                    value={maxPrice} 
+                                    onChange={(e) => setMaxPrice(e.target.value)} 
+                                />
+                            </div>
+                            <button className="btn btn-sm btn-outline-danger w-100 mt-2" onClick={handleApplyPriceFilter} style={{ borderColor: 'var(--thieuhoa-primary)', color: 'var(--thieuhoa-primary)' }}>
+                                Áp dụng
+                            </button>
+                        </div>
+                    </div>
                 </aside>
                 <section className="col-lg-9 col-md-8">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <h4 className="font-weight-bold text-uppercase m-0" style={{ color: 'var(--thieuhoa-primary)' }}>
-                            {selectedCategoryId === null && customFilterType === null ? 'Tất cả sản phẩm' : 
+                            {searchQuery ? `Kết quả tìm kiếm: "${searchQuery}"` :
+                             selectedCategoryId === null && customFilterType === null ? 'Tất cả sản phẩm' : 
                              customFilterType === 'new' ? 'Hàng mới về' :
                              customFilterType === 'sale' ? 'Sản phẩm khuyến mãi' : 'Danh mục sản phẩm'}
                         </h4>
                     </div>
-                    <ProductList selectedCategoryId={selectedCategoryId} customFilterType={customFilterType} />
+                    <ProductList 
+                        selectedCategoryId={selectedCategoryId} 
+                        customFilterType={customFilterType} 
+                        searchQuery={searchQuery}
+                        minPrice={appliedMinPrice}
+                        maxPrice={appliedMaxPrice}
+                    />
                 </section>
             </div>
         </main>

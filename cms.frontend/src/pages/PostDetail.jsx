@@ -53,11 +53,11 @@ export default function PostDetail() {
 
                 {post.imageUrl && (
                     <div className="mb-5 text-center">
-                        <img src={post.imageUrl} alt={post.title} className="img-fluid rounded shadow-sm" style={{ maxHeight: '500px', objectFit: 'cover' }} />
+                        <img src={post.imageUrl.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL || 'https://localhost:7030'}${post.imageUrl}` : post.imageUrl} alt={post.title} className="img-fluid rounded shadow-sm" style={{ maxHeight: '500px', objectFit: 'cover' }} />
                     </div>
                 )}
 
-                <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content || '<p>Đang cập nhật nội dung chi tiết...</p>' }} style={{ lineHeight: '1.8', fontSize: '1.05rem', color: '#444' }}>
+                <div className="post-content" dangerouslySetInnerHTML={{ __html: (post.content || '<p>Đang cập nhật nội dung chi tiết...</p>').replace(/src="\/uploads\//g, `src="${import.meta.env.VITE_API_URL || 'https://localhost:7030'}/uploads/`) }} style={{ lineHeight: '1.8', fontSize: '1.05rem', color: '#444' }}>
                 </div>
             </article>
         </main>

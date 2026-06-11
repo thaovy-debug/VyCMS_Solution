@@ -128,6 +128,22 @@ Ngay thuc hien: 15/05/2026
             </nav> @* Đóng cột Sidebar *@
 
             <main class="col-md-9 col-lg-10 ms-sm-auto p-4"> @* Cột nội dung chính bên phải (chiếm 9/12 cột md, 10/12 cột lg) *@
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill flex-shrink-0 me-2"></i>
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
                 @RenderBody() @* Lệnh RenderBody để nạp động giao diện của từng trang chức năng vào đây *@
             </main> @* Đóng vùng nội dung chính *@
         </div> @* Đóng dòng *@

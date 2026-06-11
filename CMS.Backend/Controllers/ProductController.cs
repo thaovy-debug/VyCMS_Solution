@@ -28,11 +28,21 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             _context = context; // Gán DbContext
         }
 
-        public IActionResult Index() // Hàm hiển thị danh sách toàn bộ sản phẩm
+        public IActionResult Index(int page = 1) // Hàm hiển thị danh sách toàn bộ sản phẩm có phân trang
         {
+            int pageSize = 5; // Số sản phẩm trên mỗi trang
+            var totalItems = _context.Products.Count();
+            
             var products = _context.Products // Lấy dữ liệu từ bảng Products
                 .Include(p => p.CategoryProduct) // Nạp kèm danh mục sản phẩm liên kết
+                .OrderByDescending(p => p.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
+                
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            
             return View(products); // Trả về View Index
         }
 
@@ -97,7 +107,16 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                 string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"); // Thư mục lưu ảnh
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder); // Tạo nếu chưa có
                 
-                var oldProduct = _context.Products.AsNoTracking().FirstOrDefault(p => p.Id == model.Id);
+                var existingProduct = _context.Products.FirstOrDefault(p => p.Id == model.Id);
+                if (existingProduct == null) return NotFound();
+
+                // Cập nhật các trường từ form
+                existingProduct.Name = model.Name;
+                existingProduct.Description = model.Description;
+                existingProduct.Price = model.Price;
+                existingProduct.StockQuantity = model.StockQuantity;
+                existingProduct.CategoryProductId = model.CategoryProductId;
+                existingProduct.Sizes = model.Sizes; // Cập nhật Sizes
 
                 if (uploadImages != null && uploadImages.Count > 0) // Nếu người dùng có chọn file ảnh mới
                 {
@@ -109,11 +128,7 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                         using (var stream = new FileStream(filePath, FileMode.Create)) { uploadImage.CopyTo(stream); }
                         filePaths.Add("/uploads/" + fileName);
                     }
-                    model.ImageUrl = string.Join(",", filePaths); // Lưu chuỗi đường dẫn các ảnh mới
-                }
-                else if (oldProduct != null && string.IsNullOrEmpty(model.ImageUrl))
-                {
-                    model.ImageUrl = oldProduct.ImageUrl; // Giữ lại ảnh cũ
+                    existingProduct.ImageUrl = string.Join(",", filePaths); // Lưu chuỗi đường dẫn các ảnh mới
                 }
 
                 if (uploadSizeGuide != null && uploadSizeGuide.Length > 0)
@@ -121,14 +136,10 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                     string sizeFileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadSizeGuide.FileName);
                     string sizeFilePath = Path.Combine(folder, sizeFileName);
                     using (var stream = new FileStream(sizeFilePath, FileMode.Create)) { uploadSizeGuide.CopyTo(stream); }
-                    model.SizeGuideImageUrl = "/uploads/" + sizeFileName;
-                }
-                else if (oldProduct != null && string.IsNullOrEmpty(model.SizeGuideImageUrl))
-                {
-                    model.SizeGuideImageUrl = oldProduct.SizeGuideImageUrl;
+                    existingProduct.SizeGuideImageUrl = "/uploads/" + sizeFileName;
                 }
 
-                _context.Products.Update(model); // Cập nhật thông tin sản phẩm
+                _context.Products.Update(existingProduct); // Cập nhật thông tin sản phẩm
                 _context.SaveChanges(); // Lưu thay đổi vào CSDL
                 return RedirectToAction("Index"); // Quay lại trang danh sách sản phẩm
             }
@@ -141,6 +152,13 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             var product = _context.Products.Find(id); // Tìm sản phẩm theo Id
             if (product != null)
             {
+                bool hasOrders = _context.OrderDetails.Any(od => od.ProductId == id);
+                if (hasOrders)
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa sản phẩm này vì đang có đơn hàng liên quan!";
+                    return RedirectToAction("Index");
+                }
+
                 _context.Products.Remove(product); // Xóa sản phẩm khỏi DbContext
                 _context.SaveChanges(); // Lưu thay đổi xuống CSDL
             }
