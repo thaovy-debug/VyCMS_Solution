@@ -4,6 +4,7 @@ using CMS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMS.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260612064417_AddMenuTable")]
+    partial class AddMenuTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,7 +43,7 @@ namespace CMS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Banners", (string)null);
+                    b.ToTable("Banners");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.Category", b =>
@@ -61,7 +64,7 @@ namespace CMS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.CategoryProduct", b =>
@@ -86,7 +89,7 @@ namespace CMS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CategoriesProducts", (string)null);
+                    b.ToTable("CategoriesProducts");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.Customer", b =>
@@ -117,7 +120,7 @@ namespace CMS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.Menu", b =>
@@ -146,7 +149,7 @@ namespace CMS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Menus", (string)null);
+                    b.ToTable("Menus");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.Order", b =>
@@ -173,7 +176,7 @@ namespace CMS.Data.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.OrderDetail", b =>
@@ -205,7 +208,7 @@ namespace CMS.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderDetails", (string)null);
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.Post", b =>
@@ -238,7 +241,7 @@ namespace CMS.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.Product", b =>
@@ -284,7 +287,7 @@ namespace CMS.Data.Migrations
 
                     b.HasIndex("CategoryProductId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.User", b =>
@@ -313,7 +316,7 @@ namespace CMS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("CMS.Data.Entities.Order", b =>

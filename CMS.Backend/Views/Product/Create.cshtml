@@ -16,26 +16,24 @@ Ngay thuc hien: 15/05/2026
     <hr /> @* Kẻ đường ngang *@
 
     <form asp-action="Create" method="post" enctype="multipart/form-data"> @* Form gửi yêu cầu POST hỗ trợ upload ảnh *@
-        <div class="row"> @* Dòng lưới chia hai cột *@
-            <div class="col-md-8"> @* Cột bên trái chiếm 8/12 cột *@
-                <div class="mb-3"> @* Tên sản phẩm *@
-                    <label class="form-label fw-bold">Tên sản phẩm:</label>
-                    <input asp-for="Name" class="form-control" placeholder="Nhập tên sản phẩm..." required />
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tên sản phẩm <span class="text-danger">*</span></label>
+                    <input asp-for="Name" class="form-control" required />
                     <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
 
-                <div class="mb-3"> @* Mô tả chi tiết *@
-                    <label class="form-label fw-bold">Mô tả sản phẩm:</label>
-                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="Nhập mô tả chi tiết sản phẩm..."></textarea>
-                    <span asp-validation-for="Description" class="text-danger small"></span>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Giá (VNĐ) <span class="text-danger">*</span></label>
+                    <input asp-for="Price" class="form-control" type="number" step="1000" required />
+                    <span asp-validation-for="Price" class="text-danger small"></span>
                 </div>
-            </div>
 
-            <div class="col-md-4"> @* Cột bên phải chiếm 4/12 cột *@
-                <div class="mb-3"> @* Loại sản phẩm *@
-                    <label class="form-label fw-bold">Loại sản phẩm:</label>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Danh mục <span class="text-danger">*</span></label>
                     <select asp-for="CategoryProductId" class="form-select" required>
-                        <option value="">-- Chọn loại sản phẩm --</option>
+                        <option value="">-- Chọn danh mục --</option>
                         @if (ViewBag.CategoriesProducts != null)
                         {
                             foreach (var cat in (IEnumerable<CMS.Data.Entities.CategoryProduct>)ViewBag.CategoriesProducts)
@@ -47,45 +45,110 @@ Ngay thuc hien: 15/05/2026
                     <span asp-validation-for="CategoryProductId" class="text-danger small"></span>
                 </div>
 
-                <div class="mb-3"> @* Đơn giá *@
-                    <label class="form-label fw-bold">Đơn giá (VNĐ):</label>
-                    <input asp-for="Price" class="form-control" type="number" step="1000" placeholder="Đơn giá sản phẩm..." required />
-                    <span asp-validation-for="Price" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3"> @* Giảm giá *@
-                    <label class="form-label fw-bold">Phần trăm giảm giá (%):</label>
-                    <input asp-for="DiscountPercent" class="form-control" type="number" min="0" max="100" />
-                    <span asp-validation-for="DiscountPercent" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3"> @* Số lượng *@
-                    <label class="form-label fw-bold">Số lượng nhập kho:</label>
-                    <input asp-for="StockQuantity" class="form-control" type="number" value="10" required />
-                    <span asp-validation-for="StockQuantity" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3"> @* Tải lên hình ảnh *@
-                    <label class="form-label fw-bold">Hình ảnh sản phẩm (có thể chọn nhiều ảnh):</label>
-                    <input type="file" name="uploadImages" class="form-control" accept="image/*" multiple />
-                </div>
-
-                <div class="mb-3"> @* Bảng size hoặc ảnh mô tả *@
-                    <label class="form-label fw-bold">Ảnh bảng size / Mô tả (tải từ máy):</label>
-                    <input type="file" name="uploadSizeGuide" class="form-control" accept="image/*" />
-                </div>
-
-                <div class="mb-3"> @* Phân loại Size *@
-                    <label class="form-label fw-bold">Các Size hiện có (cách nhau bởi dấu phẩy):</label>
-                    <input asp-for="Sizes" class="form-control" placeholder="VD: S, M, L, XL" />
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Kích cỡ (Cùng danh mục, cách nhau bằng dấu phẩy) <span class="text-danger">*</span></label>
+                    <input asp-for="Sizes" class="form-control" placeholder="S,M,L,XL" required />
                     <span asp-validation-for="Sizes" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Hình ảnh sản phẩm (Link ảnh hoặc tải lên từ máy) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="text" name="MainImageLink" class="form-control" placeholder="Nhập link ảnh (URL)" />
+                        <span class="input-group-text">Hoặc</span>
+                        <input type="file" name="MainImageFile" class="form-control" accept="image/*" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Phân loại màu sắc & Ảnh (Tùy chọn)</label>
+                    <div id="color-container"></div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addColor()">+ Thêm màu sắc</button>
+                    <input type="hidden" name="ColorCount" id="ColorCount" value="0" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ảnh phụ (Tùy chọn)</label>
+                    <div id="extra-container"></div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addExtra()">+ Thêm ảnh phụ</button>
+                    <input type="hidden" name="ExtraCount" id="ExtraCount" value="0" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ảnh Bảng Size (Tùy chọn)</label>
+                    <div class="input-group">
+                        <input type="text" name="SizeGuideLink" class="form-control" placeholder="Nhập link ảnh bảng size (URL)" />
+                        <span class="input-group-text">Hoặc</span>
+                        <input type="file" name="SizeGuideFile" class="form-control" accept="image/*" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Mô tả chi tiết (Dạng Word)</label>
+                    <textarea asp-for="Description" class="form-control" id="editor"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
                 </div>
             </div>
         </div>
 
-        <div class="mt-3"> @* Các nút thao tác *@
-            <button type="submit" class="btn btn-success">Lưu sản phẩm</button>
-            <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-danger text-white fw-bold px-4">Lưu Thay Đổi</button>
+            <a asp-action="Index" class="btn btn-outline-secondary px-4">Hủy Bỏ</a>
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <!-- Tích hợp CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#editor'))
+            .catch(error => {
+                console.error(error);
+            });
+
+        let colorIndex = 0;
+        function addColor() {
+            const html = `
+                <div class="row mb-2 border p-2 bg-light align-items-center">
+                    <div class="col-md-3">
+                        <input type="text" name="Colors[${colorIndex}].Name" class="form-control" placeholder="Tên màu (VD: Đỏ)" />
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="Colors[${colorIndex}].Link" class="form-control" placeholder="Link ảnh URL" />
+                    </div>
+                    <div class="col-md-4">
+                        <input type="file" name="ColorFile_${colorIndex}" class="form-control" accept="image/*" />
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger btn-sm w-100" onclick="this.parentElement.parentElement.remove()">X</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('color-container').insertAdjacentHTML('beforeend', html);
+            colorIndex++;
+            document.getElementById('ColorCount').value = colorIndex;
+        }
+
+        let extraIndex = 0;
+        function addExtra() {
+            const html = `
+                <div class="row mb-2 border p-2 bg-light align-items-center">
+                    <div class="col-md-6">
+                        <input type="text" name="Extras[${extraIndex}].Link" class="form-control" placeholder="Link ảnh phụ URL" />
+                    </div>
+                    <div class="col-md-5">
+                        <input type="file" name="ExtraFile_${extraIndex}" class="form-control" accept="image/*" />
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger btn-sm w-100" onclick="this.parentElement.parentElement.remove()">X</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('extra-container').insertAdjacentHTML('beforeend', html);
+            extraIndex++;
+            document.getElementById('ExtraCount').value = extraIndex;
+        }
+    </script>
+}

@@ -13,7 +13,32 @@ export default function Login() {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerLogin`, { email, password });
             if (res.status === 200) {
                 alert("Đăng nhập thành công!");
-                localStorage.setItem('customer', JSON.stringify(res.data.customer));
+                const customer = res.data.customer;
+                localStorage.setItem('customer', JSON.stringify(customer));
+                
+                // Migrate and merge guest cart / legacy cart to the new customer cart
+                const cartKey = `cart_${customer.id}`;
+                let userCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+                const guestCart = JSON.parse(localStorage.getItem('cart_guest')) || [];
+                const legacyCart = JSON.parse(localStorage.getItem('cart')) || [];
+                
+                const combined = [...userCart, ...guestCart, ...legacyCart];
+                if (combined.length > 0) {
+                    const mergedMap = new Map();
+                    combined.forEach(item => {
+                        const key = `${item.id}-${item.size || ''}-${item.color || ''}`;
+                        if (mergedMap.has(key)) {
+                            mergedMap.get(key).quantity += item.quantity;
+                        } else {
+                            mergedMap.set(key, { ...item });
+                        }
+                    });
+                    localStorage.setItem(cartKey, JSON.stringify(Array.from(mergedMap.values())));
+                }
+                
+                localStorage.removeItem('cart_guest');
+                localStorage.removeItem('cart');
+
                 window.location.href = '/'; 
             }
         } catch (err) {

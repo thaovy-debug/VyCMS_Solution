@@ -11,16 +11,18 @@ export default function Checkout() {
     const [isDirectBuy, setIsDirectBuy] = useState(false);
 
     useEffect(() => {
+        const storedCustomer = JSON.parse(localStorage.getItem('customer'));
+        const cartKey = storedCustomer ? `cart_${storedCustomer.id}` : 'cart_guest';
+
         if (location.state && location.state.directBuyItem) {
             setCart([location.state.directBuyItem]);
             setIsDirectBuy(true);
         } else {
-            const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
+            const storedCart = JSON.parse(localStorage.getItem(cartKey)) || [];
             setCart(storedCart);
             setIsDirectBuy(false);
         }
         
-        const storedCustomer = JSON.parse(localStorage.getItem('customer'));
         if (storedCustomer) {
             setCustomer(storedCustomer);
             setFormData({
@@ -62,7 +64,8 @@ export default function Checkout() {
             if (res.status === 200 || res.status === 201) {
                 alert("Đặt hàng thành công! Đơn hàng của bạn đang được chờ xử lý.");
                 if (!isDirectBuy) {
-                    localStorage.removeItem('cart');
+                    const cartKey = customer ? `cart_${customer.id}` : 'cart_guest';
+                    localStorage.removeItem(cartKey);
                     window.dispatchEvent(new Event('cartUpdated'));
                 }
                 navigate('/');

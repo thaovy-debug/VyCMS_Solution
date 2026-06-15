@@ -14,27 +14,35 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ProductDetail from './pages/ProductDetail';
 import Shop from './pages/Shop';
+import Blog from './pages/Blog';
 import PostDetail from './pages/PostDetail';
 import CategoryProductList from './components/CategoryProductList'; // Nhập component danh sách danh mục sản phẩm từ CSDL
 import ProductList from './components/ProductList'; // Nhập component danh sách sản phẩm thời trang từ CSDL
 import PostList from './components/PostList'; // Nhập component danh sách bài viết blog từ CSDL
+import ProductCard from './components/ProductCard'; // Nhập component thẻ sản phẩm
 import categoryProductService from './services/categoryProductService'; // Nhập dịch vụ lấy danh mục sản phẩm từ Backend
 import productService from './services/productService'; // Nhập dịch vụ lấy sản phẩm từ Backend CSDL
 import bannerService from './services/bannerService'; // Nhập dịch vụ lấy banner
+import menuService from './services/menuService'; // Nhập dịch vụ lấy menu
 import logoImg from './assets/imgs/logo.png'; // Logo hình ảnh
 import './App.css'; // Nhập tệp cấu hình CSS giao diện bổ trợ của Thiều Hoa
 
 function App() { // Định nghĩa component chính App của dự án
     // Khai báo state để chứa danh mục phục vụ hiển thị trên Menu ngang
     const [categories, setCategories] = useState([]); // Khởi tạo state categories và hàm setCategories
+    const [menus, setMenus] = useState([]); // State chứa các menu động từ database
     const [cartCount, setCartCount] = useState(() => {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const customer = JSON.parse(localStorage.getItem('customer'));
+        const cartKey = customer ? `cart_${customer.id}` : 'cart_guest';
+        const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
         return cart.reduce((sum, item) => sum + item.quantity, 0);
     });
 
     useEffect(() => {
         const updateCartCount = () => {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const customer = JSON.parse(localStorage.getItem('customer'));
+            const cartKey = customer ? `cart_${customer.id}` : 'cart_guest';
+            const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
             setCartCount(cart.reduce((sum, item) => sum + item.quantity, 0));
         };
         window.addEventListener('cartUpdated', updateCartCount);
@@ -42,14 +50,16 @@ function App() { // Định nghĩa component chính App của dự án
     }, []);
 
     const handleAddToCart = (product) => {
-        const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+        const customer = JSON.parse(localStorage.getItem('customer'));
+        const cartKey = customer ? `cart_${customer.id}` : 'cart_guest';
+        const currentCart = JSON.parse(localStorage.getItem(cartKey)) || [];
         const existing = currentCart.find(item => item.id === product.id);
         if (existing) {
             existing.quantity += 1;
         } else {
             currentCart.push({ ...product, quantity: 1 });
         }
-        localStorage.setItem('cart', JSON.stringify(currentCart));
+        localStorage.setItem(cartKey, JSON.stringify(currentCart));
         window.dispatchEvent(new Event('cartUpdated'));
         alert(`Đã thêm ${product.name} vào giỏ hàng!`);
     };
@@ -101,9 +111,19 @@ function App() { // Định nghĩa component chính App của dự án
             }
         };
 
+        const loadMenus = async () => {
+            try {
+                const data = await menuService.getAllMenus();
+                setMenus(data);
+            } catch (err) {
+                console.error("Lỗi khi tải menus:", err);
+            }
+        };
+
         loadMenuCategories(); // Thực thi hàm tải danh mục làm menu
         loadAllProducts(); // Thực thi tải sản phẩm
         loadBanners(); // Thực thi tải banner
+        loadMenus(); // Thực thi tải menu động
     }, []); // Chỉ chạy 1 lần khi render
 
     const handleCategoryClick = (keyword) => { // Định nghĩa hàm chuyển bộ lọc khi click danh mục phụ trong mega menu
@@ -178,80 +198,7 @@ function App() { // Định nghĩa component chính App của dự án
             ); // Kết thúc trả về
         } // Kết thúc kiểm tra
         return productsToRender.map((item) => ( // Lặp hiển thị các thẻ card sản phẩm
-            <div className="col-lg-3 col-md-4 col-sm-6 mb-4" key={item.id}> {/* 4 sản phẩm trên 1 dòng ở màn hình desktop */}
-                <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--thieuhoa-card-bg)' }}> {/* Card bo tròn */}
-                    {/* Khung chứa ảnh */}
-                    <Link to={`/product/${item.id}`} className="position-relative overflow-hidden d-block text-decoration-none" style={{ height: '260px', backgroundColor: '#F8F6F2' }}> {/* Khung giới hạn chiều cao */}
-                        {item.imageUrl ? (() => {
-                            const firstImg = item.imageUrl.split(',')[0];
-                            return (
-                                <img 
-                                    src={firstImg.startsWith('http') ? firstImg : `${import.meta.env.VITE_API_URL}${firstImg}`} // Nguồn ảnh
-                                    className="w-100 h-100 hover-zoom" // Phóng to khi hover
-                                    alt={item.name} // Nhãn
-                                    style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} // Tỷ lệ phủ ảnh
-                                />
-                            );
-                        })() : ( // Fallback
-                            <div className="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                                <i className="fa-regular fa-image" style={{ fontSize: '3rem', opacity: 0.3 }}></i>
-                            </div>
-                        )}
-                        {item.stockQuantity === 0 && (
-                            <div className="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(255,255,255,0.6)', zIndex: 10, top: 0, left: 0 }}>
-                                <span className="badge badge-dark px-3 py-2 font-weight-bold" style={{ fontSize: '1rem', letterSpacing: '1px' }}>HẾT HÀNG</span>
-                            </div>
-                        )}
-                        <span className="position-absolute badge badge-dark px-2 py-1 small font-weight-bold text-uppercase" style={{ top: '10px', left: '10px', backgroundColor: '#111111', fontSize: '0.65rem', letterSpacing: '0.5px', zIndex: 11 }}>NEW</span>
-                        {item.discountPercent > 0 && (
-                            <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: '10px', right: '10px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem', borderRadius: '4px', zIndex: 11 }}>-{item.discountPercent}%</span>
-                        )}
-                    </Link>
-
-                    {/* Thân card chứa thông tin */}
-                    <div className="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <div className="small text-uppercase font-weight-bold text-muted mb-1" style={{ fontSize: '0.68rem', letterSpacing: '1px' }}>THIỀU HOA DESIGN</div>
-                            <Link to={`/product/${item.id}`} className="text-decoration-none hover-link">
-                                <h5 className="card-title font-weight-bold text-dark mb-2" style={{ fontSize: '0.88rem', lineHeight: '1.4', height: '38px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{item.name}</h5>
-                            </Link>
-                            
-                            <div className="d-flex align-items-center mb-2" style={{ gap: '8px' }}>
-                                <span className="font-weight-bold" style={{ fontSize: '1.05rem', color: 'var(--thieuhoa-primary)' }}>
-                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.discountPercent > 0 ? item.price * (1 - item.discountPercent / 100) : item.price)}
-                                </span>
-                                {item.discountPercent > 0 && (
-                                    <span className="text-muted text-decoration-line-through small" style={{ fontSize: '0.85rem', textDecoration: 'line-through' }}>
-                                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="d-flex align-items-center mb-2" style={{ gap: '5px' }}>
-                                <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#e28743', cursor: 'pointer' }} title="Màu cam đất"></span>
-                                <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#1e3d59', cursor: 'pointer' }} title="Màu xanh navy"></span>
-                                <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#111111', cursor: 'pointer' }} title="Màu đen sang trọng"></span>
-                            </div>
-                        </div>
-                        <p className="card-text small text-muted mt-2 mb-0" style={{ fontSize: '0.78rem' }}>
-                            <i className="fa-solid fa-boxes-stacked mr-1"></i> Số lượng tồn kho: {item.stockQuantity ?? item.stock} sản phẩm
-                        </p>
-                    </div>
-
-                    {/* Chân card */}
-                    <div className="card-footer bg-transparent border-top-0 px-3 pb-3 pt-0">
-                        {item.stockQuantity === 0 ? (
-                            <button className="btn btn-secondary btn-block btn-sm rounded-pill font-weight-bold" disabled>
-                                Hết hàng
-                            </button>
-                        ) : (
-                            <button className="btn btn-outline-thieuhoa btn-block btn-sm rounded-pill font-weight-bold transition-all" onClick={() => handleAddToCart(item)}>
-                                <i className="fa-solid fa-cart-plus mr-1"></i> Mua ngay
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
+            <ProductCard key={item.id} item={item} />
         ));
     };
 
@@ -296,7 +243,7 @@ function App() { // Định nghĩa component chính App của dự án
                         <div className="col-md-4 col-6 d-flex align-items-center justify-content-end" style={{ gap: '20px', fontSize: '0.85rem' }}> {/* Chiếm 4/12 trên desktop, 6/12 trên mobile */}
                             {/* Đăng nhập tài khoản thành viên */}
                             {customer ? (
-                                <div className="d-flex align-items-center text-secondary hover-link" style={{ cursor: 'pointer' }} onClick={() => { if(window.confirm('Bạn có chắc muốn đăng xuất?')) { localStorage.removeItem('customer'); setCustomer(null); window.location.href='/'; } }}>
+                                <div className="d-flex align-items-center text-secondary hover-link" style={{ cursor: 'pointer' }} onClick={() => { if(window.confirm('Bạn có chắc muốn đăng xuất?')) { localStorage.removeItem('customer'); localStorage.removeItem('cart_guest'); setCustomer(null); window.location.href='/'; } }}>
                                     <i className="fa-solid fa-user-check mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i>
                                     <span className="d-none d-md-inline font-weight-bold" title="Click để đăng xuất">{customer.fullName}</span>
                                 </div>
@@ -326,100 +273,63 @@ function App() { // Định nghĩa component chính App của dự án
                         {/* Khu vực bên trái: Các danh mục/liên kết điều hướng */}
                         <div className="d-flex align-items-center overflow-visible navbar-links-container" style={{ whiteSpace: 'nowrap' }}> {/* Khung flexbox cho phép menu tràn ra ngoài để hiện dropdown */}
                             
-                            {/* 1. TẤT CẢ SẢN PHẨM (Có chứa Mega Menu hover như ảnh 1) */}
-                            <div className="mega-menu-hover"> {/* Lớp cha hover */}
-                                <Link 
-                                    to="/san-pham" 
-                                    className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${selectedCategoryId === null && customFilterType === null ? 'active' : ''}`} 
-                                    style={{ outline: 'none', padding: '14px 15px !important' }}
-                                >
-                                    Tất Cả Sản Phẩm <i className="fa-solid fa-chevron-down ml-1" style={{ fontSize: '0.7rem' }}></i>
-                                </Link>
+                            {menus.map((menu) => {
+                                // Kiểm tra nếu là menu Sản Phẩm thì hiển thị Mega Menu
+                                if (menu.link === '/san-pham') {
+                                    return (
+                                        <div key={menu.id} className="mega-menu-hover"> {/* Lớp cha hover */}
+                                            <Link 
+                                                to={menu.link} 
+                                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${selectedCategoryId === null && customFilterType === null && window.location.pathname === '/san-pham' ? 'active' : ''}`} 
+                                                style={{ outline: 'none', padding: '14px 15px !important', textTransform: 'uppercase' }}
+                                            >
+                                                {menu.name} <i className="fa-solid fa-chevron-down ml-1" style={{ fontSize: '0.7rem' }}></i>
+                                            </Link>
+                                            
+                                            {/* Cấu trúc Mega Menu Dropdown hiển thị danh mục từ DATABASE */}
+                                            <div className="thieuhoa-mega-menu-dropdown bg-white shadow"> {/* Khung dropdown nền trắng đổ bóng */}
+                                                <div className="container py-4"> {/* Khung đệm phía trong */}
+                                                    <div className="row text-left"> {/* Dòng cột */}
+                                                        {categories.map((cat) => (
+                                                            <div className="col-lg-3 col-md-4 col-sm-6 mb-4" key={cat.id}> {/* Ô cột cố định kích thước để bằng nhau */}
+                                                                <div className="d-flex flex-column h-100 pr-3"> {/* Thêm padding right để tạo khoảng cách giữa các cột */}
+                                                                    <Link 
+                                                                        to={`/san-pham?category=${cat.id}`}
+                                                                        className="font-weight-bold text-dark text-uppercase d-block" 
+                                                                        style={{ fontSize: '0.85rem', borderBottom: '1px solid #e0e0e0', paddingBottom: '8px', textDecoration: 'none', marginBottom: '12px' }}
+                                                                    >
+                                                                        {cat.name}
+                                                                    </Link>
+                                                                    <p className="text-secondary flex-grow-1" style={{ fontSize: '0.75rem', lineHeight: '1.6', marginBottom: '12px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                                        {cat.description || `Khám phá các mẫu ${cat.name.toLowerCase()} mới nhất với thiết kế thanh lịch.`}
+                                                                    </p>
+                                                                    <Link to={`/san-pham?category=${cat.id}`} className="font-weight-bold text-dark mt-auto" style={{ fontSize: '0.75rem', textDecoration: 'none' }}>
+                                                                        Xem tất cả &rarr;
+                                                                    </Link>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
                                 
-                                {/* Cấu trúc Mega Menu Dropdown hiển thị danh mục từ DATABASE */}
-                                <div className="thieuhoa-mega-menu-dropdown bg-white shadow"> {/* Khung dropdown nền trắng đổ bóng */}
-                                    <div className="container py-4"> {/* Khung đệm phía trong */}
-                                        <div className="row text-left"> {/* Dòng cột */}
-                                            {/* Lặp qua từng danh mục sản phẩm từ CSDL để tạo các cột menu động */}
-                                            {categories.map((cat) => (
-                                                <div className="col-md col-6 mb-3" key={cat.id}> {/* Ô cột tự chia đều */}
-                                                    <Link 
-                                                        to={`/san-pham?category=${cat.id}`}
-                                                        className="font-weight-bold text-dark text-uppercase d-block" 
-                                                        style={{ fontSize: '0.85rem', borderBottom: '1px solid #e0e0e0', paddingBottom: '8px', textDecoration: 'none', marginBottom: '8px' }}
-                                                    >
-                                                        {cat.name}
-                                                    </Link>
-                                                    <p className="text-secondary" style={{ fontSize: '0.75rem', lineHeight: '1.5', marginBottom: '8px' }}>
-                                                        {cat.description || `Khám phá các mẫu ${cat.name.toLowerCase()} mới nhất với thiết kế thanh lịch.`}
-                                                    </p>
-                                                    <Link to={`/san-pham?category=${cat.id}`} className="font-weight-bold text-dark" style={{ fontSize: '0.75rem', textDecoration: 'none' }}>
-                                                        Xem tất cả &rarr;
-                                                    </Link>
-                                                </div> /* Kết thúc cột danh mục */
-                                            ))} {/* Kết thúc lặp danh mục */}
-                                        </div> {/* Kết thúc row */}
-                                    </div> {/* Kết thúc container */}
-                                </div> {/* Kết thúc mega dropdown */}
-                            </div> {/* Kết thúc mega hover block */}
-
-                            {/* 2. MỚI */}
-                            <button 
-                                type="button" // Kiểu nút bấm
-                                onClick={() => {
-                                    setSelectedCategoryId(null); // Reset category
-                                    setCustomFilterType("new"); // Set bộ lọc sản phẩm mới
-                                }}
-                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${customFilterType === 'new' ? 'active' : ''}`} // Active nếu là new
-                                style={{ outline: 'none', padding: '14px 15px !important' }} // Thiết lập đệm
-                            >
-                                Mới {/* Hiển thị chữ Mới */}
-                            </button> {/* Kết thúc nút */}
-
-                            {/* 3. BÁN CHẠY */}
-                            <button 
-                                type="button" // Kiểu nút
-                                onClick={() => {
-                                    setSelectedCategoryId(null); // Reset category
-                                    setCustomFilterType("hot"); // Set bộ lọc bán chạy
-                                }}
-                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${customFilterType === 'hot' ? 'active' : ''}`} // Active nếu là hot
-                                style={{ outline: 'none', padding: '14px 15px !important' }} // Thiết lập đệm
-                            >
-                                Bán Chạy {/* Hiển thị chữ Bán Chạy */}
-                            </button> {/* Kết thúc nút */}
-
-                            {/* 4. SALE - OFF */}
-                            <button 
-                                type="button" // Kiểu nút
-                                onClick={() => {
-                                    setSelectedCategoryId(null); // Reset category
-                                    setCustomFilterType("sale"); // Set bộ lọc giảm giá
-                                }}
-                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${customFilterType === 'sale' ? 'active' : ''}`} // Active nếu là sale
-                                style={{ outline: 'none', padding: '14px 15px !important' }} // Thiết lập đệm
-                            >
-                                Sale - Off {/* Hiển thị chữ Sale - Off */}
-                            </button> {/* Kết thúc nút */}
-
-                            {/* 5. BLOG */}
-                            <a href="#tin-tuc-cam-nang" className="thieuhoa-nav-link text-decoration-none mr-1" style={{ padding: '14px 15px !important' }}>Blog</a> {/* Link tĩnh blog */}
-
-                            {/* 6. GIỚI THIỆU */}
-                            <a href="#thong-tin-thuong-hieu" className="thieuhoa-nav-link text-decoration-none mr-1" style={{ padding: '14px 15px !important' }}>Giới Thiệu</a> {/* Link tĩnh giới thiệu */}
-
-                            {/* 7. QUÀ TẶNG MẸ */}
-                            <button 
-                                type="button" // Kiểu nút
-                                onClick={() => {
-                                    setSelectedCategoryId(null); // Reset category
-                                    setCustomFilterType("gift"); // Set bộ lọc quà tặng mẹ
-                                }}
-                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${customFilterType === 'gift' ? 'active' : ''}`} // Active nếu là gift
-                                style={{ outline: 'none', padding: '14px 15px !important' }} // Thiết lập đệm
-                            >
-                                Quà Tặng Mẹ {/* Hiển thị chữ Quà Tặng Mẹ */}
-                            </button> {/* Kết thúc nút */}
+                                // Nếu là các link thông thường
+                                const isActive = (menu.link.includes('filter=') && window.location.search.includes(menu.link.split('?')[1])) || 
+                                                (window.location.pathname === menu.link && menu.link !== '/');
+                                return (
+                                    <Link 
+                                        key={menu.id}
+                                        to={menu.link}
+                                        className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${isActive ? 'active' : ''}`}
+                                        style={{ outline: 'none', padding: '14px 15px !important', textTransform: 'uppercase' }}
+                                    >
+                                        {menu.name}
+                                    </Link>
+                                );
+                            })}
 
                         </div> {/* Kết thúc menu */}
 
@@ -469,6 +379,7 @@ function App() { // Định nghĩa component chính App của dự án
                 <Route path="/gio-hang" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/san-pham" element={<Shop />} />
+                <Route path="/blog" element={<Blog />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/post/:id" element={<PostDetail />} />
                 <Route path="/" element={
@@ -572,44 +483,85 @@ function App() { // Định nghĩa component chính App của dự án
             <section className="py-5" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--thieuhoa-border)' }}> {/* Vùng danh mục nền trắng */}
                 <div className="container"> {/* Khung container */}
                     <div className="text-center mb-4"> {/* Căn giữa tiêu đề */}
-                        <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1px', fontSize: '1.4rem' }}>Thời Trang Trung Niên</h3> {/* Tiêu đề chính */}
+                        <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1px', fontSize: '1.4rem' }}>Danh Mục Sản Phẩm</h3> {/* Tiêu đề chính */}
                         <div className="mx-auto" style={{ width: '60px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div> {/* Dòng gạch dưới đỏ nâu */}
                     </div> {/* Kết thúc tiêu đề */}
 
-                    <div className="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3 justify-content-center"> {/* Lưới 5 cột trên máy tính, 2 cột trên điện thoại */}
-                        {categories.map((cat, index) => {
-                            // Tạo mảng icon cố định để trang trí các thẻ
-                            const icons = [
-                                "fa-solid fa-person-dress",
-                                "fa-solid fa-shirt",
-                                "fa-solid fa-people-roof",
-                                "fa-solid fa-bag-shopping",
-                                "fa-solid fa-scroll",
-                                "fa-solid fa-venus-mars",
-                                "fa-solid fa-scissors",
-                                "fa-solid fa-champagne-glasses",
-                                "fa-solid fa-vest",
-                                "fa-solid fa-socks"
-                            ];
-                            const iconClass = icons[index % icons.length]; // Chọn icon xoay vòng
+                    <div className="d-flex flex-wrap justify-content-center mt-3" style={{ gap: '2rem' }}> {/* Sử dụng flexbox thay vì grid để tự động dàn đều trên 1 hàng ngang */}
+                        {(() => {
+                            // Sắp xếp theo thứ tự mong muốn: Đầm, Quần, Áo, Chân váy, Phụ kiện
+                            const order = ["đầm", "quần", "áo", "chân váy", "phụ kiện"];
+                            let sortedCategories = [];
+                            
+                            // Đưa các danh mục có trong DB khớp thứ tự lên đầu
+                            order.forEach(keyword => {
+                                const found = categories.find(c => c.name.toLowerCase() === keyword || c.name.toLowerCase().includes(keyword));
+                                if (found && !sortedCategories.some(sc => sc.id === found.id)) {
+                                    sortedCategories.push(found);
+                                }
+                            });
 
-                            return (
-                                <div className="col mb-3" key={cat.id}> {/* Ô cột */}
-                                    <button 
-                                        onClick={() => {
-                                            setSelectedCategoryId(cat.id);
-                                            setCustomFilterType(null);
-                                        }}
-                                        className="w-100 btn p-3 d-flex align-items-center rounded-lg border-0 shadow-sm transition-all text-left" 
-                                        style={{ backgroundColor: '#f5f5f5', gap: '15px' }}
-                                    > {/* Nút bấm liên kết danh mục */}
-                                        <i className={`${iconClass} text-danger`} style={{ fontSize: '1.5rem', color: 'var(--thieuhoa-primary)', opacity: 0.85 }}></i> {/* Icon */}
-                                        <span className="font-weight-bold text-dark" style={{ fontSize: '0.88rem' }}>{cat.name}</span> {/* Nhãn chữ động */}
-                                    </button> {/* Kết thúc nút */}
-                                </div> /* Kết thúc cột */
-                            );
-                        })}
-                    </div> {/* Kết thúc row */}
+                            // Các danh mục khác (như Áo Khoác) xếp theo sau, TRỪ Sale
+                            categories.forEach(c => {
+                                if (!sortedCategories.some(sc => sc.id === c.id) && !c.name.toLowerCase().includes("sale") && !c.name.toLowerCase().includes("giảm")) {
+                                    sortedCategories.push(c);
+                                }
+                            });
+
+                            // Đưa danh mục Sale (từ DB) xuống cuối cùng
+                            categories.forEach(c => {
+                                if (!sortedCategories.some(sc => sc.id === c.id) && (c.name.toLowerCase().includes("sale") || c.name.toLowerCase().includes("giảm"))) {
+                                    sortedCategories.push(c);
+                                }
+                            });
+
+                            return sortedCategories.map((cat, index) => {
+                                // Cấu hình hình ảnh dựa vào DB hoặc mặc định
+                                let imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/04/web.webp";
+                                if (cat.imageUrl) {
+                                    imgUrl = cat.imageUrl.startsWith('http') ? cat.imageUrl : `${import.meta.env.VITE_API_URL}${cat.imageUrl}`;
+                                } else {
+                                    const nameLower = cat.name.toLowerCase();
+                                    if (nameLower.includes("đầm")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp";
+                                    else if (nameLower.includes("quần")) imgUrl = "https://file.hstatic.net/200000182297/article/quan-ong-rong-nu-cong-so_ba0dfcefc1fa4543afbe43b35123d51c.jpg";
+                                    else if (nameLower.includes("áo")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/01/ao-kieu-trung-nien.webp";
+                                    else if (nameLower.includes("chân váy")) imgUrl = "https://file.hstatic.net/200000182297/article/chan-vay-xep-ly-dai_2c419356d2ee4fbcbb07deaf6bb2013f.jpg";
+                                    else if (nameLower.includes("phụ kiện") || nameLower.includes("túi")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/tui-xach-camie-thieu-hoa.webp";
+                                    else if (nameLower.includes("sale")) imgUrl = "https://storage.googleapis.com/a1aa/image/eI5WqA4K2K20BS1b8XJ3WJ3rB2y2o1P1S3y2o1P1S3y2o1P.jpg"; // Ảnh icon SALE
+                                    else if (nameLower.includes("bộ")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/do-bo-trung-nien-thieu-hoa.webp";
+                                    else if (nameLower.includes("khăn")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/khan-choang-co-thieu-hoa.webp";
+                                }
+
+                                return (
+                                    <div className="text-center" key={cat.id} style={{ width: '130px' }}> {/* Đặt chiều rộng cố định để các khối đều nhau */}
+                                        <button 
+                                            onClick={() => {
+                                                if (cat.isCustom) {
+                                                    setSelectedCategoryId(null);
+                                                    setCustomFilterType("sale");
+                                                } else {
+                                                    setSelectedCategoryId(cat.id);
+                                                    setCustomFilterType(null);
+                                                }
+                                            }}
+                                            className="btn bg-transparent border-0 p-0 text-center w-100" 
+                                            style={{ transition: 'transform 0.3s ease' }}
+                                            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                        > {/* Nút bấm liên kết danh mục dạng khối tròn */}
+                                            <div 
+                                                className="rounded-circle overflow-hidden mx-auto mb-2 shadow-sm d-flex align-items-center justify-content-center"
+                                                style={{ width: '110px', height: '110px', border: '3px solid #f2f0eb', backgroundColor: '#fff' }}
+                                            >
+                                                <img src={imgUrl} alt={cat.name} className="w-100 h-100" style={{ objectFit: 'cover' }} />
+                                            </div>
+                                            <span className="font-weight-bold text-dark d-block mt-2" style={{ fontSize: '0.9rem' }}>{cat.name}</span> {/* Nhãn chữ động */}
+                                        </button> {/* Kết thúc nút */}
+                                    </div> /* Kết thúc khối */
+                                );
+                            });
+                        })()}
+                    </div> {/* Kết thúc flexbox */}
                 </div> {/* Kết thúc container */}
             </section> {/* Kết thúc phần danh mục */}
                 </>
@@ -674,7 +626,7 @@ function App() { // Định nghĩa component chính App của dự án
                                 <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
                             </div>
                             <div className="row">
-                                {renderHomepageProductGrid([...allProducts].sort((a, b) => b.id - a.id).slice(0, 4))}
+                                {renderHomepageProductGrid([...allProducts].filter(p => p.createdDate && new Date() - new Date(p.createdDate) < 7 * 24 * 60 * 60 * 1000).sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)).slice(0, 4))}
                             </div>
                             <div className="text-center mt-3">
                                 <button 
@@ -707,38 +659,7 @@ function App() { // Định nghĩa component chính App của dự án
                             </div>
                         </section>
 
-                        {/* CỤM THEO TỪNG DANH MỤC THỰC TẾ TRONG DATABASE */}
-                        {categories.map((cat) => {
-                            const catProducts = allProducts.filter(p => p.categoryProductId === cat.id);
-                            return (
-                                <section key={cat.id} className="mb-5 pb-3">
-                                    <div className="text-center mb-4">
-                                        <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem' }}>{cat.name}</h3>
-                                        <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
-                                    </div>
-                                    <div className="row">
-                                        {catProducts.length > 0 ? (
-                                            renderHomepageProductGrid(catProducts.slice(0, 4))
-                                        ) : (
-                                            <div className="col-12 text-center py-4 text-muted bg-light rounded">
-                                                <i className="fa-solid fa-circle-info mr-2"></i> Danh mục này hiện chưa có sản phẩm.
-                                            </div>
-                                        )}
-                                    </div>
-                                    {catProducts.length > 0 && (
-                                        <div className="text-center mt-3">
-                                            <button 
-                                                onClick={() => setSelectedCategoryId(cat.id)} 
-                                                className="btn btn-thieuhoa px-4 py-2 text-uppercase font-weight-bold text-white rounded-pill shadow-sm"
-                                                style={{ fontSize: '0.82rem' }}
-                                            >
-                                                Xem Thêm
-                                            </button>
-                                        </div>
-                                    )}
-                                </section>
-                            );
-                        })}
+                        {/* CỤM THEO TỪNG DANH MỤC THỰC TẾ TRONG DATABASE (Đã được yêu cầu loại bỏ trên trang chủ) */}
                     </div>
                 ) : (
                     /* 2. CHẾ ĐỘ TRANG DANH MỤC: HIỂN THỊ SIDEBAR BỘ LỌC BÊN TRÁI VÀ DANH SÁCH SẢN PHẨM BÊN PHẢI */
@@ -787,7 +708,7 @@ function App() { // Định nghĩa component chính App của dự án
                 )}
 
                 {/* PHẦN 7: TIN TỨC & CẨM NANG MẶC ĐẸP (Dữ liệu CSDL) */}
-                <div className="border-top mt-5 pt-4">
+                <div id="tin-tuc-cam-nang" className="border-top mt-5 pt-4">
                     <PostList />
                 </div>
                 

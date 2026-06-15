@@ -11,6 +11,9 @@ using CMS.Data.Entities; // Sử dụng thực thể CategoryProduct
 using Microsoft.AspNetCore.Mvc; // Sử dụng các lớp điều hướng Controller và View
 using Microsoft.AspNetCore.Authorization; // Sử dụng phân quyền và xác thực người dùng
 using System.Linq; // Sử dụng LINQ
+using Microsoft.AspNetCore.Http; // Hỗ trợ upload ảnh
+using System.IO; // Hỗ trợ IO
+using System; // Guid
 
 namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
 {
@@ -37,10 +40,20 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         }
 
         [HttpPost] // Nhận yêu cầu HTTP POST khi gửi form
-        public IActionResult Create(CategoryProduct model) // Hàm xử lý lưu loại sản phẩm mới
+        public IActionResult Create(CategoryProduct model, IFormFile? uploadImage) // Hàm xử lý lưu loại sản phẩm mới
         {
             if (ModelState.IsValid) // Kiểm tra dữ liệu đầu vào hợp lệ theo DataAnnotations
             {
+                if (uploadImage != null && uploadImage.Length > 0)
+                {
+                    string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
+                    string filePath = Path.Combine(folder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create)) { uploadImage.CopyTo(stream); }
+                    model.ImageUrl = "/uploads/" + fileName;
+                }
+
                 _context.CategoriesProducts.Add(model); // Thêm vào DbContext
                 _context.SaveChanges(); // Lưu xuống CSDL
                 return RedirectToAction("Index"); // Quay lại trang danh sách
@@ -57,11 +70,27 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         }
 
         [HttpPost] // Nhận yêu cầu HTTP POST khi gửi form chỉnh sửa
-        public IActionResult Edit(CategoryProduct model) // Hàm xử lý cập nhật thông tin loại sản phẩm
+        public IActionResult Edit(CategoryProduct model, IFormFile? uploadImage) // Hàm xử lý cập nhật thông tin loại sản phẩm
         {
             if (ModelState.IsValid) // Kiểm tra dữ liệu hợp lệ
             {
-                _context.CategoriesProducts.Update(model); // Cập nhật thực thể
+                var existingCategory = _context.CategoriesProducts.FirstOrDefault(c => c.Id == model.Id);
+                if (existingCategory == null) return NotFound();
+
+                existingCategory.Name = model.Name;
+                existingCategory.Description = model.Description;
+
+                if (uploadImage != null && uploadImage.Length > 0)
+                {
+                    string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
+                    string filePath = Path.Combine(folder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create)) { uploadImage.CopyTo(stream); }
+                    existingCategory.ImageUrl = "/uploads/" + fileName;
+                }
+
+                _context.CategoriesProducts.Update(existingCategory); // Cập nhật thực thể
                 _context.SaveChanges(); // Lưu xuống CSDL
                 return RedirectToAction("Index"); // Quay lại trang danh sách
             }

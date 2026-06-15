@@ -37,7 +37,10 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.ImageUrl, // Lấy đường dẫn hình ảnh của sản phẩm
                     p.StockQuantity, // Lấy số lượng hàng còn trong kho
                     p.DiscountPercent, // Lấy phần trăm giảm giá của sản phẩm (0 = không giảm)
-                    p.CategoryProductId // Lấy mã danh mục sản phẩm liên kết
+                    p.CategoryProductId, // Lấy mã danh mục sản phẩm liên kết
+                    p.Sizes, // Thêm danh sách size
+                    p.Colors, // Thêm danh sách màu sắc
+                    p.CreatedDate // Thêm ngày tạo
                 }) // Kết thúc biểu thức Select gọt tỉa
                 .ToListAsync(); // Chuyển đổi bất đồng bộ kết quả truy vấn thành danh sách List
 
@@ -56,11 +59,63 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.ImageUrl, // Lấy đường dẫn hình ảnh của sản phẩm
                     p.StockQuantity, // Lấy số lượng hàng còn trong kho
                     p.DiscountPercent, // Lấy phần trăm giảm giá của sản phẩm (0 = không giảm)
-                    p.CategoryProductId // Lấy mã danh mục sản phẩm liên kết
+                    p.CategoryProductId, // Lấy mã danh mục sản phẩm liên kết
+                    p.Sizes, // Thêm danh sách size
+                    p.Colors, // Thêm danh sách màu sắc
+                    p.CreatedDate // Thêm ngày tạo
                 }) // Kết thúc biểu thức Select gọt tỉa
                 .ToListAsync(); // Chuyển kết quả sang danh sách bất đồng bộ
 
             return Ok(products); // Trả về danh sách sản phẩm đã lọc kèm mã trạng thái HTTP 200 OK
+        }
+
+        [HttpGet("new")]
+        public async Task<IActionResult> GetNew()
+        {
+            var sevenDaysAgo = DateTime.Now.AddDays(-7);
+            var products = await _context.Products
+                .Where(p => p.CreatedDate >= sevenDaysAgo)
+                .OrderByDescending(p => p.CreatedDate)
+                .Take(4)
+                .Select(p => new {
+                    p.Id,
+                    p.Name,
+                    p.Price,
+                    p.ImageUrl,
+                    p.StockQuantity,
+                    p.DiscountPercent,
+                    p.CategoryProductId,
+                    p.Sizes,
+                    p.Colors,
+                    p.CreatedDate
+                })
+                .ToListAsync();
+
+            return Ok(products);
+        }
+
+        [HttpGet("sale")]
+        public async Task<IActionResult> GetSale()
+        {
+            var products = await _context.Products
+                .Where(p => p.DiscountPercent > 0)
+                .OrderByDescending(p => p.Id)
+                .Take(4)
+                .Select(p => new {
+                    p.Id,
+                    p.Name,
+                    p.Price,
+                    p.ImageUrl,
+                    p.StockQuantity,
+                    p.DiscountPercent,
+                    p.CategoryProductId,
+                    p.Sizes,
+                    p.Colors,
+                    p.CreatedDate
+                })
+                .ToListAsync();
+
+            return Ok(products);
         }
 
         [HttpGet("{id}")] // Định nghĩa đường dẫn nhận ID trực tiếp để xem chi tiết sản phẩm

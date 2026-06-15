@@ -27,6 +27,7 @@ namespace CMS.Data // Định nghĩa không gian tên chứa lớp cấu hình D
         public DbSet<Order> Orders { get; set; } // Khai báo bảng Orders (Đơn hàng)
         public DbSet<OrderDetail> OrderDetails { get; set; } // Khai báo bảng OrderDetails (Chi tiết đơn hàng)
         public DbSet<Banner> Banners { get; set; } // Khai báo bảng Banners (Quản lý Banner)
+        public DbSet<Menu> Menus { get; set; } // Khai báo bảng Menus (Quản lý Menu)
 
     }
 }

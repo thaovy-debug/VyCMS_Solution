@@ -22,6 +22,9 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         public string? Description { get; set; } // Thuộc tính mô tả danh mục sản phẩm (cho phép null)
 
+        [StringLength(255)]
+        public string? ImageUrl { get; set; } // Đường dẫn ảnh đại diện danh mục
+
         // Quan hệ một - nhiều: Một danh mục sản phẩm sẽ có liên kết với một tập hợp nhiều sản phẩm
         public virtual ICollection<Product>? Products { get; set; }
     }

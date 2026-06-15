@@ -56,6 +56,24 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
             return Ok(posts); // Trả về danh sách bài viết đã lọc kèm mã trạng thái HTTP 200 OK
         }
 
+        [HttpGet("latest")]
+        public async Task<IActionResult> GetLatest()
+        {
+            var posts = await _context.Posts
+                .OrderByDescending(p => p.CreatedDate)
+                .Take(4)
+                .Select(p => new {
+                    p.Id,
+                    p.Title,
+                    p.ImageUrl,
+                    p.CreatedDate,
+                    CategoryName = p.Category.Name
+                })
+                .ToListAsync();
+
+            return Ok(posts);
+        }
+
         [HttpGet("{id}")] // Khai báo phương thức GET nhận tham số khóa chính id của bài viết cần xem chi tiết
         public async Task<IActionResult> GetDetail(int id) // Định nghĩa hàm lấy chi tiết một bài viết cụ thể
         {

@@ -54,33 +54,87 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         }
 
         [HttpPost] // Nhận HTTP POST
-        public IActionResult Create(Product model, List<IFormFile> uploadImages, IFormFile? uploadSizeGuide) // Hàm xử lý lưu thông tin sản phẩm mới kèm ảnh upload
+        public IActionResult Create(Product model) // Hàm xử lý lưu thông tin sản phẩm mới kèm ảnh upload
         {
             if (ModelState.IsValid) // Kiểm tra tính hợp lệ của dữ liệu form
             {
                 string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"); // Định nghĩa thư mục lưu ảnh
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder); // Tạo thư mục nếu chưa tồn tại
 
-                if (uploadImages != null && uploadImages.Count > 0) // Nếu người dùng tải nhiều file lên
+                // Xử lý Main Image
+                string mainImageUrl = Request.Form["MainImageLink"];
+                var mainImageFile = Request.Form.Files["MainImageFile"];
+                if (mainImageFile != null && mainImageFile.Length > 0)
                 {
-                    List<string> filePaths = new List<string>();
-                    foreach (var uploadImage in uploadImages)
-                    {
-                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName); // Tạo tên file ảnh ngẫu nhiên duy nhất
-                        string filePath = Path.Combine(folder, fileName); // Đường dẫn lưu vật lý
-                        using (var stream = new FileStream(filePath, FileMode.Create)) { uploadImage.CopyTo(stream); }
-                        filePaths.Add("/uploads/" + fileName);
-                    }
-                    model.ImageUrl = string.Join(",", filePaths); // Gán chuỗi đường dẫn tương đối của các ảnh ngăn cách bằng dấu phẩy
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(mainImageFile.FileName);
+                    string filePath = Path.Combine(folder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create)) { mainImageFile.CopyTo(stream); }
+                    mainImageUrl = "/uploads/" + fileName;
                 }
 
-                if (uploadSizeGuide != null && uploadSizeGuide.Length > 0)
+                // Xử lý Extra Images
+                List<string> filePaths = new List<string>();
+                if (!string.IsNullOrEmpty(mainImageUrl)) filePaths.Add(mainImageUrl);
+
+                int.TryParse(Request.Form["ExtraCount"], out int extraCount);
+                for (int i = 0; i < extraCount; i++)
                 {
-                    string sizeFileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadSizeGuide.FileName);
-                    string sizeFilePath = Path.Combine(folder, sizeFileName);
-                    using (var stream = new FileStream(sizeFilePath, FileMode.Create)) { uploadSizeGuide.CopyTo(stream); }
-                    model.SizeGuideImageUrl = "/uploads/" + sizeFileName;
+                    string extraLink = Request.Form[$"Extras[{i}].Link"];
+                    var extraFile = Request.Form.Files[$"ExtraFile_{i}"];
+                    if (extraFile != null && extraFile.Length > 0)
+                    {
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(extraFile.FileName);
+                        string filePath = Path.Combine(folder, fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create)) { extraFile.CopyTo(stream); }
+                        filePaths.Add("/uploads/" + fileName);
+                    }
+                    else if (!string.IsNullOrEmpty(extraLink))
+                    {
+                        filePaths.Add(extraLink);
+                    }
                 }
+                model.ImageUrl = string.Join(",", filePaths);
+
+                // Xử lý Colors
+                int.TryParse(Request.Form["ColorCount"], out int colorCount);
+                var colorList = new List<object>();
+                for (int i = 0; i < colorCount; i++)
+                {
+                    string colorName = Request.Form[$"Colors[{i}].Name"];
+                    string colorLink = Request.Form[$"Colors[{i}].Link"];
+                    var colorFile = Request.Form.Files[$"ColorFile_{i}"];
+                    string finalColorUrl = "";
+
+                    if (colorFile != null && colorFile.Length > 0)
+                    {
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(colorFile.FileName);
+                        string filePath = Path.Combine(folder, fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create)) { colorFile.CopyTo(stream); }
+                        finalColorUrl = "/uploads/" + fileName;
+                    }
+                    else if (!string.IsNullOrEmpty(colorLink))
+                    {
+                        finalColorUrl = colorLink;
+                    }
+
+                    if (!string.IsNullOrEmpty(colorName))
+                    {
+                        colorList.Add(new { name = colorName, image = finalColorUrl });
+                    }
+                }
+                model.Colors = System.Text.Json.JsonSerializer.Serialize(colorList);
+
+                // Xử lý Size Guide
+                string sizeGuideUrl = Request.Form["SizeGuideLink"];
+                var sizeGuideFile = Request.Form.Files["SizeGuideFile"];
+                if (sizeGuideFile != null && sizeGuideFile.Length > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(sizeGuideFile.FileName);
+                    string filePath = Path.Combine(folder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create)) { sizeGuideFile.CopyTo(stream); }
+                    sizeGuideUrl = "/uploads/" + fileName;
+                }
+                model.SizeGuideImageUrl = sizeGuideUrl;
 
                 _context.Products.Add(model); // Thêm sản phẩm vào DbContext
                 _context.SaveChanges(); // Lưu vào CSDL

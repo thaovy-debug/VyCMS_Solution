@@ -35,7 +35,8 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     .Select(c => new { // Áp dụng kỹ thuật gọt tỉa (Projection) chỉ lấy các trường cần thiết ra FrontEnd
                         c.Id, // Lấy trường mã ID của danh mục sản phẩm
                         c.Name, // Lấy trường tên của danh mục sản phẩm
-                        c.Description // Lấy trường mô tả của danh mục sản phẩm
+                        c.Description, // Lấy trường mô tả của danh mục sản phẩm
+                        c.ImageUrl // Lấy trường hình ảnh danh mục sản phẩm
                     }) // Kết thúc biểu thức Select gọt tỉa
                     .ToListAsync(); // Chuyển đổi bất đồng bộ sang dạng danh sách mảng dữ liệu
 

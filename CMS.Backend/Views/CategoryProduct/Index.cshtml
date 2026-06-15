@@ -23,6 +23,7 @@ Ngay thuc hien: 15/05/2026
         <thead class="table-light"> @* Phần đầu bảng *@
             <tr> @* Dòng tiêu đề *@
                 <th style="width:80px">ID</th> @* Cột ID *@
+                <th>Hình ảnh</th> @* Cột ảnh *@
                 <th>Tên loại sản phẩm</th> @* Cột tên loại *@
                 <th>Mô tả chi tiết</th> @* Cột mô tả *@
                 <th style="width:180px">Thao tác</th> @* Cột thao tác *@
@@ -33,6 +34,12 @@ Ngay thuc hien: 15/05/2026
             {
                 <tr> @* Dòng dữ liệu *@
                     <td>@item.Id</td> @* Hiển thị mã Id *@
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" style="width: 50px; height: 50px; object-fit: cover;" class="rounded-circle" />
+                        }
+                    </td>
                     <td>@item.Name</td> @* Hiển thị tên *@
                     <td>@item.Description</td> @* Hiển thị mô tả *@
                     <td> @* Các nút thao tác *@

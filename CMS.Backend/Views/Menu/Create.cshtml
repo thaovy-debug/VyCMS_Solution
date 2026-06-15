@@ -1,0 +1,60 @@
+@model CMS.Data.Entities.Menu
+
+@{
+    ViewData["Title"] = "Thêm mới Menu";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Thêm mới Menu</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Menu</a></li>
+        <li class="breadcrumb-item active">Thêm mới</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-plus me-1"></i>
+            Thông tin Menu
+        </div>
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" placeholder="Ví dụ: Sản phẩm, Giới thiệu..." />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Link" class="form-label"></label>
+                    <input asp-for="Link" class="form-control" placeholder="Ví dụ: /san-pham, /gioi-thieu..." />
+                    <span asp-validation-for="Link" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="OrderIndex" class="form-label"></label>
+                    <input asp-for="OrderIndex" class="form-control" type="number" value="0" />
+                    <span asp-validation-for="OrderIndex" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input class="form-check-input" asp-for="IsHidden" />
+                    <label class="form-check-label" asp-for="IsHidden">
+                        @Html.DisplayNameFor(model => model.IsHidden)
+                    </label>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Lưu Menu</button>
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

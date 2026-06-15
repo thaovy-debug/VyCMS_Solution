@@ -23,6 +23,8 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         public string? Sizes { get; set; } // Danh sách size sản phẩm, phân cách bằng dấu phẩy (vd: S,M,L,XL)
 
+        public string? Colors { get; set; } // Danh sách màu sắc sản phẩm dạng JSON (vd: [{"name":"Đỏ","image":"url"}])
+
         public string? SizeGuideImageUrl { get; set; } // Ảnh mô tả thêm hoặc bảng size
 
         [Range(0, double.MaxValue)] // Ràng buộc giá trị nhập vào phải từ 0 trở lên
@@ -40,5 +42,7 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         [ForeignKey("CategoryProductId")] // Chỉ định CategoryProductId làm khóa ngoại liên kết đến bảng CategoryProduct
         public virtual CategoryProduct? CategoryProduct { get; set; } // Đối tượng tham chiếu đến danh mục sản phẩm liên quan
+        
+        public DateTime CreatedDate { get; set; } = DateTime.Now; // Thêm ngày tạo sản phẩm
     }
 }

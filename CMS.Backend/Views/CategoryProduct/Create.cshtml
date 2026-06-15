@@ -15,12 +15,17 @@ Ngay thuc hien: 15/05/2026
     <h2 class="text-primary">THÊM LOẠI SẢN PHẨM MỚI</h2> @* Tiêu đề chính *@
     <hr /> @* Đường kẻ phân cách *@
 
-    <form asp-action="Create" method="post"> @* Form gửi yêu cầu POST *@
+    <form asp-action="Create" method="post" enctype="multipart/form-data"> @* Form gửi yêu cầu POST *@
         <div class="mb-3"> @* Nhóm nhập tên *@
             <label class="form-label fw-bold">Tên loại sản phẩm:</label> @* Nhãn nhập *@
             <input asp-for="Name" class="form-control" placeholder="Nhập tên loại sản phẩm (ví dụ: Điện thoại, Laptop...)" required /> @* Ô nhập tên *@
             <span asp-validation-for="Name" class="text-danger small"></span> @* Kiểm tra lỗi dữ liệu *@
         </div> @* Kết thúc nhóm *@
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Hình ảnh đại diện:</label>
+            <input type="file" name="uploadImage" class="form-control" accept="image/*" />
+        </div>
 
         <div class="mb-3"> @* Nhóm nhập mô tả *@
             <label class="form-label fw-bold">Mô tả:</label> @* Nhãn nhập *@
