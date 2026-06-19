@@ -10,6 +10,7 @@ using System; // Sử dụng các kiểu cơ bản của hệ thống .NET như 
 using System.Linq; // Sử dụng thư viện LINQ để thực hiện các thao tác kiểm tra dữ liệu mẫu trong CSDL
 using CMS.Data; // Sử dụng đối tượng ngữ cảnh ApplicationDbContext của dự án
 using CMS.Data.Entities; // Sử dụng các thực thể thực trong CSDL (Product, Category, Post, Customer, Order, OrderDetail)
+using Microsoft.EntityFrameworkCore;
 
 namespace CMS.Backend.Helpers // Khai báo namespace tương ứng chứa lớp hỗ trợ Seed
 {
@@ -18,6 +19,18 @@ namespace CMS.Backend.Helpers // Khai báo namespace tương ứng chứa lớp 
         public static void SeedData(ApplicationDbContext context) // Hàm tĩnh thực hiện kiểm tra và nạp dữ liệu mẫu
         {
             context.Database.EnsureCreated(); // Đảm bảo cơ sở dữ liệu SQL Server đã được khởi tạo thành công
+            
+            try 
+            {
+                context.Database.ExecuteSqlRaw("ALTER TABLE Customers ADD AvatarUrl nvarchar(max) NULL;");
+            } 
+            catch { } // Bỏ qua lỗi nếu cột đã tồn tại
+
+            try 
+            {
+                context.Database.ExecuteSqlRaw("ALTER TABLE Customers ADD AddressBook nvarchar(max) NULL;");
+            } 
+            catch { } // Bỏ qua lỗi nếu cột đã tồn tại
         } // Kết thúc hàm SeedData
     } // Kết thúc lớp DbSeed
 } // Kết thúc namespace CMS.Backend.Helpers

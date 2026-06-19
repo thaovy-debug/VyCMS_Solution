@@ -171,6 +171,7 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                 existingProduct.StockQuantity = model.StockQuantity;
                 existingProduct.CategoryProductId = model.CategoryProductId;
                 existingProduct.Sizes = model.Sizes; // Cập nhật Sizes
+                existingProduct.IsNew = model.IsNew; // Cập nhật trạng thái sản phẩm mới
 
                 if (uploadImages != null && uploadImages.Count > 0) // Nếu người dùng có chọn file ảnh mới
                 {
@@ -217,6 +218,68 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                 _context.SaveChanges(); // Lưu thay đổi xuống CSDL
             }
             return RedirectToAction("Index"); // Quay lại trang danh sách sản phẩm
+        }
+
+        [HttpPost]
+        public IActionResult ToggleNew(int id, bool isNew)
+        {
+            var product = _context.Products.Find(id);
+            if (product != null)
+            {
+                product.IsNew = isNew;
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        public IActionResult ToggleHot(int id, bool isHot)
+        {
+            var product = _context.Products.Find(id);
+            if (product != null)
+            {
+                product.IsHot = isHot;
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        public IActionResult UpdateSale(int id, bool isSale, decimal? salePrice)
+        {
+            var product = _context.Products.Find(id);
+            if (product != null)
+            {
+                if (isSale && salePrice.HasValue && salePrice.Value > 0 && product.Price > 0)
+                {
+                    decimal discount = 100 - (salePrice.Value / product.Price * 100);
+                    product.DiscountPercent = (int)Math.Round(discount);
+                    if (product.DiscountPercent < 0) product.DiscountPercent = 0;
+                    if (product.DiscountPercent > 100) product.DiscountPercent = 100;
+                }
+                else
+                {
+                    product.DiscountPercent = 0;
+                }
+                _context.SaveChanges();
+                return Json(new { success = true, discountPercent = product.DiscountPercent });
+            }
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        public IActionResult ToggleVisible(int id, bool isVisible)
+        {
+            var product = _context.Products.Find(id);
+            if (product != null)
+            {
+                product.IsVisible = isVisible;
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
         }
     }
 }

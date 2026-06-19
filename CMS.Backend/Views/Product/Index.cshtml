@@ -27,7 +27,9 @@ Ngay thuc hien: 15/05/2026
                 <th>Tên sản phẩm</th> @* Cột tên sản phẩm *@
                 <th>Loại sản phẩm</th> @* Cột loại danh mục sản phẩm *@
                 <th style="width:150px">Đơn giá (VNĐ)</th> @* Cột đơn giá *@
+                <th style="width:150px">Giá Sale (VNĐ)</th> @* Cột giá khuyến mãi *@
                 <th style="width:100px">Số lượng</th> @* Cột tồn kho *@
+                <th style="width:140px">Trạng thái</th> @* Cột bật tắt trạng thái *@
                 <th style="width:180px">Thao tác</th> @* Cột thao tác *@
             </tr> @* Đóng dòng *@
         </thead> @* Đóng đầu *@
@@ -57,6 +59,17 @@ Ngay thuc hien: 15/05/2026
                     </td>
                     <td>@item.CategoryProduct?.Name</td> @* Ô hiển thị tên loại sản phẩm *@
                     <td class="text-end fw-semibold text-danger">@item.Price.ToString("N0") đ</td> @* Định dạng tiền tệ VNĐ không chữ thập phân *@
+                    <td class="text-end fw-semibold text-success" id="salePrice_@item.Id">
+                        @if (item.DiscountPercent > 0)
+                        {
+                            var salePrice = Math.Round((decimal)item.Price * (100 - item.DiscountPercent) / 100);
+                            <text>@salePrice.ToString("N0") đ</text>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">Không</span>
+                        }
+                    </td>
                     <td class="text-center"> @* Ô hiển thị số lượng kho *@
                         @if (item.StockQuantity <= 5) @* Nếu tồn kho quá ít dưới 5 cái *@
                         {
@@ -66,6 +79,24 @@ Ngay thuc hien: 15/05/2026
                         {
                             <span class="badge bg-primary">@item.StockQuantity</span> @* Hiển thị badge màu xanh *@
                         }
+                    </td>
+                    <td>
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input chk-new" type="checkbox" data-id="@item.Id" @(item.IsNew ? "checked" : "")>
+                            <label class="form-check-label small text-muted">Mới (New)</label>
+                        </div>
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input chk-hot" type="checkbox" data-id="@item.Id" @(item.IsHot ? "checked" : "")>
+                            <label class="form-check-label small text-muted">Bán chạy</label>
+                        </div>
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input chk-visible" type="checkbox" data-id="@item.Id" @(item.IsVisible ? "checked" : "")>
+                            <label class="form-check-label small text-muted">Hiển thị web</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input chk-sale" type="checkbox" data-id="@item.Id" data-price="@item.Price" @(item.DiscountPercent > 0 ? "checked" : "")>
+                            <label class="form-check-label small text-muted">Khuyến mãi <span class="discount-badge badge bg-warning text-dark @(item.DiscountPercent > 0 ? "" : "d-none")">@item.DiscountPercent%</span></label>
+                        </div>
                     </td>
                     <td> @* Ô chứa các nút thao tác sửa xóa *@
                         @* Nút sửa *@
@@ -96,3 +127,128 @@ Ngay thuc hien: 15/05/2026
         </nav>
     }
 </div> @* Đóng khối py-4 *@
+
+<!-- Modal Nhập Giá Khuyến Mãi -->
+<div class="modal fade" id="salePriceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">Cập nhật Giá Khuyến Mãi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Giá gốc của sản phẩm: <strong id="saleModalOriginalPrice" class="text-danger">0</strong> VNĐ</p>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nhập Giá sau khi giảm (VNĐ):</label>
+                    <input type="number" class="form-control" id="saleModalInputPrice" min="0" step="1000" placeholder="Ví dụ: 250000">
+                    <small class="text-muted">Hệ thống sẽ tự động tính ra phần trăm (%) giảm giá.</small>
+                </div>
+                <input type="hidden" id="saleModalProductId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary" id="btnSaveSalePrice">Lưu Khuyến Mãi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Xử lý bật/tắt Hàng mới
+            $('.chk-new').change(function () {
+                var id = $(this).data('id');
+                var isChecked = $(this).is(':checked');
+                $.post('/Product/ToggleNew', { id: id, isNew: isChecked }, function (res) {
+                    if (!res.success) alert("Lỗi khi cập nhật trạng thái Sản phẩm mới!");
+                });
+            });
+
+            // Xử lý bật/tắt Bán chạy
+            $('.chk-hot').change(function () {
+                var id = $(this).data('id');
+                var isChecked = $(this).is(':checked');
+                $.post('/Product/ToggleHot', { id: id, isHot: isChecked }, function (res) {
+                    if (!res.success) alert("Lỗi khi cập nhật trạng thái Bán chạy!");
+                });
+            });
+
+            // Xử lý bật/tắt Hiển thị
+            $('.chk-visible').change(function () {
+                var id = $(this).data('id');
+                var isChecked = $(this).is(':checked');
+                $.post('/Product/ToggleVisible', { id: id, isVisible: isChecked }, function (res) {
+                    if (!res.success) alert("Lỗi khi cập nhật trạng thái Hiển thị!");
+                });
+            });
+
+            // Xử lý bật/tắt Sale
+            var currentSaleCheckbox = null;
+            var isModalSaved = false;
+
+            $('.chk-sale').change(function () {
+                currentSaleCheckbox = $(this);
+                var id = $(this).data('id');
+                var price = $(this).data('price');
+                var isChecked = $(this).is(':checked');
+
+                if (isChecked) {
+                    // Mở Modal
+                    isModalSaved = false;
+                    $('#saleModalProductId').val(id);
+                    $('#saleModalOriginalPrice').text(price.toLocaleString('vi-VN'));
+                    $('#saleModalInputPrice').val('');
+                    
+                    var saleModal = new bootstrap.Modal(document.getElementById('salePriceModal'));
+                    saleModal.show();
+                } else {
+                    // Tắt Sale
+                    $.post('/Product/UpdateSale', { id: id, isSale: false, salePrice: null }, function (res) {
+                        if (res.success) {
+                            currentSaleCheckbox.siblings('label').find('.discount-badge').addClass('d-none');
+                            $('#salePrice_' + id).html('<span class="text-muted small">Không</span>');
+                        } else {
+                            alert("Lỗi khi tắt khuyến mãi!");
+                            currentSaleCheckbox.prop('checked', true); // Trả lại trạng thái
+                        }
+                    });
+                }
+            });
+
+            // Khi đóng Modal mà chưa Save
+            $('#salePriceModal').on('hidden.bs.modal', function () {
+                if (!isModalSaved && currentSaleCheckbox != null && currentSaleCheckbox.is(':checked')) {
+                    currentSaleCheckbox.prop('checked', false);
+                }
+            });
+
+            // Khi bấm Lưu trong Modal
+            $('#btnSaveSalePrice').click(function () {
+                var id = $('#saleModalProductId').val();
+                var salePrice = $('#saleModalInputPrice').val();
+                
+                if (!salePrice || isNaN(salePrice) || Number(salePrice) < 0) {
+                    alert("Vui lòng nhập giá khuyến mãi hợp lệ!");
+                    return;
+                }
+
+                $.post('/Product/UpdateSale', { id: id, isSale: true, salePrice: salePrice }, function (res) {
+                    if (res.success) {
+                        isModalSaved = true;
+                        var badge = currentSaleCheckbox.siblings('label').find('.discount-badge');
+                        badge.removeClass('d-none').text(res.discountPercent + '%');
+                        
+                        $('#salePrice_' + id).text(Number(salePrice).toLocaleString('vi-VN') + ' đ');
+                        
+                        var modalEl = document.getElementById('salePriceModal');
+                        var modalIns = bootstrap.Modal.getInstance(modalEl);
+                        modalIns.hide();
+                    } else {
+                        alert("Lỗi khi lưu thông tin khuyến mãi!");
+                    }
+                });
+            });
+        });
+    </script>
+}

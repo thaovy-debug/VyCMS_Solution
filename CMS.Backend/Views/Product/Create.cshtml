@@ -88,6 +88,11 @@ Ngay thuc hien: 15/05/2026
                     <textarea asp-for="Description" class="form-control" id="editor"></textarea>
                     <span asp-validation-for="Description" class="text-danger small"></span>
                 </div>
+
+                <div class="mb-3 form-check">
+                    <input class="form-check-input" asp-for="IsNew" />
+                    <label class="form-check-label fw-bold" asp-for="IsNew">Đánh dấu là Sản phẩm mới (Sẽ hiện ở mục Hàng mới về)</label>
+                </div>
             </div>
         </div>
 

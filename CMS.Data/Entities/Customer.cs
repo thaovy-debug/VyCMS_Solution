@@ -32,8 +32,15 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         public string? Address { get; set; } // Thuộc tính lưu trữ địa chỉ của khách hàng (có thể null)
 
-        [Required] // Yêu cầu bắt buộc nhập mật khẩu
+        public string? AvatarUrl { get; set; } // Thuộc tính lưu trữ đường dẫn ảnh đại diện của khách hàng
+        
+        public string? AddressBook { get; set; } // Sổ địa chỉ (lưu dạng JSON)
+
+        [Required]
         public string Password { get; set; } // Thuộc tính lưu trữ mật khẩu thô của khách hàng để đơn giản hóa hệ thống
+
+        public string? ResetOtp { get; set; } // Mã OTP khôi phục mật khẩu
+        public DateTime? ResetOtpExpiry { get; set; } // Thời hạn của mã OTP
 
         // Quan hệ một - nhiều: Một khách hàng có thể thực hiện mua sắm và tạo nhiều đơn hàng (Orders)
         public virtual ICollection<Order>? Orders { get; set; }

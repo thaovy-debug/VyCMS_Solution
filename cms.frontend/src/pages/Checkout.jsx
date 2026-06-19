@@ -9,6 +9,22 @@ export default function Checkout() {
     const navigate = useNavigate();
     const location = useLocation();
     const [isDirectBuy, setIsDirectBuy] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [orderId, setOrderId] = useState(null);
+
+    // Location state
+    const [provinces, setProvinces] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
+
+    const [selectedProvince, setSelectedProvince] = useState('');
+    const [selectedDistrict, setSelectedDistrict] = useState('');
+    const [selectedWard, setSelectedWard] = useState('');
+    const [specificAddress, setSpecificAddress] = useState('');
+
+    const [addressBook, setAddressBook] = useState([]);
+    const [useAddressBook, setUseAddressBook] = useState(false);
+    const [selectedAddressId, setSelectedAddressId] = useState(null);
 
     useEffect(() => {
         const storedCustomer = JSON.parse(localStorage.getItem('customer'));
@@ -28,11 +44,77 @@ export default function Checkout() {
             setFormData({
                 fullName: storedCustomer.fullName || '',
                 phone: storedCustomer.phone || '',
-                address: storedCustomer.address || '',
                 notes: ''
             });
+            if (storedCustomer.address) {
+                setSpecificAddress(storedCustomer.address);
+            }
+            if (storedCustomer.addressBook) {
+                try {
+                    const parsedBook = JSON.parse(storedCustomer.addressBook);
+                    if (parsedBook && parsedBook.length > 0) {
+                        setAddressBook(parsedBook);
+                        setUseAddressBook(true);
+                        const defaultAddr = parsedBook.find(a => a.isDefault) || parsedBook[0];
+                        setSelectedAddressId(defaultAddr.id);
+                        setSelectedProvince(defaultAddr.province);
+                        setSelectedDistrict(defaultAddr.district);
+                        setSelectedWard(defaultAddr.ward);
+                        setSpecificAddress(defaultAddr.specific);
+                    }
+                } catch (e) {
+                    console.error("Error parsing address book in checkout", e);
+                }
+            }
         }
-    }, []);
+
+        // Fetch Vietnam provinces API
+        const fetchProvinces = async () => {
+            try {
+                const res = await axios.get('https://provinces.open-api.vn/api/?depth=3');
+                setProvinces(res.data);
+            } catch (err) {
+                console.error("Failed to load provinces", err);
+            }
+        };
+        fetchProvinces();
+    }, [location.state]);
+
+    useEffect(() => {
+        if (selectedProvince) {
+            const p = provinces.find(p => p.name === selectedProvince);
+            setDistricts(p ? p.districts : []);
+            setWards([]);
+            setSelectedDistrict('');
+            setSelectedWard('');
+        }
+    }, [selectedProvince, provinces]);
+
+    useEffect(() => {
+        if (selectedDistrict && useAddressBook === false) {
+            const d = districts.find(d => d.name === selectedDistrict);
+            setWards(d ? d.wards : []);
+            setSelectedWard('');
+        }
+    }, [selectedDistrict, districts, useAddressBook]);
+
+    const handleSelectAddress = (id) => {
+        setSelectedAddressId(id);
+        const addr = addressBook.find(a => a.id === id);
+        if (addr) {
+            setSelectedProvince(addr.province);
+            // Cập nhật districts và wards tạm thời hoặc bỏ qua logic reset của useEffect
+            const p = provinces.find(prov => prov.name === addr.province);
+            if (p) {
+                setDistricts(p.districts);
+                const d = p.districts.find(dist => dist.name === addr.district);
+                if (d) setWards(d.wards);
+            }
+            setSelectedDistrict(addr.district);
+            setSelectedWard(addr.ward);
+            setSpecificAddress(addr.specific);
+        }
+    };
 
     const total = cart.reduce((sum, item) => sum + (item.discountPercent > 0 ? item.price * (1 - item.discountPercent / 100) : item.price) * item.quantity, 0);
 
@@ -45,10 +127,17 @@ export default function Checkout() {
             return;
         }
 
+        if (!selectedProvince || !selectedDistrict || !selectedWard || !specificAddress) {
+            alert("Vui lòng nhập đầy đủ địa chỉ giao hàng (Tỉnh/Thành, Quận/Huyện, Phường/Xã và Địa chỉ cụ thể).");
+            return;
+        }
+
+        const fullShippingAddress = `${specificAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`;
+
         const orderData = {
             customerId: customer ? customer.id : null,
             totalAmount: total,
-            shippingAddress: formData.address,
+            shippingAddress: fullShippingAddress,
             phone: formData.phone,
             notes: formData.notes,
             cartItems: cart.map(item => ({
@@ -62,25 +151,51 @@ export default function Checkout() {
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Orders`, orderData);
             if (res.status === 200 || res.status === 201) {
-                alert("Đặt hàng thành công! Đơn hàng của bạn đang được chờ xử lý.");
                 if (!isDirectBuy) {
                     const cartKey = customer ? `cart_${customer.id}` : 'cart_guest';
                     localStorage.removeItem(cartKey);
                     window.dispatchEvent(new Event('cartUpdated'));
                 }
-                navigate('/');
+                setOrderId(res.data.orderId || res.data.id || "MỚI");
+                setIsSuccess(true);
             }
         } catch (err) {
             alert(err.response?.data?.message || "Đã xảy ra lỗi khi đặt hàng.");
         }
     };
 
-    if (cart.length === 0) {
+    if (cart.length === 0 && !isSuccess) {
         return (
             <main className="container py-5 flex-grow-1 text-center">
                 <h4>Giỏ hàng trống</h4>
                 <p className="text-muted">Bạn chưa chọn sản phẩm nào để thanh toán.</p>
                 <Link to="/" className="btn btn-thieuhoa text-white mt-3 px-4 py-2" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '30px' }}>Mua sắm ngay</Link>
+            </main>
+        );
+    }
+
+    if (isSuccess) {
+        return (
+            <main className="container py-5 flex-grow-1 d-flex justify-content-center align-items-center">
+                <div className="card shadow border-0 p-5 text-center" style={{ borderRadius: '15px', maxWidth: '550px', width: '100%', margin: '0 auto' }}>
+                    <div className="mb-4">
+                        <i className="fas fa-check-circle" style={{ fontSize: '80px', color: '#28a745' }}></i>
+                    </div>
+                    <h3 className="font-weight-bold text-dark mb-3">Đặt hàng thành công!</h3>
+                    <p className="text-muted mb-4" style={{ fontSize: '1.1rem' }}>
+                        Cảm ơn bạn đã tin tưởng và mua sắm tại ZEY CHÍC.<br/>
+                        Mã đơn hàng của bạn là: <strong style={{ color: 'var(--thieuhoa-primary)' }}>#{orderId}</strong>
+                    </p>
+                    
+                    <div className="d-flex flex-column" style={{ gap: '15px' }}>
+                        <Link to="/profile" state={{ tab: 'orders' }} className="btn btn-outline-secondary py-3 font-weight-bold" style={{ borderRadius: '8px', border: '2px solid #6c757d' }}>
+                            <i className="fas fa-file-invoice mr-2"></i>XEM CHI TIẾT ĐƠN HÀNG
+                        </Link>
+                        <Link to="/" className="btn text-white py-3 font-weight-bold" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }}>
+                            <i className="fas fa-shopping-bag mr-2"></i>TIẾP TỤC MUA SẮM
+                        </Link>
+                    </div>
+                </div>
             </main>
         );
     }
@@ -106,10 +221,81 @@ export default function Checkout() {
                                 <label className="font-weight-bold">Số điện thoại</label>
                                 <input name="phone" type="tel" pattern="[0-9]{10,11}" title="Vui lòng nhập số điện thoại hợp lệ từ 10 đến 11 chữ số" className="form-control" value={formData.phone} onChange={handleChange} required placeholder="Số điện thoại liên hệ..." />
                             </div>
-                            <div className="form-group mb-3">
-                                <label className="font-weight-bold">Địa chỉ giao hàng</label>
-                                <textarea name="address" className="form-control" rows="2" value={formData.address} onChange={handleChange} required placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."></textarea>
-                            </div>
+
+                            {addressBook.length > 0 && (
+                                <div className="mb-4">
+                                    <div className="d-flex mb-3 gap-3">
+                                        <div className="form-check mr-4">
+                                            <input className="form-check-input" type="radio" name="addressMode" id="modeBook" checked={useAddressBook} onChange={() => setUseAddressBook(true)} />
+                                            <label className="form-check-label font-weight-bold" htmlFor="modeBook" style={{ cursor: 'pointer' }}>Chọn từ sổ địa chỉ</label>
+                                        </div>
+                                        <div className="form-check">
+                                            <input className="form-check-input" type="radio" name="addressMode" id="modeNew" checked={!useAddressBook} onChange={() => {
+                                                setUseAddressBook(false);
+                                                setSelectedProvince('');
+                                                setSelectedDistrict('');
+                                                setSelectedWard('');
+                                                setSpecificAddress('');
+                                            }} />
+                                            <label className="form-check-label font-weight-bold" htmlFor="modeNew" style={{ cursor: 'pointer' }}>Giao đến địa chỉ khác</label>
+                                        </div>
+                                    </div>
+
+                                    {useAddressBook && (
+                                        <div className="list-group mb-3">
+                                            {addressBook.map(addr => (
+                                                <label key={addr.id} className={`list-group-item list-group-item-action ${selectedAddressId === addr.id ? 'active' : ''}`} style={{ cursor: 'pointer', borderRadius: '8px', marginBottom: '8px', border: selectedAddressId === addr.id ? '2px solid var(--thieuhoa-primary)' : '1px solid #ddd', backgroundColor: selectedAddressId === addr.id ? '#f8f9fa' : '#fff', color: '#333' }}>
+                                                    <div className="d-flex align-items-center">
+                                                        <input type="radio" className="mr-3" name="selectedAddr" checked={selectedAddressId === addr.id} onChange={() => handleSelectAddress(addr.id)} />
+                                                        <div>
+                                                            {addr.isDefault && <span className="badge badge-success mb-1" style={{ fontSize: '0.65rem' }}>Mặc định</span>}
+                                                            <p className="mb-0 small">{addr.specific}, {addr.ward}, {addr.district}, {addr.province}</p>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {(!useAddressBook || addressBook.length === 0) && (
+                                <div className="p-3 bg-light rounded border mb-4">
+                                    <div className="form-group mb-3">
+                                        <label className="font-weight-bold">Tỉnh / Thành phố <span className="text-danger">*</span></label>
+                                        <select className="form-control" value={selectedProvince} onChange={(e) => setSelectedProvince(e.target.value)} required>
+                                            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                                            {provinces.map(p => (
+                                                <option key={p.code} value={p.name}>{p.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="row">
+                                        <div className="col-md-6 form-group mb-3">
+                                            <label className="font-weight-bold">Quận / Huyện <span className="text-danger">*</span></label>
+                                            <select className="form-control" value={selectedDistrict} onChange={(e) => setSelectedDistrict(e.target.value)} required disabled={!selectedProvince}>
+                                                <option value="">-- Chọn Quận / Huyện --</option>
+                                                {districts.map(d => (
+                                                    <option key={d.code} value={d.name}>{d.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="col-md-6 form-group mb-3">
+                                            <label className="font-weight-bold">Phường / Xã <span className="text-danger">*</span></label>
+                                            <select className="form-control" value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)} required disabled={!selectedDistrict}>
+                                                <option value="">-- Chọn Phường / Xã --</option>
+                                                {wards.map(w => (
+                                                    <option key={w.code} value={w.name}>{w.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="form-group mb-3">
+                                        <label className="font-weight-bold">Địa chỉ cụ thể (Số nhà, tên đường) <span className="text-danger">*</span></label>
+                                        <input type="text" className="form-control" value={specificAddress} onChange={(e) => setSpecificAddress(e.target.value)} required placeholder="Ví dụ: 123 Lê Lợi..." />
+                                    </div>
+                                </div>
+                            )}
                             <div className="form-group mb-4">
                                 <label className="font-weight-bold">Ghi chú đơn hàng (Tùy chọn)</label>
                                 <textarea name="notes" className="form-control" rows="2" value={formData.notes} onChange={handleChange} placeholder="Ví dụ: Giao hàng vào giờ hành chính..."></textarea>

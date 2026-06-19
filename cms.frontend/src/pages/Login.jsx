@@ -46,19 +46,6 @@ export default function Login() {
         }
     };
 
-    const handleForgotPassword = async () => {
-        if (!email) {
-            alert("Vui lòng nhập Email của bạn vào ô Email trước khi bấm Quên mật khẩu.");
-            return;
-        }
-        try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerForgotPassword`, { email });
-            alert(res.data.message || "Đã gửi mật khẩu mới đến email của bạn.");
-        } catch (err) {
-            alert(err.response?.data?.message || "Lỗi gửi yêu cầu khôi phục mật khẩu.");
-        }
-    };
-
     return (
         <main className="container py-5 flex-grow-1 d-flex justify-content-center align-items-center">
             <div className="card shadow-sm border-0 p-4" style={{ width: '100%', maxWidth: '450px', borderRadius: '12px' }}>
@@ -71,12 +58,13 @@ export default function Login() {
                     <div className="form-group mb-4">
                         <div className="d-flex justify-content-between align-items-center">
                             <label className="font-weight-bold mb-0">Mật khẩu</label>
-                            <span 
-                                onClick={handleForgotPassword} 
-                                style={{ cursor: 'pointer', color: 'var(--thieuhoa-primary)', fontSize: '0.9rem' }}
+                            <Link 
+                                to="/forgot-password" 
+                                state={{ defaultEmail: email }}
+                                style={{ color: 'var(--thieuhoa-primary)', fontSize: '0.9rem' }}
                             >
                                 Quên mật khẩu?
-                            </span>
+                            </Link>
                         </div>
                         <input type="password" className="form-control mt-2" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Nhập mật khẩu..." />
                     </div>

@@ -20,10 +20,12 @@ Ngay thuc hien: 15/05/2026
         <thead class="table-light"> @* Phần đầu bảng *@
             <tr> @* Dòng tiêu đề *@
                 <th style="width:70px">ID</th> @* Cột ID *@
+                <th style="width:80px" class="text-center">Ảnh</th> @* Cột ảnh sản phẩm *@
+                <th style="width:150px">Sản phẩm</th> @* Cột tên sản phẩm *@
                 <th>Khách hàng</th> @* Cột tên khách hàng *@
                 <th style="width:150px">Ngày đặt hàng</th> @* Cột ngày đặt *@
                 <th style="width:150px">Tổng tiền (VNĐ)</th> @* Cột tổng tiền đơn hàng *@
-                <th style="width:150px">Trạng thái</th> @* Cột trạng thái đơn hàng *@
+                <th style="width:200px">Trạng thái</th> @* Cột trạng thái đơn hàng *@
                 <th>Ghi chú đơn hàng</th> @* Cột ghi chú khách hàng *@
                 <th style="width:220px">Thao tác</th> @* Cột thao tác *@
             </tr> @* Đóng dòng *@
@@ -39,22 +41,51 @@ Ngay thuc hien: 15/05/2026
 
                 <tr> @* Dòng chứa thông tin đơn hàng *@
                     <td>@item.Id</td> @* Ô hiển thị mã Id *@
+                    <td class="text-center">
+                        @if (item.OrderDetails != null && item.OrderDetails.Any())
+                        {
+                            var firstProduct = item.OrderDetails.FirstOrDefault()?.Product;
+                            if (firstProduct != null && !string.IsNullOrEmpty(firstProduct.ImageUrl))
+                            {
+                                <img src="@firstProduct.ImageUrl" alt="Product" style="width: 50px; height: 50px; object-fit: cover;" class="rounded border" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded border d-flex align-items-center justify-content-center mx-auto" style="width: 50px; height: 50px;">
+                                    <i class="fa-regular fa-image text-muted"></i>
+                                </div>
+                            }
+                        }
+                    </td>
+                    <td>
+                        @if (item.OrderDetails != null && item.OrderDetails.Any())
+                        {
+                            var firstProduct = item.OrderDetails.FirstOrDefault()?.Product;
+                            <div class="fw-bold text-dark text-truncate" style="max-width: 130px;" title="@firstProduct?.Name">
+                                @(firstProduct?.Name ?? "Sản phẩm")
+                            </div>
+                            @if (item.OrderDetails.Count > 1)
+                            {
+                                <span class="badge rounded-pill bg-danger mt-1" style="font-size:0.75rem;">
+                                    +@(item.OrderDetails.Count - 1) sp khác
+                                </span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted small">0 sp</span>
+                        }
+                    </td>
                     <td class="fw-bold">@item.Customer?.FullName</td> @* Ô hiển thị tên khách hàng *@
                     <td>@item.OrderDate.ToString("dd/MM/yyyy HH:mm")</td> @* Ô hiển thị ngày giờ đặt *@
                     <td class="text-end fw-semibold text-danger">@total.ToString("N0") đ</td> @* Định dạng tiền tệ VNĐ *@
-                    <td class="text-center"> @* Ô hiển thị trạng thái đơn hàng dạng badge *@
-                        @if (item.Status == 0) // Chờ duyệt
-                        {
-                            <span class="badge bg-warning text-dark px-3 py-1">Chờ duyệt</span>
-                        }
-                        else if (item.Status == 1) // Đang giao
-                        {
-                            <span class="badge bg-primary px-3 py-1">Đang giao</span>
-                        }
-                        else if (item.Status == 2) // Đã xong
-                        {
-                            <span class="badge bg-success px-3 py-1">Đã xong</span>
-                        }
+                    <td class="text-center"> @* Ô hiển thị trạng thái đơn hàng dạng dropdown *@
+                        <select class="form-select form-select-sm status-dropdown fw-bold text-white border-0 shadow-sm" data-id="@item.Id" style="background-color: @(item.Status == 0 ? "#6c757d" : item.Status == 1 ? "#ffc107" : item.Status == 2 ? "#0d6efd" : "#198754"); cursor: pointer; min-width: 160px;">
+                            @if (item.Status == 0) { <option value="0" selected style="background:white;color:black">Chờ xác nhận</option> } else { <option value="0" style="background:white;color:black">Chờ xác nhận</option> }
+                            @if (item.Status == 1) { <option value="1" selected style="background:white;color:black">Chờ giao hàng</option> } else { <option value="1" style="background:white;color:black">Chờ giao hàng</option> }
+                            @if (item.Status == 2) { <option value="2" selected style="background:white;color:black">Đang giao hàng</option> } else { <option value="2" style="background:white;color:black">Đang giao hàng</option> }
+                            @if (item.Status == 3) { <option value="3" selected style="background:white;color:black">Đã giao</option> } else { <option value="3" style="background:white;color:black">Đã giao</option> }
+                        </select>
                     </td>
                     <td>@item.Notes</td> @* Ô hiển thị ghi chú đơn hàng *@
                     <td> @* Ô thao tác gồm xem chi tiết, sửa và xóa *@
@@ -74,3 +105,40 @@ Ngay thuc hien: 15/05/2026
         </tbody> @* Đóng thân *@
     </table> @* Đóng bảng *@
 </div> @* Đóng khối py-4 *@
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.status-dropdown').change(function () {
+                var $select = $(this);
+                var orderId = $select.data('id');
+                var newStatus = $select.val();
+                
+                // Thay đổi màu nền ngay lập tức để phản hồi nhanh
+                if (newStatus == '0') $select.css('background-color', '#6c757d');
+                else if (newStatus == '1') $select.css('background-color', '#ffc107');
+                else if (newStatus == '2') $select.css('background-color', '#0d6efd');
+                else if (newStatus == '3') $select.css('background-color', '#198754');
+
+                $.ajax({
+                    url: '/Order/UpdateStatus',
+                    type: 'POST',
+                    data: {
+                        id: orderId,
+                        status: newStatus
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            // Thành công
+                        } else {
+                            alert("Lỗi: " + res.message);
+                        }
+                    },
+                    error: function () {
+                        alert("Có lỗi xảy ra khi cập nhật trạng thái!");
+                    }
+                });
+            });
+        });
+    </script>
+}

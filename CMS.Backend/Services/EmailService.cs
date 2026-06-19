@@ -1,5 +1,6 @@
 using MimeKit;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 
@@ -32,14 +33,17 @@ namespace CMS.Backend.Services
             emailMessage.To.Add(new MailboxAddress("", email));
             emailMessage.Subject = subject;
 
-            var bodyBuilder = new BodyBuilder { HtmlBody = htmlMessage };
+            var bodyBuilder = new BodyBuilder { 
+                HtmlBody = htmlMessage,
+                TextBody = "Xin chào! Đây là email tự động từ hệ thống ZEY CHÍC. Vui lòng mở bằng trình duyệt hoặc ứng dụng hỗ trợ HTML để xem chi tiết." 
+            };
             emailMessage.Body = bodyBuilder.ToMessageBody();
 
             using var client = new SmtpClient();
             try
             {
-                // Connect với cấu hình SSL/TLS tương ứng (587 thường dùng STARTTLS, false ở tham số 3)
-                await client.ConnectAsync(smtpServer, port, false);
+                // Sử dụng StartTls thay vì false để tăng cường bảo mật và độ uy tín
+                await client.ConnectAsync(smtpServer, port, SecureSocketOptions.StartTls);
                 await client.AuthenticateAsync(senderEmail, password);
                 await client.SendAsync(emailMessage);
             }

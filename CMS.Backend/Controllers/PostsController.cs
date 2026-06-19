@@ -24,27 +24,43 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
         }
 
         [HttpGet] // Khai báo phương thức GET để tải toàn bộ danh sách bài viết
-        public async Task<IActionResult> GetAll() // Định nghĩa hàm bất đồng bộ trả về kết quả dưới dạng IActionResult
+        public async Task<IActionResult> GetAll([FromQuery] int? categoryId)
         {
-            var posts = await _context.Posts // Truy vấn bảng Posts trong cơ sở dữ liệu
-                .OrderByDescending(p => p.Id) // Sắp xếp các bài viết giảm dần theo ID để tin mới nhất lên đầu
-                .Select(p => new { // Áp dụng kỹ thuật gọt tỉa dữ liệu để giảm bớt băng thông truyền tải JSON
-                    p.Id, // Chỉ lấy mã định danh bài viết
-                    p.Title, // Lấy tiêu đề bài viết
-                    p.ImageUrl, // Lấy đường dẫn hình ảnh đại diện
-                    p.CreatedDate, // Lấy ngày tạo bài viết
-                    CategoryName = p.Category.Name // Lấy trực tiếp tên của danh mục liên kết qua khóa ngoại CategoryId
-                }) // Kết thúc phép chiếu Select
-                .ToListAsync(); // Chuyển đổi bất đồng bộ kết quả truy vấn thành danh sách List
+            try
+            {
+                var query = _context.Posts.AsQueryable();
 
-            return Ok(posts); // Trả về kết quả kèm mã trạng thái HTTP 200 OK
+                query = query.Where(p => p.IsVisible);
+
+                if (categoryId.HasValue)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId.Value);
+                }
+
+                var posts = await query
+                    .OrderByDescending(p => p.CreatedDate)
+                    .Select(p => new {
+                        p.Id,
+                        p.Title,
+                        p.ImageUrl,
+                        p.CreatedDate,
+                        CategoryName = p.Category.Name
+                    })
+                    .ToListAsync();
+
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi hệ thống SQL Server khi tải danh sách tin tức: {ex.Message}");
+            }
         }
 
         [HttpGet("category/{categoryId}")] // Khai báo phương thức GET nhận tham số động categoryId trên URL
         public async Task<IActionResult> GetByCategory(int categoryId) // Định nghĩa hàm lọc bài viết theo mã chuyên mục
         {
             var posts = await _context.Posts // Truy vấn bảng Posts trong cơ sở dữ liệu
-                .Where(p => p.CategoryId == categoryId) // Lọc các bản ghi có CategoryId khớp với tham số truyền vào
+                .Where(p => p.CategoryId == categoryId && p.IsVisible) // Lọc các bản ghi có CategoryId khớp và được phép hiển thị
                 .Select(p => new { // Gọt tỉa các trường dữ liệu để chỉ trả về thông tin cần thiết
                     p.Id, // Lấy mã bài viết
                     p.Title, // Lấy tiêu đề bài viết
@@ -60,6 +76,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
         public async Task<IActionResult> GetLatest()
         {
             var posts = await _context.Posts
+                .Where(p => p.IsVisible)
                 .OrderByDescending(p => p.CreatedDate)
                 .Take(4)
                 .Select(p => new {
@@ -78,7 +95,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
         public async Task<IActionResult> GetDetail(int id) // Định nghĩa hàm lấy chi tiết một bài viết cụ thể
         {
             var post = await _context.Posts // Truy vấn bảng Posts từ cơ sở dữ liệu
-                .FirstOrDefaultAsync(p => p.Id == id); // Tìm bài viết đầu tiên khớp ID, hoặc null nếu không tồn tại
+                .FirstOrDefaultAsync(p => p.Id == id && p.IsVisible); // Tìm bài viết đầu tiên khớp ID và hiển thị, hoặc null nếu không tồn tại
 
             if (post == null) // Kiểm tra nếu không tìm thấy bài viết nào trong CSDL
             {

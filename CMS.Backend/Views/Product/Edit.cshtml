@@ -98,6 +98,11 @@ Ngay thuc hien: 15/05/2026
                     <input asp-for="Sizes" class="form-control" placeholder="VD: S, M, L, XL" />
                     <span asp-validation-for="Sizes" class="text-danger small"></span>
                 </div>
+
+                <div class="mb-3 form-check"> @* Trạng thái sản phẩm mới *@
+                    <input class="form-check-input" asp-for="IsNew" />
+                    <label class="form-check-label fw-bold" asp-for="IsNew">Đánh dấu là Sản phẩm mới (Sẽ hiện ở mục Hàng mới về)</label>
+                </div>
             </div>
         </div>
 

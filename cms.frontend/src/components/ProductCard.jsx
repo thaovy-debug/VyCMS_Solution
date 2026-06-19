@@ -3,6 +3,40 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ item }) => {
     const navigate = useNavigate();
+    const [isFavorite, setIsFavorite] = React.useState(false);
+
+    React.useEffect(() => {
+        const customer = JSON.parse(localStorage.getItem('customer'));
+        const key = customer ? `favorites_${customer.id}` : 'favorites_guest';
+        const favs = JSON.parse(localStorage.getItem(key)) || [];
+        setIsFavorite(favs.some(f => f.id === item.id));
+        
+        const updateFavs = () => {
+            const currentFavs = JSON.parse(localStorage.getItem(key)) || [];
+            setIsFavorite(currentFavs.some(f => f.id === item.id));
+        };
+        window.addEventListener('favoritesUpdated', updateFavs);
+        return () => window.removeEventListener('favoritesUpdated', updateFavs);
+    }, [item.id]);
+
+    const toggleFavorite = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const customer = JSON.parse(localStorage.getItem('customer'));
+        const key = customer ? `favorites_${customer.id}` : 'favorites_guest';
+        let favs = JSON.parse(localStorage.getItem(key)) || [];
+        
+        if (isFavorite) {
+            favs = favs.filter(f => f.id !== item.id);
+            setIsFavorite(false);
+        } else {
+            favs.push(item);
+            setIsFavorite(true);
+        }
+        localStorage.setItem(key, JSON.stringify(favs));
+        window.dispatchEvent(new Event('favoritesUpdated'));
+    };
+
 
     const handleBuyNow = (e) => {
         e.preventDefault();
@@ -50,8 +84,17 @@ const ProductCard = ({ item }) => {
                         <span className="position-absolute badge badge-dark px-2 py-1 small font-weight-bold text-uppercase" style={{ top: '10px', left: '10px', backgroundColor: '#111111', fontSize: '0.65rem', letterSpacing: '0.5px', zIndex: 11 }}>NEW</span>
                     )}
                     {item.discountPercent > 0 && (
-                        <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: '10px', right: '10px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem', borderRadius: '4px', zIndex: 11 }}>-{item.discountPercent}%</span>
+                        <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: item.createdDate && new Date() - new Date(item.createdDate) < 7 * 24 * 60 * 60 * 1000 ? '40px' : '10px', left: '10px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem', borderRadius: '4px', zIndex: 11 }}>-{item.discountPercent}%</span>
                     )}
+                    
+                    <div 
+                        className="position-absolute d-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm" 
+                        style={{ top: '10px', right: '10px', zIndex: 12, cursor: 'pointer', width: '32px', height: '32px', transition: 'all 0.2s' }}
+                        onClick={toggleFavorite}
+                        title={isFavorite ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+                    >
+                        <i className={`${isFavorite ? 'fa-solid text-danger' : 'fa-regular text-secondary'} fa-heart`} style={{ fontSize: '1.1rem', marginTop: '2px' }}></i>
+                    </div>
                 </Link>
 
                 {/* Thân card chứa thông tin */}

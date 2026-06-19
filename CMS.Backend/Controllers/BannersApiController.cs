@@ -22,7 +22,7 @@ namespace CMS.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Banner>>> GetBanners()
         {
-            return await _context.Banners.ToListAsync();
+            return await _context.Banners.Where(b => b.IsVisible).ToListAsync();
         }
     }
 }

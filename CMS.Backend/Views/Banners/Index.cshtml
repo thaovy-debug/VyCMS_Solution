@@ -28,6 +28,7 @@
                         <th class="py-3 px-4">#</th>
                         <th class="py-3 px-4">Hình ảnh</th>
                         <th class="py-3 px-4">Tiêu đề Banner</th>
+                        <th class="py-3 px-4 text-center">Trạng thái</th>
                         <th class="py-3 px-4 text-center">Thao tác</th>
                     </tr>
                 </thead>
@@ -53,6 +54,11 @@
                                 </td>
                                 <td class="px-4 fw-bold">@item.Title</td>
                                 <td class="px-4 text-center">
+                                    <div class="form-check form-switch d-inline-block">
+                                        <input class="form-check-input chk-banner-visible" type="checkbox" data-id="@item.Id" @(item.IsVisible ? "checked" : "")>
+                                    </div>
+                                </td>
+                                <td class="px-4 text-center">
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary shadow-sm mr-2" title="Chỉnh sửa">
                                         <i class="fa-solid fa-pen-to-square"></i> Sửa
                                     </a>
@@ -71,3 +77,19 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.chk-banner-visible').change(function () {
+                var id = $(this).data('id');
+                var isChecked = $(this).is(':checked');
+                $.post('/Banners/ToggleVisible', { id: id, isVisible: isChecked }, function (res) {
+                    if (!res.success) {
+                        alert("Lỗi khi cập nhật trạng thái hiển thị!");
+                    }
+                });
+            });
+        });
+    </script>
+}

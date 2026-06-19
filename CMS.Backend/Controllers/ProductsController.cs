@@ -29,6 +29,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
         public async Task<IActionResult> GetAll() // Định nghĩa hàm bất đồng bộ trả về kết quả dưới dạng IActionResult
         {
             var products = await _context.Products // Truy vấn bảng Products từ cơ sở dữ liệu
+                .Where(p => p.IsVisible) // Chỉ lấy các sản phẩm được phép hiển thị
                 .OrderByDescending(p => p.Id) // Sắp xếp sản phẩm giảm dần theo ID để sản phẩm mới nhất lên đầu
                 .Select(p => new { // Áp dụng kỹ thuật gọt tỉa dữ liệu để giảm bớt băng thông truyền tải JSON
                     p.Id, // Lấy mã ID của sản phẩm
@@ -40,7 +41,9 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId, // Lấy mã danh mục sản phẩm liên kết
                     p.Sizes, // Thêm danh sách size
                     p.Colors, // Thêm danh sách màu sắc
-                    p.CreatedDate // Thêm ngày tạo
+                    p.CreatedDate, // Thêm ngày tạo
+                    p.IsNew, // Thêm trạng thái sản phẩm mới
+                    p.IsHot // Thêm trạng thái bán chạy
                 }) // Kết thúc biểu thức Select gọt tỉa
                 .ToListAsync(); // Chuyển đổi bất đồng bộ kết quả truy vấn thành danh sách List
 
@@ -51,7 +54,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
         public async Task<IActionResult> GetByCategoryProduct(int categoryProductId) // Định nghĩa hàm lọc sản phẩm theo danh mục
         {
             var products = await _context.Products // Truy vấn bảng Products từ cơ sở dữ liệu
-                .Where(p => p.CategoryProductId == categoryProductId) // Lọc các sản phẩm có CategoryProductId trùng khớp
+                .Where(p => p.CategoryProductId == categoryProductId && p.IsVisible) // Lọc các sản phẩm có CategoryProductId trùng khớp và được phép hiển thị
                 .Select(p => new { // Gọt tỉa các trường dữ liệu để chỉ trả về thông tin cần thiết
                     p.Id, // Lấy mã ID của sản phẩm
                     p.Name, // Lấy tên sản phẩm
@@ -62,7 +65,9 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId, // Lấy mã danh mục sản phẩm liên kết
                     p.Sizes, // Thêm danh sách size
                     p.Colors, // Thêm danh sách màu sắc
-                    p.CreatedDate // Thêm ngày tạo
+                    p.CreatedDate, // Thêm ngày tạo
+                    p.IsNew, // Thêm trạng thái sản phẩm mới
+                    p.IsHot
                 }) // Kết thúc biểu thức Select gọt tỉa
                 .ToListAsync(); // Chuyển kết quả sang danh sách bất đồng bộ
 
@@ -72,9 +77,8 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
         [HttpGet("new")]
         public async Task<IActionResult> GetNew()
         {
-            var sevenDaysAgo = DateTime.Now.AddDays(-7);
             var products = await _context.Products
-                .Where(p => p.CreatedDate >= sevenDaysAgo)
+                .Where(p => p.IsNew && p.IsVisible)
                 .OrderByDescending(p => p.CreatedDate)
                 .Take(4)
                 .Select(p => new {
@@ -87,7 +91,9 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId,
                     p.Sizes,
                     p.Colors,
-                    p.CreatedDate
+                    p.CreatedDate,
+                    p.IsNew,
+                    p.IsHot
                 })
                 .ToListAsync();
 
@@ -98,7 +104,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
         public async Task<IActionResult> GetSale()
         {
             var products = await _context.Products
-                .Where(p => p.DiscountPercent > 0)
+                .Where(p => p.DiscountPercent > 0 && p.IsVisible)
                 .OrderByDescending(p => p.Id)
                 .Take(4)
                 .Select(p => new {
@@ -111,7 +117,35 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId,
                     p.Sizes,
                     p.Colors,
-                    p.CreatedDate
+                    p.CreatedDate,
+                    p.IsNew,
+                    p.IsHot
+                })
+                .ToListAsync();
+
+            return Ok(products);
+        }
+
+        [HttpGet("hot")]
+        public async Task<IActionResult> GetHot()
+        {
+            var products = await _context.Products
+                .Where(p => p.IsHot && p.IsVisible)
+                .OrderByDescending(p => p.Id)
+                .Take(4)
+                .Select(p => new {
+                    p.Id,
+                    p.Name,
+                    p.Price,
+                    p.ImageUrl,
+                    p.StockQuantity,
+                    p.DiscountPercent,
+                    p.CategoryProductId,
+                    p.Sizes,
+                    p.Colors,
+                    p.CreatedDate,
+                    p.IsNew,
+                    p.IsHot
                 })
                 .ToListAsync();
 
@@ -122,7 +156,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
         public async Task<IActionResult> GetDetail(int id) // Định nghĩa hàm lấy chi tiết một sản phẩm cụ thể
         {
             var product = await _context.Products // Truy vấn bảng Products từ cơ sở dữ liệu
-                .FirstOrDefaultAsync(p => p.Id == id); // Tìm sản phẩm đầu tiên khớp ID, hoặc null nếu không tồn tại
+                .FirstOrDefaultAsync(p => p.Id == id && p.IsVisible); // Tìm sản phẩm đầu tiên khớp ID và được phép hiển thị, hoặc null nếu không tồn tại
 
             if (product == null) // Kiểm tra nếu không tìm thấy sản phẩm nào trong CSDL
             {

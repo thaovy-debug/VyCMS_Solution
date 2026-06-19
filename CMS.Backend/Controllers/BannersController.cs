@@ -140,6 +140,19 @@ namespace CMS.Backend.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public IActionResult ToggleVisible(int id, bool isVisible)
+        {
+            var banner = _context.Banners.Find(id);
+            if (banner != null)
+            {
+                banner.IsVisible = isVisible;
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
         private bool BannerExists(int id)
         {
             return _context.Banners.Any(e => e.Id == id);

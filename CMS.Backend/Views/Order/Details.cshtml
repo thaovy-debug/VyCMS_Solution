@@ -27,10 +27,24 @@ Ngay thuc hien: 15/05/2026
                     <h5 class="card-title m-0">Thông Tin Khách Hàng</h5>
                 </div>
                 <div class="card-body"> @* Thân card *@
+                    @{
+                        string displayAddress = Model.Customer?.Address ?? "";
+                        string displayPhone = Model.Customer?.Phone ?? "";
+                        string displayNotes = Model.Notes ?? "";
+
+                        if (!string.IsNullOrEmpty(Model.Notes) && Model.Notes.StartsWith("Giao đến: "))
+                        {
+                            var parts = Model.Notes.Split(new[] { " | ĐT: ", " | Ghi chú: " }, StringSplitOptions.None);
+                            if (parts.Length > 0) displayAddress = parts[0].Replace("Giao đến: ", "");
+                            if (parts.Length > 1) displayPhone = parts[1];
+                            if (parts.Length > 2) displayNotes = parts[2];
+                            else displayNotes = "Không có ghi chú";
+                        }
+                    }
                     <p><strong>Họ và tên:</strong> @Model.Customer?.FullName</p>
                     <p><strong>Email:</strong> @Model.Customer?.Email</p>
-                    <p><strong>Số điện thoại:</strong> @Model.Customer?.Phone</p>
-                    <p><strong>Địa chỉ giao hàng:</strong> @Model.Customer?.Address</p>
+                    <p><strong>Số điện thoại:</strong> @displayPhone</p>
+                    <p><strong>Địa chỉ giao hàng:</strong> @displayAddress</p>
                 </div>
             </div>
         </div>
@@ -44,23 +58,29 @@ Ngay thuc hien: 15/05/2026
                     <p><strong>Ngày đặt hàng:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
                     <p>
                         <strong>Trạng thái:</strong>
-                        @if (Model.Status == 0) // Chờ duyệt
+                        @if (Model.Status == 0) // Chờ xác nhận
                         {
-                            <span class="badge bg-warning text-dark px-3 py-1">Chờ duyệt</span>
+                            <span class="badge bg-secondary text-white px-3 py-1">Chờ xác nhận</span>
                         }
-                        else if (Model.Status == 1) // Đang giao
+                        else if (Model.Status == 1) // Chờ giao hàng
                         {
-                            <span class="badge bg-primary px-3 py-1">Đang giao</span>
+                            <span class="badge bg-warning text-dark px-3 py-1">Chờ giao hàng</span>
                         }
-                        else if (Model.Status == 2) // Đã xong
+                        else if (Model.Status == 2) // Đang giao hàng
                         {
-                            <span class="badge bg-success px-3 py-1">Đã xong</span>
+                            <span class="badge bg-primary px-3 py-1">Đang giao hàng</span>
+                        }
+                        else if (Model.Status == 3) // Đã giao
+                        {
+                            <span class="badge bg-success px-3 py-1">Đã giao</span>
                         }
                     </p>
-                    <p><strong>Ghi chú đơn hàng:</strong> @(string.IsNullOrEmpty(Model.Notes) ? "Không có ghi chú" : Model.Notes)</p>
+                    <p><strong>Ghi chú đơn hàng:</strong> @(string.IsNullOrEmpty(displayNotes) ? "Không có ghi chú" : displayNotes)</p>
                 </div>
             </div>
         </div>
+
+
     </div>
 
     <div class="card"> @* Thẻ card chứa danh sách sản phẩm đặt mua *@
@@ -72,6 +92,7 @@ Ngay thuc hien: 15/05/2026
                 <thead class="table-light"> @* Tiêu đề các cột *@
                     <tr>
                         <th style="width:70px">Stt</th>
+                        <th style="width:100px" class="text-center">Ảnh</th>
                         <th>Tên sản phẩm</th>
                         <th style="width:180px" class="text-end">Đơn giá</th>
                         <th style="width:100px" class="text-center">Số lượng</th>
@@ -89,6 +110,12 @@ Ngay thuc hien: 15/05/2026
 
                             <tr>
                                 <td class="text-center">@index</td>
+                                <td class="text-center">
+                                    @if (!string.IsNullOrEmpty(detail.Product?.ImageUrl))
+                                    {
+                                        <img src="@detail.Product.ImageUrl" alt="@detail.Product.Name" style="width: 60px; height: 60px; object-fit: cover;" class="rounded border" />
+                                    }
+                                </td>
                                 <td>
                                     <span class="fw-bold text-dark">@detail.Product?.Name</span>
                                     <span class="text-muted d-block small">ID sản phẩm: @detail.ProductId</span>
@@ -103,13 +130,13 @@ Ngay thuc hien: 15/05/2026
                     else
                     {
                         <tr>
-                            <td colspan="5" class="text-center text-muted p-4">Đơn hàng chưa có chi tiết sản phẩm.</td>
+                            <td colspan="6" class="text-center text-muted p-4">Đơn hàng chưa có chi tiết sản phẩm.</td>
                         </tr>
                     }
                 </tbody>
                 <tfoot class="table-light"> @* Chân bảng tính tổng cộng *@
                     <tr>
-                        <td colspan="4" class="text-end fw-bold">TỔNG CỘNG:</td>
+                        <td colspan="5" class="text-end fw-bold">TỔNG CỘNG:</td>
                         <td class="text-end fw-bold text-danger fs-5">@totalAmount.ToString("N0") đ</td>
                     </tr>
                 </tfoot>

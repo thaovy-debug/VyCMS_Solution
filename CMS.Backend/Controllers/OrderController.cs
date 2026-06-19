@@ -30,6 +30,7 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             var orders = _context.Orders // Lấy dữ liệu từ bảng Orders
                 .Include(o => o.Customer) // Nạp kèm khách hàng
                 .Include(o => o.OrderDetails) // Nạp kèm chi tiết đơn hàng
+                .ThenInclude(od => od.Product) // Nạp thông tin sản phẩm
                 .ToList();
             return View(orders); // Trả về View danh sách đơn hàng
         }
@@ -65,6 +66,17 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
 
             _context.SaveChanges(); // Lưu thay đổi xuống CSDL
             return RedirectToAction("Index"); // Quay lại trang danh sách đơn hàng
+        }
+
+        [HttpPost]
+        public IActionResult UpdateStatus(int id, int status)
+        {
+            var order = _context.Orders.Find(id);
+            if (order == null) return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
+
+            order.Status = status;
+            _context.SaveChanges();
+            return Json(new { success = true });
         }
 
         public IActionResult Delete(int id) // Hàm xử lý xóa đơn hàng theo Id

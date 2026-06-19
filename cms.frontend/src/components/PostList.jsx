@@ -10,15 +10,21 @@ import React, { useState, useEffect } from 'react'; // Nhập React và các Hoo
 import { Link } from 'react-router-dom';
 import blogService from '../services/blogService'; // Nhập lớp dịch vụ blogService để gọi API bài viết từ Backend
 
-const PostList = () => { // Định nghĩa component chức năng PostList
+const PostList = ({ isHome, postsProp, loadingProp }) => { // Định nghĩa component chức năng PostList
     const [posts, setPosts] = useState([]); // Khai báo state posts lưu trữ mảng bài viết từ API, mặc định rỗng
     const [loading, setLoading] = useState(true); // Khai báo state loading quản lý trạng thái tải dữ liệu
 
     useEffect(() => { // Tự động chạy tải bài viết khi component được nạp lần đầu
+        if (postsProp !== undefined) {
+            setPosts(postsProp);
+            setLoading(loadingProp);
+            return;
+        }
+
         const fetchPosts = async () => { // Định nghĩa hàm bất đồng bộ fetchPosts
             try { // Khối bắt đầu try
                 setLoading(true); // Thiết lập trạng thái loading là true
-                const data = await blogService.getAllPosts(); // Gọi hàm lấy danh sách bài viết từ service
+                const data = isHome ? await blogService.getLatestPosts() : await blogService.getAllPosts(); // Gọi hàm lấy danh sách bài viết từ service
                 setPosts(data); // Cập nhật mảng bài viết nhận được vào state posts
             } catch (error) { // Bắt lỗi trong khối catch nếu xảy ra sự cố
                 console.error("Lỗi khi tải danh sách bài viết:", error); // Log lỗi chi tiết
@@ -28,7 +34,7 @@ const PostList = () => { // Định nghĩa component chức năng PostList
         }; // Kết thúc định nghĩa hàm fetchPosts
 
         fetchPosts(); // Thực thi hàm tải bài viết
-    }, []); // Mảng phụ thuộc rỗng đảm bảo chỉ chạy một lần duy nhất khi render lần đầu
+    }, [isHome, postsProp, loadingProp]); // Chạy lại nếu isHome thay đổi
 
     if (loading) { // Nếu trạng thái loading đang là true
         return <div className="text-center my-4 text-muted">Đang tải tin tức thời trang xu hướng...</div>; // Trả về giao diện thông báo chờ tải dữ liệu

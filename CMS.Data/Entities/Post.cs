@@ -25,5 +25,8 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
         // Khóa ngoại liên kết tới Category
         public int CategoryId { get; set; } // Thuộc tính CategoryId - Khóa ngoại liên kết đến danh mục bài viết
         public virtual Category Category { get; set; } // Khai báo đối tượng tham chiếu đến thực thể Category liên quan
+
+        [System.ComponentModel.DataAnnotations.Display(Name = "Hiển thị bài viết")]
+        public bool IsVisible { get; set; } = true; // Thuộc tính quyết định ẩn hiện bài viết
     }
 }

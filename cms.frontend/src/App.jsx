@@ -12,10 +12,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import ForgotPassword from './pages/ForgotPassword';
 import ProductDetail from './pages/ProductDetail';
 import Shop from './pages/Shop';
 import Blog from './pages/Blog';
 import PostDetail from './pages/PostDetail';
+import Profile from './pages/Profile'; // Trang Profile người dùng
 import CategoryProductList from './components/CategoryProductList'; // Nhập component danh sách danh mục sản phẩm từ CSDL
 import ProductList from './components/ProductList'; // Nhập component danh sách sản phẩm thời trang từ CSDL
 import PostList from './components/PostList'; // Nhập component danh sách bài viết blog từ CSDL
@@ -220,10 +222,10 @@ function App() { // Định nghĩa component chính App của dự án
                         {/* Cột trái: Cửa hàng & Hotline chăm sóc khách hàng */}
                         <div className="col-md-4 d-none d-md-flex align-items-center" style={{ gap: '20px' }}> {/* Chiếm 4/12 lưới, ẩn trên mobile */}
                             {/* Hệ thống cửa hàng */}
-                            <a href="/he-thong-cua-hang" className="d-flex align-items-center text-secondary text-decoration-none hover-link" style={{ fontSize: '0.85rem' }}> {/* Liên kết cửa hàng */}
+                            <Link to="/he-thong-cua-hang" className="d-flex align-items-center text-secondary text-decoration-none hover-link" style={{ fontSize: '0.85rem' }}> {/* Liên kết cửa hàng */}
                                 <i className="fa-solid fa-location-dot mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon định vị */}
                                 <span className="font-weight-bold">Cửa hàng</span> {/* Nhãn chữ */}
-                            </a> {/* Kết thúc liên kết */}
+                            </Link> {/* Kết thúc liên kết */}
 
                             {/* Hotline hỗ trợ miễn phí */}
                             <div className="d-flex align-items-center text-secondary" style={{ fontSize: '0.85rem' }}> {/* Hotline */}
@@ -234,19 +236,19 @@ function App() { // Định nghĩa component chính App của dự án
 
                         {/* Cột giữa: Logo thương hiệu Thiều Hoa chính thức */}
                         <div className="col-md-4 col-6 text-center"> {/* Chiếm 4/12 trên desktop, 6/12 trên mobile */}
-                            <a href="/" className="d-inline-block text-decoration-none py-2"> {/* Liên kết trang chủ */}
+                            <Link to="/" className="d-inline-block text-decoration-none py-2"> {/* Liên kết trang chủ */}
                                 <img src={logoImg} alt="Thiều Hoa - Xu Hướng Phái Đẹp" style={{ height: '85px', objectFit: 'contain' }} />
-                            </a> {/* Kết thúc liên kết */}
+                            </Link> {/* Kết thúc liên kết */}
                         </div> {/* Kết thúc cột giữa */}
 
                         {/* Cột phải: Tài khoản & Giỏ hàng */}
                         <div className="col-md-4 col-6 d-flex align-items-center justify-content-end" style={{ gap: '20px', fontSize: '0.85rem' }}> {/* Chiếm 4/12 trên desktop, 6/12 trên mobile */}
                             {/* Đăng nhập tài khoản thành viên */}
                             {customer ? (
-                                <div className="d-flex align-items-center text-secondary hover-link" style={{ cursor: 'pointer' }} onClick={() => { if(window.confirm('Bạn có chắc muốn đăng xuất?')) { localStorage.removeItem('customer'); localStorage.removeItem('cart_guest'); setCustomer(null); window.location.href='/'; } }}>
+                                <Link to="/profile" className="d-flex align-items-center text-secondary text-decoration-none hover-link" style={{ cursor: 'pointer' }}>
                                     <i className="fa-solid fa-user-check mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i>
-                                    <span className="d-none d-md-inline font-weight-bold" title="Click để đăng xuất">{customer.fullName}</span>
-                                </div>
+                                    <span className="d-none d-md-inline font-weight-bold" title="Trang cá nhân">Xin chào {customer.fullName}</span>
+                                </Link>
                             ) : (
                                 <Link to="/login" className="d-flex align-items-center text-secondary text-decoration-none hover-link"> {/* Nút liên kết đăng nhập */}
                                     <i className="fa-regular fa-user mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon người dùng */}
@@ -255,10 +257,10 @@ function App() { // Định nghĩa component chính App của dự án
                             )}
 
                             {/* Giỏ hàng mua sắm */}
-                            <a href="/gio-hang" className="d-flex align-items-center text-dark text-decoration-none hover-link position-relative"> {/* Nút liên kết giỏ hàng */}
+                            <Link to="/gio-hang" className="d-flex align-items-center text-dark text-decoration-none hover-link position-relative"> {/* Nút liên kết giỏ hàng */}
                                 <i className="fa-solid fa-bag-shopping text-danger" style={{ fontSize: '1.3rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon túi xách */}
                                 <span className="position-absolute badge badge-danger badge-pill font-weight-bold" style={{ top: '-8px', right: '-8px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.65rem' }}>{cartCount}</span> {/* Số lượng sản phẩm */}
-                            </a> {/* Kết thúc liên kết */}
+                            </Link> {/* Kết thúc liên kết */}
                         </div> {/* Kết thúc cột phải */}
                         
                     </div> {/* Kết thúc row */}
@@ -376,12 +378,14 @@ function App() { // Định nghĩa component chính App của dự án
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/gio-hang" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/san-pham" element={<Shop />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/post/:id" element={<PostDetail />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/" element={
                     <>
             {/* HIỂN THỊ CÁC THÀNH PHẦN QUẢNG CÁO TRANG CHỦ CHỈ KHI KHÔNG LỌC DANH MỤC HOẶC LỌC ĐẶC BIỆT */}
@@ -400,14 +404,14 @@ function App() { // Định nghĩa component chính App của dự án
                             <div className="carousel-inner">
                                 {banners.map((banner, idx) => (
                                     <div key={banner.id} className={`carousel-item ${idx === 0 ? 'active' : ''}`}>
-                                        <a href="/san-pham" className="d-block" style={{ backgroundColor: '#f9fafb', textAlign: 'center' }}>
+                                        <Link to="/san-pham" className="d-block" style={{ backgroundColor: '#f9fafb', textAlign: 'center' }}>
                                             <img 
                                                 src={banner.imageUrl.startsWith('http') ? banner.imageUrl : `${import.meta.env.VITE_API_URL}${banner.imageUrl}`} 
                                                 className="d-inline-block" 
                                                 alt={banner.title} 
                                                 style={{ objectFit: 'contain', width: '100%', maxHeight: '480px' }} 
                                             />
-                                        </a>
+                                        </Link>
                                     </div>
                                 ))}
                             </div>
@@ -626,7 +630,7 @@ function App() { // Định nghĩa component chính App của dự án
                                 <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
                             </div>
                             <div className="row">
-                                {renderHomepageProductGrid([...allProducts].filter(p => p.createdDate && new Date() - new Date(p.createdDate) < 7 * 24 * 60 * 60 * 1000).sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)).slice(0, 4))}
+                                {renderHomepageProductGrid([...allProducts].filter(p => p.isNew).sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)).slice(0, 4))}
                             </div>
                             <div className="text-center mt-3">
                                 <button 
@@ -651,6 +655,26 @@ function App() { // Định nghĩa component chính App của dự án
                             <div className="text-center mt-3">
                                 <button 
                                     onClick={() => setCustomFilterType("sale")} 
+                                    className="btn btn-thieuhoa px-4 py-2 text-uppercase font-weight-bold text-white rounded-pill shadow-sm"
+                                    style={{ fontSize: '0.82rem' }}
+                                >
+                                    Xem Thêm
+                                </button>
+                            </div>
+                        </section>
+
+                        {/* CỤM 3: BÁN CHẠY */}
+                        <section id="ban-chay-sec" className="mb-5 pb-3">
+                            <div className="text-center mb-4">
+                                <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem' }}>BÁN CHẠY</h3>
+                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
+                            </div>
+                            <div className="row">
+                                {renderHomepageProductGrid([...allProducts].filter(p => p.isHot).slice(0, 4))}
+                            </div>
+                            <div className="text-center mt-3">
+                                <button 
+                                    onClick={() => setCustomFilterType("hot")} 
                                     className="btn btn-thieuhoa px-4 py-2 text-uppercase font-weight-bold text-white rounded-pill shadow-sm"
                                     style={{ fontSize: '0.82rem' }}
                                 >
@@ -709,7 +733,7 @@ function App() { // Định nghĩa component chính App của dự án
 
                 {/* PHẦN 7: TIN TỨC & CẨM NANG MẶC ĐẸP (Dữ liệu CSDL) */}
                 <div id="tin-tuc-cam-nang" className="border-top mt-5 pt-4">
-                    <PostList />
+                    <PostList isHome={true} />
                 </div>
                 
             </main> {/* Kết thúc main content */}
@@ -762,12 +786,12 @@ function App() { // Định nghĩa component chính App của dự án
                         <div className="col-lg-3 col-md-6 mb-4 mb-md-0"> {/* Cột 3 chiếm 3/12 */}
                             <h5 className="thieuhoa-footer-title">CHÍNH SÁCH MUA HÀNG</h5> {/* Tiêu đề cột */}
                             <ul className="list-unstyled d-flex flex-column" style={{ gap: '10px' }}> {/* Sắp xếp cột dọc */}
-                                <li><a href="/chinh-sach-bao-mat" className="thieuhoa-footer-link text-decoration-none">Chính sách bảo mật thông tin</a></li> {/* Liên kết chính sách bảo mật */}
-                                <li><a href="/chinh-sach-doi-tra" className="thieuhoa-footer-link text-decoration-none">Chính sách đổi trả sản phẩm</a></li> {/* Liên kết chính sách đổi trả */}
-                                <li><a href="/chinh-sach-bao-hanh" className="thieuhoa-footer-link text-decoration-none">Chính sách bảo hành sản phẩm</a></li> {/* Liên kết chính sách bảo hành */}
-                                <li><a href="/chinh-sach-van-chuyen" className="thieuhoa-footer-link text-decoration-none">Chính sách giao hàng toàn quốc</a></li> {/* Liên kết chính sách vận chuyển */}
-                                <li><a href="/dieu-khoan-dich-vu" className="thieuhoa-footer-link text-decoration-none">Điều khoản & Điều kiện dịch vụ</a></li> {/* Liên kết điều khoản */}
-                                <li><a href="/cau-hoi-thuong-gap" className="thieuhoa-footer-link text-decoration-none">Câu hỏi thường gặp (FAQs)</a></li> {/* Liên kết FAQs */}
+                                <li><Link to="/chinh-sach-bao-mat" className="thieuhoa-footer-link text-decoration-none">Chính sách bảo mật thông tin</Link></li> {/* Liên kết chính sách bảo mật */}
+                                <li><Link to="/chinh-sach-doi-tra" className="thieuhoa-footer-link text-decoration-none">Chính sách đổi trả sản phẩm</Link></li> {/* Liên kết chính sách đổi trả */}
+                                <li><Link to="/chinh-sach-bao-hanh" className="thieuhoa-footer-link text-decoration-none">Chính sách bảo hành sản phẩm</Link></li> {/* Liên kết chính sách bảo hành */}
+                                <li><Link to="/chinh-sach-van-chuyen" className="thieuhoa-footer-link text-decoration-none">Chính sách giao hàng toàn quốc</Link></li> {/* Liên kết chính sách vận chuyển */}
+                                <li><Link to="/dieu-khoan-dich-vu" className="thieuhoa-footer-link text-decoration-none">Điều khoản & Điều kiện dịch vụ</Link></li> {/* Liên kết điều khoản */}
+                                <li><Link to="/cau-hoi-thuong-gap" className="thieuhoa-footer-link text-decoration-none">Câu hỏi thường gặp (FAQs)</Link></li> {/* Liên kết FAQs */}
                             </ul> {/* Kết thúc danh sách */}
                         </div> {/* Kết thúc cột 3 */}
 

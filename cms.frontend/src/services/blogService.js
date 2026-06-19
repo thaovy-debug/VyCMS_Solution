@@ -16,14 +16,30 @@ const blogService = { // Khai báo đối tượng dịch vụ chứa các phư�
     }, // Kết thúc phương thức getBlogCategories
 
     // Hàm gọi API lấy toàn bộ các bài viết (Mẹo phối đồ, tin tức thời trang)
-    getAllPosts: () => { // Định nghĩa hàm gọi API lấy danh sách bài viết thời trang
-        const url = '/Posts'; // Khai báo đường dẫn tương đối khớp với PostsController ở Backend
-        return axiosClient.get(url); // Thực hiện yêu cầu HTTP GET và trả về danh sách bài viết nhận được từ CSDL
+    getAllPosts: (filters = {}) => { // Nhận thêm tham số filters để lọc động
+        const url = '/Posts';
+        return axiosClient.get(url, { params: filters }); // Thực hiện yêu cầu HTTP GET và trả về danh sách bài viết
+    },
+
+    getLatestPosts: () => {
+        const url = '/Posts/latest';
+        return axiosClient.get(url);
     },
 
     getPostById: (id) => {
         const url = `/Posts/${id}`;
         return axiosClient.get(url);
+    },
+
+    // Lấy toàn bộ danh mục bài viết thật từ SQL Server
+    getAllCategories: async () => {
+        try {
+            const response = await axiosClient.get('/Categories');
+            return response.data || response;
+        } catch (error) {
+            console.error("Lỗi API getAllCategories:", error);
+            throw error;
+        }
     }
 }; // Kết thúc đối tượng dịch vụ blogService
 

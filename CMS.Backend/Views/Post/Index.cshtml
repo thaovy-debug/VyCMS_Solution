@@ -34,7 +34,11 @@ Ngay thuc hien: 15/05/2026
                                 : string.Empty;
                         }
                         <p class="card-text text-truncate" title="@plainText">@plainText</p> @* Nội dung bài viết hiển thị thu gọn một dòng *@
-                        <p class="text-muted small">Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy")</p> @* Hiển thị ngày đăng định dạng dd/MM/yyyy *@
+                        <p class="text-muted small mb-1">Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy")</p> @* Hiển thị ngày đăng định dạng dd/MM/yyyy *@
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input chk-post-visible" type="checkbox" data-id="@item.Id" @(item.IsVisible ? "checked" : "")>
+                            <label class="form-check-label small text-muted font-weight-bold">Hiển thị web</label>
+                        </div>
                         @* Nút xem chi tiết bài viết *@
                         <a href="/Post/Details/@item.Id" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
                         
@@ -53,3 +57,19 @@ Ngay thuc hien: 15/05/2026
         } @* Kết thúc vòng lặp *@
     </div> @* Kết thúc dòng *@
 </div> @* Kết thúc vùng chứa *@
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.chk-post-visible').change(function () {
+                var id = $(this).data('id');
+                var isChecked = $(this).is(':checked');
+                $.post('/Post/ToggleVisible', { id: id, isVisible: isChecked }, function (res) {
+                    if (!res.success) {
+                        alert("Lỗi khi cập nhật trạng thái hiển thị!");
+                    }
+                });
+            });
+        });
+    </script>
+}

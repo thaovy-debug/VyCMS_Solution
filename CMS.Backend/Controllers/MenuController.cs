@@ -125,6 +125,19 @@ namespace CMS.Backend.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public IActionResult ToggleVisible(int id, bool isVisible)
+        {
+            var menu = _context.Menus.Find(id);
+            if (menu != null)
+            {
+                menu.IsHidden = !isVisible;
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+
         private bool MenuExists(int id)
         {
             return _context.Menus.Any(e => e.Id == id);

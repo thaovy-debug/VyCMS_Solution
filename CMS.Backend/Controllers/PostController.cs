@@ -198,5 +198,18 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             }
             return Json(new { uploaded = false, error = new { message = "Lỗi tải ảnh lên" } });
         }
+
+        [HttpPost]
+        public IActionResult ToggleVisible(int id, bool isVisible)
+        {
+            var post = _context.Posts.Find(id);
+            if (post != null)
+            {
+                post.IsVisible = isVisible;
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
     }
 }

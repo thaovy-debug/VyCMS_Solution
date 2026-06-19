@@ -44,5 +44,14 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
         public virtual CategoryProduct? CategoryProduct { get; set; } // Đối tượng tham chiếu đến danh mục sản phẩm liên quan
         
         public DateTime CreatedDate { get; set; } = DateTime.Now; // Thêm ngày tạo sản phẩm
+        
+        [Display(Name = "Là sản phẩm mới")]
+        public bool IsNew { get; set; } = false; // Thuộc tính xác định sản phẩm là hàng mới về
+
+        [Display(Name = "Là sản phẩm bán chạy")]
+        public bool IsHot { get; set; } = false; // Thuộc tính tác động thủ công để đẩy sản phẩm lên mục Bán chạy
+
+        [Display(Name = "Hiển thị sản phẩm")]
+        public bool IsVisible { get; set; } = true; // Thuộc tính quyết định ẩn hiện sản phẩm
     }
 }

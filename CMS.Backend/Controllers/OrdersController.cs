@@ -41,17 +41,27 @@ namespace CMS.Backend.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                // Lắp ráp địa chỉ, sđt vào Notes vì DB không có cột riêng
+                var fullNotes = $"Giao đến: {input.ShippingAddress} | ĐT: {input.Phone}";
+                if (!string.IsNullOrEmpty(input.Notes))
+                {
+                    fullNotes += $" | Ghi chú: {input.Notes}";
+                }
+
                 // 1. Tạo bản ghi đơn hàng
                 var newOrder = new Order
                 {
                     OrderDate = DateTime.Now,
                     CustomerId = input.CustomerId,
                     Status = 0,
-                    Notes = input.Notes
+                    Notes = fullNotes
                 };
 
                 _context.Orders.Add(newOrder);
                 await _context.SaveChangesAsync();
+
+                string productRowsHtml = "";
+                decimal totalPrice = 0;
 
                 // 2. Chạy vòng lặp qua danh sách giỏ hàng
                 foreach (var item in input.CartItems)
@@ -80,6 +90,17 @@ namespace CMS.Backend.Controllers
 
                     // 3. Khấu trừ số lượng tồn kho
                     product.StockQuantity -= item.Quantity;
+
+                    // 4. Tạo HTML cho email
+                    productRowsHtml += $@"
+                        <tr>
+                            <td style='padding: 10px 0; border-bottom: 1px dashed #eee;'>{product.Name} {(!string.IsNullOrEmpty(item.Size) ? $"(Size: {item.Size})" : "")}</td>
+                            <td style='padding: 10px 0; border-bottom: 1px dashed #eee; text-align: center;'>{item.Quantity}</td>
+                            <td style='padding: 10px 0; border-bottom: 1px dashed #eee; text-align: right;'>{product.Price:N0} đ</td>
+                            <td style='padding: 10px 0; border-bottom: 1px dashed #eee; text-align: right;'>{(product.Price * item.Quantity):N0} đ</td>
+                        </tr>
+                    ";
+                    totalPrice += product.Price * item.Quantity;
                 }
 
                 await _context.SaveChangesAsync();
@@ -89,12 +110,61 @@ namespace CMS.Backend.Controllers
                 var customer = await _context.Customers.FindAsync(input.CustomerId);
                 if (customer != null && !string.IsNullOrEmpty(customer.Email))
                 {
-                    string subject = $"Xác nhận đơn hàng #{newOrder.Id} từ ZEY CHÍC";
+                    string subject = $"ZEY CHÍC - Xác nhận đơn hàng #{newOrder.Id}";
                     string body = $@"
-                        <h3>Cảm ơn {customer.FullName} đã đặt hàng tại ZEY CHÍC!</h3>
-                        <p>Đơn hàng <strong>#{newOrder.Id}</strong> của bạn đã được hệ thống ghi nhận thành công.</p>
-                        <p>Chúng tôi sẽ sớm liên hệ để giao hàng.</p>
-                        <p>Trân trọng,<br/>Đội ngũ ZEY CHÍC</p>
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset=""UTF-8"">
+                            <title>Xác nhận đơn hàng</title>
+                        </head>
+                        <body style=""background-color: #f9f9f9; padding: 20px 0; margin: 0;"">
+                            <div style=""max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; background-color: #fff; padding: 30px; border-radius: 4px; border: 1px solid #eaeaea;"">
+                                <div style=""text-align: center; margin-bottom: 20px;"">
+                                    <h2 style=""color: #800000; margin: 0; font-size: 24px;"">ZEY CHÍC</h2>
+                                    <p style=""color: #888; font-size: 13px; margin-top: 5px;"">Cảm ơn bạn đã đặt hàng tại ZEY CHÍC!</p>
+                                </div>
+                                <div style=""border-bottom: 2px solid #800000; margin-bottom: 20px;""></div>
+
+                                <p style=""font-size: 14px; color: #333;"">Kính chào <strong>{customer.FullName}</strong>,</p>
+                                <p style=""font-size: 14px; color: #333;"">Yêu cầu đặt hàng của bạn đã được tiếp nhận và đang được xử lý.</p>
+                                
+                                <h3 style=""font-size: 16px; margin-top: 25px; margin-bottom: 15px; color: #333;"">Thông tin đơn hàng #{newOrder.Id}</h3>
+                                <div style=""border-bottom: 1px solid #eee; margin-bottom: 15px;""></div>
+                                
+                                <p style=""font-size: 13px; color: #555; margin: 5px 0;""><strong>Ngày đặt:</strong> {newOrder.OrderDate:dd/MM/yyyy HH:mm}</p>
+                                <p style=""font-size: 13px; color: #555; margin: 5px 0;""><strong>Người nhận:</strong> {customer.FullName} - <strong>SĐT:</strong> {input.Phone ?? customer.Phone}</p>
+                                <p style=""font-size: 13px; color: #555; margin: 5px 0;""><strong>Địa chỉ giao hàng:</strong> {input.ShippingAddress ?? customer.Address ?? ""}</p>
+                                {(string.IsNullOrEmpty(input.Notes) ? "" : $"<p style='font-size: 13px; color: #555; margin: 5px 0;'><strong>Ghi chú:</strong> {input.Notes}</p>")}
+                                
+                                <h3 style=""font-size: 16px; margin-top: 25px; margin-bottom: 15px; color: #333;"">Chi tiết sản phẩm</h3>
+                                <table style=""width: 100%; border-collapse: collapse; font-size: 13px; color: #333;"">
+                                    <thead>
+                                        <tr>
+                                            <th style=""text-align: left; padding-bottom: 10px; border-bottom: 1px solid #ddd;"">Sản phẩm</th>
+                                            <th style=""text-align: center; padding-bottom: 10px; border-bottom: 1px solid #ddd;"">SL</th>
+                                            <th style=""text-align: right; padding-bottom: 10px; border-bottom: 1px solid #ddd;"">Đơn giá</th>
+                                            <th style=""text-align: right; padding-bottom: 10px; border-bottom: 1px solid #ddd;"">Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {productRowsHtml}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan=""3"" style=""text-align: right; padding-top: 15px; font-weight: bold;"">Tổng cộng:</td>
+                                            <td style=""text-align: right; padding-top: 15px; font-weight: bold; color: #800000;"">{totalPrice:N0} đ</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                                <div style=""text-align: center; margin-top: 40px;"">
+                                    <p style=""font-size: 12px; color: #888;"">Cảm ơn bạn đã tin tưởng và lựa chọn ZEY CHÍC.</p>
+                                    <p style=""font-size: 11px; color: #aaa;"">&copy; {DateTime.Now.Year} ZEY CHÍC. All rights reserved.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>
                     ";
                     try {
                         await _emailService.SendEmailAsync(customer.Email, subject, body);
@@ -130,6 +200,7 @@ namespace CMS.Backend.Controllers
                     Details = o.OrderDetails.Select(od => new {
                         od.ProductId,
                         ProductName = od.Product.Name,
+                        ImageUrl = od.Product.ImageUrl,
                         od.Quantity,
                         od.UnitPrice,
                         od.Size
@@ -144,6 +215,8 @@ namespace CMS.Backend.Controllers
     public class OrderInputDTO
     {
         public int CustomerId { get; set; }
+        public string? ShippingAddress { get; set; }
+        public string? Phone { get; set; }
         public string? Notes { get; set; }
         public List<CartItemDTO> CartItems { get; set; } = new List<CartItemDTO>();
     }

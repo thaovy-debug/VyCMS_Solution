@@ -12,5 +12,8 @@ namespace CMS.Data.Entities
         public string Title { get; set; }
 
         public string? ImageUrl { get; set; }
+
+        [Display(Name = "Hiển thị web")]
+        public bool IsVisible { get; set; } = true;
     }
 }

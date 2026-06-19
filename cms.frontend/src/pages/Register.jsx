@@ -43,8 +43,8 @@ export default function Register() {
                         <input name="phone" type="text" className="form-control" onChange={handleChange} placeholder="Nhập số điện thoại..." />
                     </div>
                     <div className="form-group mb-4">
-                        <label className="font-weight-bold">Địa chỉ</label>
-                        <input name="address" type="text" className="form-control" onChange={handleChange} placeholder="Nhập địa chỉ..." />
+                        <label className="font-weight-bold">Địa chỉ nhận hàng</label>
+                        <input name="address" type="text" className="form-control" onChange={handleChange} required placeholder="Nhập địa chỉ nhận hàng chi tiết..." />
                     </div>
                     <button type="submit" className="btn btn-block text-white font-weight-bold py-2 mb-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }}>ĐĂNG KÝ</button>
                     <div className="text-center">

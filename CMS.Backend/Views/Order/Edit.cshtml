@@ -21,9 +21,10 @@ Ngay thuc hien: 15/05/2026
         <div class="mb-3"> @* Trạng thái *@
             <label class="form-label fw-bold">Trạng thái đơn hàng:</label>
             <select asp-for="Status" class="form-select" required>
-                <option value="0">Chờ duyệt</option>
-                <option value="1">Đang giao</option>
-                <option value="2">Đã xong</option>
+                <option value="0">Chờ xác nhận</option>
+                <option value="1">Chờ giao hàng</option>
+                <option value="2">Đang giao hàng</option>
+                <option value="3">Đã giao</option>
             </select>
             <span asp-validation-for="Status" class="text-danger small"></span>
         </div>

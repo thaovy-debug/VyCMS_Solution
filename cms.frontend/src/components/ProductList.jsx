@@ -27,12 +27,12 @@ const ProductList = ({ selectedCategoryId, customFilterType, searchQuery, minPri
                 } else { // Ngược lại nếu xem tất cả hoặc xem danh mục đặc biệt
                     data = await productService.getAllProducts(); // Tải tất cả các sản phẩm từ database
                     if (customFilterType === 'new') { // Nếu người dùng chọn xem sản phẩm mới (New arrival)
-                        data = data.filter(p => p.createdDate && new Date() - new Date(p.createdDate) < 7 * 24 * 60 * 60 * 1000);
+                        data = data.filter(p => p.isNew);
                         data.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)); // Sắp xếp sản phẩm mới nhất lên đầu
                     } else if (customFilterType === 'sale') { // Nếu chọn xem sản phẩm đang giảm giá (Sale Off)
                         data = data.filter(p => p.discountPercent > 0); // Lọc các sản phẩm có phần trăm giảm giá > 0
                     } else if (customFilterType === 'hot') {
-                        data = [...data].sort((a, b) => (a.stockQuantity || a.stock) - (b.stockQuantity || b.stock)); // Bán chạy: tồn kho ít
+                        data = data.filter(p => p.isHot); // Bán chạy: Lọc theo cờ IsHot
                     } // Kết thúc lọc điều kiện đặc biệt
                 } // Kết thúc khối điều kiện phân loại tải
                 // Lọc theo từ khóa tìm kiếm
