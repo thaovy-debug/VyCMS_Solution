@@ -32,6 +32,8 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         public string? Size { get; set; } // Size khách hàng đã chọn (S, M, L, XL...)
 
+        public string? Color { get; set; } // Màu sắc khách hàng đã chọn
+
         [ForeignKey("OrderId")] // Chỉ định OrderId làm khóa ngoại liên kết tới bảng Order
         public virtual Order? Order { get; set; } // Khai báo đối tượng tham chiếu đến thực thể Order liên quan
 

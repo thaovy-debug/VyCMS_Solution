@@ -25,6 +25,8 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         public string? Colors { get; set; } // Danh sách màu sắc sản phẩm dạng JSON (vd: [{"name":"Đỏ","image":"url"}])
 
+        public string? VariantStocks { get; set; } // Quản lý tồn kho theo từng phân loại (VD: {"Màu trắng-S": 10}) (vd: [{"name":"Đỏ","image":"url"}])
+
         public string? SizeGuideImageUrl { get; set; } // Ảnh mô tả thêm hoặc bảng size
 
         [Range(0, double.MaxValue)] // Ràng buộc giá trị nhập vào phải từ 0 trở lên
@@ -53,5 +55,7 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         [Display(Name = "Hiển thị sản phẩm")]
         public bool IsVisible { get; set; } = true; // Thuộc tính quyết định ẩn hiện sản phẩm
+
+        public bool IsDeleted { get; set; } = false; // Thuộc tính cờ xóa mềm (soft delete)
     }
 }

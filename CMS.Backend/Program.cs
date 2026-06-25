@@ -15,7 +15,8 @@ var builder = WebApplication.CreateBuilder(args); // Khởi tạo trình xây d�
 
 // Đăng ký kết nối Database với SQL Server dựa vào Connection String "DefaultConnection"
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))); // Cấu hình nhà cung cấp cơ sở dữ liệu SQL Server
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        o => o.UseCompatibilityLevel(120))); // Cấu hình nhà cung cấp cơ sở dữ liệu SQL Server với CompatibilityLevel 120 để hỗ trợ Contains trên list
 
 // Đăng ký dịch vụ cho các Controller hỗ trợ View (MVC) và Web API
 builder.Services.AddControllersWithViews(); // Đăng ký các controller và view cho luồng MVC
@@ -71,7 +72,7 @@ app.UseStaticFiles(); // Cho phép ứng dụng phục vụ các tệp tĩnh (CS
 app.UseSwagger(); // Bật Middleware sinh tài liệu JSON Swagger
 app.UseSwaggerUI(c => // Cấu hình giao diện Swagger UI để kiểm thử trực quan
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ThaiCMS Web API v1"); // Định nghĩa endpoint tài liệu API v1
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ThaoVyCMS Web API v1"); // Định nghĩa endpoint tài liệu API v1
     c.RoutePrefix = "swagger"; // Thiết lập đường dẫn truy cập tài liệu Swagger mặc định là /swagger
 });
 

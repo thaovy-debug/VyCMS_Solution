@@ -11,45 +11,242 @@ Ngay thuc hien: 15/05/2026
     Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
 }
 
-<div class="py-4"> @* Vùng đệm dọc cho trang *@
-    <div class="d-flex justify-content-between align-items-center mb-3"> @* Bố cục căn ngang hai đầu *@
-        <h2 class="text-primary">QUẢN LÝ KHÁCH HÀNG</h2> @* Tiêu đề quản lý *@
-        <a asp-action="Create" class="btn btn-success"> @* Nút thêm mới *@
-            <i class="bi bi-plus-circle"></i> Thêm khách hàng mới
-        </a> @* Kết thúc nút thêm *@
-    </div> @* Kết thúc tiêu đề *@
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    <table class="table table-striped table-bordered align-middle"> @* Bảng kẻ sọc, có viền *@
-        <thead class="table-light"> @* Phần đầu bảng *@
-            <tr> @* Dòng tiêu đề *@
-                <th style="width:70px">ID</th> @* Cột ID *@
-                <th>Họ và tên</th> @* Cột họ tên *@
-                <th>Email liên hệ</th> @* Cột địa chỉ email *@
-                <th style="width:150px">Số điện thoại</th> @* Cột điện thoại *@
-                <th>Địa chỉ giao hàng</th> @* Cột địa chỉ *@
-                <th style="width:180px">Thao tác</th> @* Cột thao tác *@
-            </tr> @* Đóng dòng *@
-        </thead> @* Đóng đầu *@
-        <tbody> @* Phần thân *@
-            @foreach (var item in Model) @* Duyệt qua danh sách khách hàng *@
-            {
-                <tr> @* Dòng dữ liệu *@
-                    <td>@item.Id</td> @* Ô hiển thị mã Id *@
-                    <td class="fw-bold">@item.FullName</td> @* Ô hiển thị họ tên *@
-                    <td>@item.Email</td> @* Ô hiển thị Email *@
-                    <td>@item.Phone</td> @* Ô hiển thị điện thoại *@
-                    <td>@item.Address</td> @* Ô hiển thị địa chỉ *@
-                    <td> @* Ô chứa các nút chức năng *@
-                        @* Nút sửa *@
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Sửa</a>
-                        
-                        @* Nút xóa *@
-                        <a asp-action="Delete" asp-route-id="@item.Id"
-                           class="btn btn-sm btn-outline-danger"
-                           onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng @item.FullName không? Việc này có thể ảnh hưởng tới các đơn đặt hàng liên quan.')">Xóa</a>
-                    </td> @* Đóng ô thao tác *@
-                </tr> @* Đóng dòng *@
-            } @* Đóng vòng lặp *@
-        </tbody> @* Đóng thân *@
-    </table> @* Đóng bảng *@
-</div> @* Đóng khối py-4 *@
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+    }
+
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        font-size: 42px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 0;
+    }
+
+    /* Card styling */
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .th-btn-primary {
+        background-color: var(--th-primary);
+        color: white;
+    }
+
+    .th-btn-primary:hover {
+        background-color: #724c30;
+        color: white;
+    }
+
+    /* Table */
+    .th-table-container {
+        overflow-x: auto;
+    }
+
+    .th-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .th-table th {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--th-text-sub);
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--th-border);
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .th-table td {
+        padding: 12px;
+        font-size: 13px;
+        color: var(--th-text-main);
+        border-bottom: 1px solid var(--th-border);
+        vertical-align: middle;
+        background: #FFFFFF;
+    }
+
+    .th-table tr {
+        height: 96px;
+        transition: background-color 0.2s ease;
+    }
+
+    .th-table tbody tr:hover td {
+        background-color: #FDFBFA;
+    }
+
+    /* Actions */
+    .th-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .th-btn-action {
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .th-btn-edit {
+        border: 1px solid var(--th-warning);
+        color: var(--th-warning);
+    }
+    .th-btn-edit:hover { background: var(--th-warning); color: white; }
+
+    .th-btn-delete {
+        border: 1px solid var(--th-danger);
+        color: var(--th-danger);
+    }
+    .th-btn-delete:hover { background: var(--th-danger); color: white; }
+
+    /* Lock/Unlock Actions */
+    .th-btn-lock {
+        border: 1px solid var(--th-warning);
+        color: var(--th-warning);
+    }
+    .th-btn-lock:hover { background: var(--th-warning); color: white; }
+    
+    .th-btn-unlock {
+        border: 1px solid var(--th-success);
+        color: var(--th-success);
+    }
+    .th-btn-unlock:hover { background: var(--th-success); color: white; }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+    .status-active {
+        background-color: #E8F5E9;
+        color: #2E7D32;
+    }
+    .status-locked {
+        background-color: #FFEBEE;
+        color: #C62828;
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">Quản lý Khách Hàng</h1>
+        <div class="d-flex gap-3">
+            <a asp-action="Create" class="th-btn th-btn-primary">
+                <i class="bi bi-plus-lg"></i> Thêm khách hàng mới
+            </a>
+        </div>
+    </div>
+
+    <div class="th-card th-table-container">
+        <table class="th-table">
+            <thead>
+                <tr>
+                    <th style="width:70px">ID</th>
+                    <th style="width:220px">Họ và tên</th>
+                    <th style="width:200px">Email liên hệ</th>
+                    <th style="width:130px">Số điện thoại</th>
+                    <th>Địa chỉ giao hàng</th>
+                    <th style="width:100px; text-align:center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold text-muted">#@item.Id</td>
+                        <td class="fw-bold" style="color: var(--th-text-main); font-size: 15px;">
+                            @item.FullName
+                            @if(item.IsLocked)
+                            {
+                                <span class="status-badge status-locked">Bị khóa</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-active">Hoạt động</span>
+                            }
+                        </td>
+                        <td class="text-muted">@item.Email</td>
+                        <td class="text-muted">@item.Phone</td>
+                        <td class="text-muted">
+                            @if (!string.IsNullOrEmpty(item.Address))
+                            {
+                                <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px;" title="@item.Address">
+                                    @item.Address
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            <div class="th-actions justify-content-center">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="th-btn-action th-btn-edit">Sửa</a>
+                                @if(item.IsLocked)
+                                {
+                                    <a asp-action="ToggleLock" asp-route-id="@item.Id"
+                                       class="th-btn-action th-btn-unlock"
+                                       onclick="return confirm('Bạn có chắc chắn muốn mở khóa tài khoản @item.FullName?')">Mở khóa</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="ToggleLock" asp-route-id="@item.Id"
+                                       class="th-btn-action th-btn-lock"
+                                       onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản @item.FullName?')">Khóa</a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

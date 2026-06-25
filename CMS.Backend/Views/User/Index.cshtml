@@ -11,63 +11,213 @@ Ngay thuc hien: 15/05/2026
     Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
 }
 
-<div class="py-4"> @* Vùng đệm dọc cho trang *@
-    <div class="d-flex justify-content-between align-items-center mb-3"> @* Bố cục căn ngang hai phần tử *@
-        <h2 class="text-dark">QUẢN LÝ THÀNH VIÊN</h2> @* Tiêu đề quản lý thành viên *@
-        <a asp-action="Create" class="btn btn-success"> @* Nút thêm thành viên mới *@
-            <i class="bi bi-plus-circle"></i> Thêm thành viên mới @* Biểu tượng và nhãn nút *@
-        </a> @* Kết thúc nút thêm *@
-    </div> @* Kết thúc tiêu đề *@
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    <table class="table table-striped table-bordered"> @* Thẻ bảng kẻ sọc và viền ngoài của Bootstrap *@
-        <thead class="table-light"> @* Phần đầu bảng màu sáng *@
-            <tr> @* Dòng tiêu đề *@
-                <th style="width:60px">ID</th> @* Cột ID độ rộng cố định 60px *@
-                <th>Tên Đăng Nhập</th> @* Cột tài khoản *@
-                <th>Họ Và Tên</th> @* Cột họ tên đầy đủ *@
-                <th>Quyền Hạn</th> @* Cột vai trò *@
-                <th style="width:150px">Thao Tác</th> @* Cột thao tác rộng 150px *@
-            </tr> @* Đóng dòng *@
-        </thead> @* Đóng đầu *@
-        <tbody> @* Phần thân chứa dữ liệu các tài khoản *@
-            @foreach (var user in Model) @* Vòng lặp duyệt qua danh sách người dùng *@
-            {
-                <tr> @* Dòng chứa thông tin của một người dùng *@
-                    <td>@user.Id</td> @* Ô hiển thị ID *@
-                    <td>@user.Username</td> @* Ô hiển thị tài khoản đăng nhập *@
-                    <td>@user.FullName</td> @* Ô hiển thị tên đầy đủ *@
-                    <td> @* Ô hiển thị quyền hạn dạng badge *@
-                        @if (!string.IsNullOrEmpty(user.Role)) @* Kiểm tra vai trò không bị trống *@
-                        {
-                            @if (user.Role == "Admin") @* Quyền Admin hiển thị màu đỏ *@
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+        --th-success: #4CAF50;
+    }
+
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        font-size: 42px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 0;
+    }
+
+    /* Card styling */
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .th-btn-primary {
+        background-color: var(--th-primary);
+        color: white;
+    }
+
+    .th-btn-primary:hover {
+        background-color: #724c30;
+        color: white;
+    }
+
+    /* Table */
+    .th-table-container {
+        overflow-x: auto;
+    }
+
+    .th-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .th-table th {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--th-text-sub);
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--th-border);
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .th-table td {
+        padding: 16px 24px;
+        font-size: 14px;
+        color: var(--th-text-main);
+        border-bottom: 1px solid var(--th-border);
+        vertical-align: middle;
+        background: #FFFFFF;
+    }
+
+    .th-table tr {
+        height: 72px;
+        transition: background-color 0.2s ease;
+    }
+
+    .th-table tbody tr:hover td {
+        background-color: #FDFBFA;
+    }
+
+    /* Actions */
+    .th-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .th-btn-action {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .th-btn-edit {
+        border: 1px solid var(--th-warning);
+        color: var(--th-warning);
+    }
+    .th-btn-edit:hover { background: var(--th-warning); color: white; }
+
+    .th-btn-delete {
+        border: 1px solid var(--th-danger);
+        color: var(--th-danger);
+    }
+    .th-btn-delete:hover { background: var(--th-danger); color: white; }
+    
+    .role-badge {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .role-admin { background-color: #FEECEB; color: var(--th-danger); }
+    .role-editor { background-color: #FFF6E5; color: #E6A100; }
+    .role-mod { background-color: #E3F2FD; color: #1976D2; }
+    .role-default { background-color: #F5F5F5; color: #616161; }
+</style>
+
+<div class="admin-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">Quản lý Thành viên</h1>
+        <a asp-action="Create" class="th-btn th-btn-primary">
+            <i class="bi bi-plus-lg"></i> Thêm thành viên mới
+        </a>
+    </div>
+
+    <div class="th-card th-table-container">
+        <table class="th-table">
+            <thead>
+                <tr>
+                    <th style="width:80px">ID</th>
+                    <th>Tên Đăng Nhập</th>
+                    <th>Họ Và Tên</th>
+                    <th>Quyền Hạn</th>
+                    <th style="width:200px">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold text-muted">#@user.Id</td>
+                        <td class="fw-bold" style="color: var(--th-primary);">@user.Username</td>
+                        <td class="fw-semibold">@user.FullName</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(user.Role))
                             {
-                                <span class="badge bg-danger">@user.Role</span>
+                                @if (user.Role == "Admin")
+                                {
+                                    <span class="role-badge role-admin">@user.Role</span>
+                                }
+                                else if (user.Role == "Editor")
+                                {
+                                    <span class="role-badge role-editor">@user.Role</span>
+                                }
+                                else if (user.Role == "Moderator")
+                                {
+                                    <span class="role-badge role-mod">@user.Role</span>
+                                }
+                                else
+                                {
+                                    <span class="role-badge role-default">@user.Role</span>
+                                }
                             }
-                            else if (user.Role == "Editor") @* Quyền Editor hiển thị màu vàng *@
-                            {
-                                <span class="badge bg-warning text-dark">@user.Role</span>
-                            }
-                            else if (user.Role == "Moderator") @* Quyền Moderator hiển thị màu xanh lơ *@
-                            {
-                                <span class="badge bg-info text-dark">@user.Role</span>
-                            }
-                            else @* Các quyền khác (như User) hiển thị màu xám *@
-                            {
-                                <span class="badge bg-secondary">@user.Role</span>
-                            }
-                        }
-                    </td> @* Đóng ô quyền *@
-                    <td> @* Ô chứa các nút thao tác sửa xóa *@
-                        @* Nút sửa tài khoản *@
-                        <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-warning">Sửa</a>
-                        
-                        @* Nút xóa tài khoản *@
-                        <a asp-action="Delete" asp-route-id="@user.Id"
-                           class="btn btn-sm btn-outline-danger"
-                           onclick="return confirm('Bạn có chắc chắn muốn xóa thành viên @user.Username không?')">Xóa</a>
-                    </td> @* Đóng ô thao tác *@
-                </tr> @* Đóng dòng *@
-            } @* Đóng vòng lặp *@
-        </tbody> @* Đóng thân bảng *@
-    </table> @* Đóng thẻ bảng *@
-</div> @* Đóng khối py-4 *@
+                        </td>
+                        <td>
+                            <div class="th-actions">
+                                <a asp-action="Edit" asp-route-id="@user.Id" class="th-btn-action th-btn-edit">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@user.Id"
+                                   class="th-btn-action th-btn-delete"
+                                   onclick="return confirm('Bạn có chắc chắn muốn xóa thành viên @user.Username không?')">Xóa</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

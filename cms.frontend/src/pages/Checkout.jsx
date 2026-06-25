@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function Checkout() {
     const [cart, setCart] = useState([]);
@@ -123,12 +124,12 @@ export default function Checkout() {
     const handleCheckout = async (e) => {
         e.preventDefault();
         if (cart.length === 0) {
-            alert("Giỏ hàng của bạn đang trống!");
+            toast.warning("Giỏ hàng của bạn đang trống!");
             return;
         }
 
         if (!selectedProvince || !selectedDistrict || !selectedWard || !specificAddress) {
-            alert("Vui lòng nhập đầy đủ địa chỉ giao hàng (Tỉnh/Thành, Quận/Huyện, Phường/Xã và Địa chỉ cụ thể).");
+            toast.warning("Vui lòng nhập đầy đủ địa chỉ giao hàng (Tỉnh/Thành, Quận/Huyện, Phường/Xã và Địa chỉ cụ thể).");
             return;
         }
 
@@ -160,7 +161,7 @@ export default function Checkout() {
                 setIsSuccess(true);
             }
         } catch (err) {
-            alert(err.response?.data?.message || "Đã xảy ra lỗi khi đặt hàng.");
+            toast.warning(err.response?.data?.message || "Đã xảy ra lỗi khi đặt hàng.");
         }
     };
 
@@ -324,7 +325,7 @@ export default function Checkout() {
                                             {item.size && <span className="ml-2 font-weight-bold text-dark">| Size: {item.size}</span>}
                                         </small>
                                         <div className="text-danger font-weight-bold mt-1" style={{ fontSize: '0.95rem' }}>
-                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format((item.discountPercent > 0 ? item.price * (1 - item.discountPercent / 100) : item.price) * item.quantity)}
+                                            {(val => new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ')((item.discountPercent > 0 ? item.price * (1 - item.discountPercent / 100) : item.price) * item.quantity)}
                                         </div>
                                     </div>
                                 </div>
@@ -332,7 +333,7 @@ export default function Checkout() {
                         </div>
                         <div className="d-flex justify-content-between mb-2">
                             <span className="text-muted">Tạm tính:</span>
-                            <span className="font-weight-bold">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total)}</span>
+                            <span className="font-weight-bold">{(val => new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ')(total)}</span>
                         </div>
                         <div className="d-flex justify-content-between mb-3 pb-3 border-bottom">
                             <span className="text-muted">Phí vận chuyển:</span>
@@ -341,7 +342,7 @@ export default function Checkout() {
                         <div className="d-flex justify-content-between">
                             <span className="font-weight-bold" style={{ fontSize: '1.1rem' }}>Tổng cộng:</span>
                             <span className="font-weight-bold text-danger" style={{ fontSize: '1.3rem' }}>
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total)}
+                                {(val => new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ')(total)}
                             </span>
                         </div>
                     </div>

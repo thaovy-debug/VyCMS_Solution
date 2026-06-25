@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function Register() {
     const [formData, setFormData] = useState({ fullName: '', email: '', password: '', phone: '', address: '' });
@@ -13,11 +14,11 @@ export default function Register() {
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerRegister`, formData);
             if (res.status === 201) {
-                alert("Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
+                toast.success("Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
                 navigate('/login');
             }
         } catch (err) {
-            alert(err.response?.data?.message || "Lỗi đăng ký. Vui lòng kiểm tra lại.");
+            toast.warning(err.response?.data?.message || "Lỗi đăng ký. Vui lòng kiểm tra lại.");
         }
     };
 

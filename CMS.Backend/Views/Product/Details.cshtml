@@ -1,0 +1,228 @@
+@model CMS.Data.Entities.Product
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Chi tiết sản phẩm";
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+        --th-success: #4CAF50;
+    }
+
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 24px;
+    }
+
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        padding: 32px;
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .th-btn-outline {
+        background-color: transparent;
+        border: 1px solid #BDB5AF;
+        color: var(--th-text-sub);
+    }
+
+    .th-btn-outline:hover {
+        border-color: var(--th-text-main);
+        color: var(--th-text-main);
+    }
+    
+    .th-btn-warning {
+        background-color: var(--th-warning);
+        color: #FFFFFF;
+    }
+
+    .th-btn-warning:hover {
+        background-color: #E6A100;
+        color: #FFFFFF;
+    }
+    
+    .details-table { width: 100%; border-collapse: collapse; }
+    .details-table th, .details-table td { padding: 16px; border-bottom: 1px solid var(--th-border); vertical-align: top; }
+    .details-table th { color: var(--th-text-sub); font-weight: 600; width: 220px; }
+    .details-table td { color: var(--th-text-main); font-weight: 500; }
+    .details-table tr:last-child th, .details-table tr:last-child td { border-bottom: none; }
+    
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+</style>
+
+<div class="admin-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title mb-0">Chi Tiết Sản Phẩm</h1>
+        <div class="d-flex gap-3">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="th-btn th-btn-warning">
+                <i class="bi bi-pencil"></i> Chỉnh sửa
+            </a>
+            <a asp-action="Index" class="th-btn th-btn-outline">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+
+    <div class="th-card">
+        <div class="row">
+            <div class="col-md-4 text-center mb-3">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    var images = Model.ImageUrl.Split(',');
+                    <div style="max-height: 620px; overflow-y: auto; padding-right: 5px;" class="custom-scrollbar">
+                        @foreach (var img in images)
+                        {
+                            <img src="@img" style="border-radius: 16px; margin-bottom: 16px; border: 1px solid var(--th-border); max-height: 300px; width: 100%; object-fit: cover;" alt="Hình sản phẩm" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div style="background-color: #FDFBFA; border-radius: 16px; height: 300px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--th-border);">
+                        <span style="color: #BDB5AF;"><i class="bi bi-image" style="font-size: 3rem;"></i><br/>Chưa có hình</span>
+                    </div>
+                }
+            </div>
+            <div class="col-md-8">
+                <h3 style="font-weight: 700; color: var(--th-primary); margin-bottom: 24px;">@Model.Name</h3>
+                <div style="border: 1px solid var(--th-border); border-radius: 16px; overflow: hidden;">
+                    <table class="details-table">
+                        <tbody>
+                            <tr>
+                                <th>Mã sản phẩm (ID)</th>
+                                <td>@Model.Id</td>
+                            </tr>
+                            <tr>
+                                <th>Danh mục</th>
+                                <td>@(Model.CategoryProduct?.Name ?? "Không có")</td>
+                            </tr>
+                            <tr>
+                                <th>Đơn giá</th>
+                                <td style="color: var(--th-danger); font-weight: 700;">@Model.Price.ToString("N0") VNĐ</td>
+                            </tr>
+                            <tr>
+                                <th>Khuyến mãi</th>
+                                <td>
+                                    @if(Model.DiscountPercent > 0)
+                                    {
+                                        <span style="background-color: #FEECEB; color: var(--th-danger); padding: 4px 12px; border-radius: 8px; font-weight: 600; font-size: 13px;">@Model.DiscountPercent%</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #BDB5AF;">Không</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Tổng tồn kho</th>
+                                <td><span style="background-color: #E3F2FD; color: #0D47A1; padding: 4px 12px; border-radius: 8px; font-weight: 600; font-size: 13px;">@Model.StockQuantity</span></td>
+                            </tr>
+                            <tr>
+                                <th>Màu sắc</th>
+                                <td>
+                                    @if(!string.IsNullOrEmpty(Model.Colors))
+                                    {
+                                        <div style="background-color: #FDFBFA; padding: 12px; border-radius: 8px; border: 1px solid var(--th-border); font-family: monospace; font-size: 13px;">@Model.Colors</div>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #BDB5AF;">Không có</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Kích cỡ (Size)</th>
+                                <td>
+                                    @if(!string.IsNullOrEmpty(Model.Sizes))
+                                    {
+                                        @Model.Sizes
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #BDB5AF;">Không có</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Tồn kho theo phân loại</th>
+                                <td>
+                                    @if(!string.IsNullOrEmpty(Model.VariantStocks))
+                                    {
+                                        <div style="background-color: #FDFBFA; padding: 12px; border-radius: 8px; border: 1px solid var(--th-border); font-family: monospace; font-size: 13px;">@Model.VariantStocks</div>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #BDB5AF;">Không có</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Trạng thái hiển thị</th>
+                                <td>
+                                    @if(Model.IsVisible)
+                                    {
+                                        <span style="background-color: #E8F5E9; color: var(--th-success); padding: 4px 12px; border-radius: 8px; font-weight: 600; font-size: 13px;"><i class="bi bi-eye me-1"></i> Hiển thị</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="background-color: #F2F0ED; color: var(--th-text-sub); padding: 4px 12px; border-radius: 8px; font-weight: 600; font-size: 13px;"><i class="bi bi-eye-slash me-1"></i> Đã ẩn</span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        @if(!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="mt-5">
+                <h5 style="font-weight: 700; color: var(--th-text-main); margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--th-border);">Mô tả sản phẩm</h5>
+                <div style="background-color: #FDFBFA; padding: 24px; border-radius: 16px; border: 1px solid var(--th-border); line-height: 1.6; color: var(--th-text-main);">
+                    @Html.Raw(Model.Description)
+                </div>
+            </div>
+        }
+    </div>
+</div>

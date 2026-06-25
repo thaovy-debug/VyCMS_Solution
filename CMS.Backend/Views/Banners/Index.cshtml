@@ -4,77 +4,230 @@
     ViewData["Title"] = "Quản lý Banner";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-primary font-weight-bold m-0"><i class="fa-solid fa-images mr-2"></i>QUẢN LÝ BANNER</h2>
-    <a asp-action="Create" class="btn btn-success font-weight-bold shadow-sm">
-        <i class="fa-solid fa-plus mr-2"></i>Thêm Banner Mới
-    </a>
-</div>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="fa-solid fa-circle-check mr-2"></i>@TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+        --th-success: #4CAF50;
+    }
+
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        font-size: 42px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 0;
+    }
+
+    /* Card styling */
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .th-btn-primary {
+        background-color: var(--th-primary);
+        color: white;
+    }
+
+    .th-btn-primary:hover {
+        background-color: #724c30;
+        color: white;
+    }
+
+    /* Table */
+    .th-table-container {
+        overflow-x: auto;
+    }
+
+    .th-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .th-table th {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--th-text-sub);
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--th-border);
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .th-table td {
+        padding: 12px;
+        font-size: 13px;
+        color: var(--th-text-main);
+        border-bottom: 1px solid var(--th-border);
+        vertical-align: middle;
+        background: #FFFFFF;
+    }
+
+    .th-table tr {
+        height: 96px;
+        transition: background-color 0.2s ease;
+    }
+
+    .th-table tbody tr:hover td {
+        background-color: #FDFBFA;
+    }
+
+    /* Actions */
+    .th-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .th-btn-action {
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .th-btn-edit {
+        border: 1px solid var(--th-warning);
+        color: var(--th-warning);
+    }
+    .th-btn-edit:hover { background: var(--th-warning); color: white; }
+
+    .th-btn-delete {
+        border: 1px solid var(--th-danger);
+        color: var(--th-danger);
+    }
+    .th-btn-delete:hover { background: var(--th-danger); color: white; }
+    
+    /* Toggle Switch */
+    .form-switch .form-check-input {
+        width: 40px;
+        height: 20px;
+        margin-top: 0;
+        cursor: pointer;
+    }
+    .form-switch .form-check-input:checked {
+        background-color: var(--th-success);
+        border-color: var(--th-success);
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">Quản lý Banner</h1>
+        <div class="d-flex gap-3">
+            <a asp-action="Create" class="th-btn th-btn-primary">
+                <i class="bi bi-plus-lg"></i> Thêm Banner mới
+            </a>
+        </div>
     </div>
-}
 
-<div class="card shadow-sm border-0">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover table-striped mb-0 align-middle">
-                <thead class="bg-primary text-white">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4 border-0" style="background-color: #E8F5E9; color: var(--th-success); border-radius: 12px;" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="th-card th-table-container">
+        <table class="th-table">
+            <thead>
+                <tr>
+                    <th style="width:60px">#</th>
+                    <th style="width:200px">Hình ảnh</th>
+                    <th>Tiêu đề Banner</th>
+                    <th style="width:120px; text-align:center;">Trạng thái</th>
+                    <th style="width:100px; text-align:center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
                     <tr>
-                        <th class="py-3 px-4">#</th>
-                        <th class="py-3 px-4">Hình ảnh</th>
-                        <th class="py-3 px-4">Tiêu đề Banner</th>
-                        <th class="py-3 px-4 text-center">Trạng thái</th>
-                        <th class="py-3 px-4 text-center">Thao tác</th>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-image" style="font-size: 48px; opacity: 0.5;"></i>
+                            <p class="mb-0 mt-3">Chưa có banner nào trong hệ thống.</p>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Any())
+                }
+                else
+                {
+                    int index = 1;
+                    foreach (var item in Model)
                     {
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">
-                                <i class="fa-regular fa-image fa-3x mb-3 opacity-50"></i>
-                                <p class="mb-0">Chưa có banner nào trong hệ thống.</p>
+                            <td class="fw-semibold text-muted">@index</td>
+                            <td>
+                                <img src="@item.ImageUrl" alt="@item.Title" style="height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--th-border);" />
+                            </td>
+                            <td class="fw-bold" style="color: var(--th-text-main); font-size: 15px;">@item.Title</td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    <div class="form-check form-switch m-0 d-flex align-items-center gap-2">
+                                        <input class="form-check-input chk-banner-visible m-0" type="checkbox" data-id="@item.Id" @(item.IsVisible ? "checked" : "")>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="th-actions justify-content-center">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="th-btn-action th-btn-edit">Sửa</a>
+                                    
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa banner này?');">
+                                        <button type="submit" class="th-btn-action th-btn-delete w-100">Xóa</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
+                        index++;
                     }
-                    else
-                    {
-                        int index = 1;
-                        foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="px-4 fw-bold text-muted">@index</td>
-                                <td class="px-4">
-                                    <img src="@item.ImageUrl" alt="@item.Title" class="img-thumbnail shadow-sm" style="height: 80px; object-fit: cover;" />
-                                </td>
-                                <td class="px-4 fw-bold">@item.Title</td>
-                                <td class="px-4 text-center">
-                                    <div class="form-check form-switch d-inline-block">
-                                        <input class="form-check-input chk-banner-visible" type="checkbox" data-id="@item.Id" @(item.IsVisible ? "checked" : "")>
-                                    </div>
-                                </td>
-                                <td class="px-4 text-center">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary shadow-sm mr-2" title="Chỉnh sửa">
-                                        <i class="fa-solid fa-pen-to-square"></i> Sửa
-                                    </a>
-                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa banner này?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="Xóa">
-                                            <i class="fa-solid fa-trash-can"></i> Xóa
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            index++;
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 

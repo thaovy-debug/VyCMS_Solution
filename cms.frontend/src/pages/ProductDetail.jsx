@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import productService from '../services/productService';
+import { toast } from 'react-toastify';
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -63,7 +64,7 @@ export default function ProductDetail() {
             const next = prev + delta;
             if (next < 1) return 1;
             if (product && product.stockQuantity < next) {
-                alert(`Xin lỗi, sản phẩm này chỉ còn ${product.stockQuantity} chiếc trong kho!`);
+                toast.warning(`Xin lỗi, sản phẩm này chỉ còn ${product.stockQuantity} chiếc trong kho!`);
                 return product.stockQuantity;
             }
             return next;
@@ -79,11 +80,11 @@ export default function ProductDetail() {
 
     const handleAddToCart = () => {
         if (product.sizes && !selectedSize) {
-            alert('Vui lòng chọn size trước khi mua!');
+            toast.warning('Vui lòng chọn size trước khi mua!');
             return;
         }
         if (parsedColors.length > 0 && !selectedColor) {
-            alert('Vui lòng chọn màu sắc trước khi mua!');
+            toast.warning('Vui lòng chọn màu sắc trước khi mua!');
             return;
         }
 
@@ -94,7 +95,7 @@ export default function ProductDetail() {
         
         const nextQuantity = existing ? existing.quantity + quantity : quantity;
         if (product.stockQuantity < nextQuantity) {
-            alert('Số lượng sản phẩm trong kho không đủ!');
+            toast.warning('Số lượng sản phẩm trong kho không đủ!');
             return;
         }
 
@@ -105,20 +106,20 @@ export default function ProductDetail() {
         }
         localStorage.setItem(cartKey, JSON.stringify(currentCart));
         window.dispatchEvent(new Event('cartUpdated'));
-        alert(`Đã thêm ${product.name} ${selectedColor ? `(Màu: ${selectedColor})` : ''} ${selectedSize ? `(Size: ${selectedSize})` : ''} vào giỏ hàng!`);
+        toast.success(`Đã thêm ${product.name} ${selectedColor ? `(Màu: ${selectedColor})` : ''} ${selectedSize ? `(Size: ${selectedSize})` : ''} vào giỏ hàng!`);
     };
 
     const handleBuyNow = () => {
         if (product.sizes && !selectedSize) {
-            alert('Vui lòng chọn size trước khi mua!');
+            toast.warning('Vui lòng chọn size trước khi mua!');
             return;
         }
         if (parsedColors.length > 0 && !selectedColor) {
-            alert('Vui lòng chọn màu sắc trước khi mua!');
+            toast.warning('Vui lòng chọn màu sắc trước khi mua!');
             return;
         }
         if (product.stockQuantity < quantity) {
-            alert('Số lượng sản phẩm trong kho không đủ!');
+            toast.warning('Số lượng sản phẩm trong kho không đủ!');
             return;
         }
         const directProduct = { ...product, quantity: quantity, size: selectedSize, color: selectedColor };
@@ -202,11 +203,11 @@ export default function ProductDetail() {
 
                     <div className="d-flex align-items-center mb-4 pb-3 border-bottom">
                         <h3 className="font-weight-bold m-0 text-danger" style={{ fontSize: '1.8rem' }}>
-                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.discountPercent > 0 ? product.price * (1 - product.discountPercent / 100) : product.price)}
+                            {(val => new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ')(product.discountPercent > 0 ? product.price * (1 - product.discountPercent / 100) : product.price)}
                         </h3>
                         {product.discountPercent > 0 && (
                             <span className="text-muted text-decoration-line-through ml-3" style={{ fontSize: '1.1rem' }}>
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                                {(val => new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ')(product.price)}
                             </span>
                         )}
                     </div>
@@ -261,7 +262,7 @@ export default function ProductDetail() {
                                 if (isNaN(num)) return;
                                 if (num < 1) { setQuantity(1); }
                                 else if (product && num > product.stockQuantity) {
-                                    alert(`Xin lỗi, sản phẩm này chỉ còn ${product.stockQuantity} chiếc trong kho!`);
+                                    toast.warning(`Xin lỗi, sản phẩm này chỉ còn ${product.stockQuantity} chiếc trong kho!`);
                                     setQuantity(product.stockQuantity);
                                 } else { setQuantity(num); }
                             }} onBlur={() => {

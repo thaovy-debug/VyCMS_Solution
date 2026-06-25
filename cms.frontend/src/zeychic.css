@@ -1,0 +1,47 @@
+/* ZEY CHIC HOVER DROPDOWN MENU */
+.zeychic-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 750px;
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08) !important;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(15px);
+    transition: all 0.25s ease-out;
+    z-index: 9999;
+    padding: 16px;
+    border: 1px solid #EEE7E1;
+}
+
+.mega-menu-hover:hover .zeychic-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.zeychic-dropdown-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.zeychic-dropdown-item {
+    height: 70px;
+    padding: 0 24px;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+    border-bottom: 1px solid #EEE7E1;
+}
+
+.zeychic-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.zeychic-dropdown-item:hover {
+    background-color: #FAF8F5;
+    padding-left: 32px;
+    border-bottom-color: transparent;
+}

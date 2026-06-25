@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function ForgotPassword() {
     const location = useLocation();
@@ -19,15 +20,15 @@ export default function ForgotPassword() {
     const handleForgotPassword = async (e) => {
         e.preventDefault();
         if (!email) {
-            alert("Vui lòng nhập Email của bạn.");
+            toast.warning("Vui lòng nhập Email của bạn.");
             return;
         }
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerForgotPassword`, { email });
-            alert(res.data.message || "Đã gửi mã OTP đến email của bạn.");
+            toast(res.data.message || "Đã gửi mã OTP đến email của bạn.");
             setShowOtpForm(true);
         } catch (err) {
-            alert(err.response?.data?.message || "Lỗi gửi yêu cầu khôi phục mật khẩu.");
+            toast.warning(err.response?.data?.message || "Lỗi gửi yêu cầu khôi phục mật khẩu.");
         }
     };
 
@@ -35,10 +36,10 @@ export default function ForgotPassword() {
         e.preventDefault();
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerResetPassword`, { email, otp, newPassword });
-            alert(res.data.message || "Khôi phục mật khẩu thành công! Bạn có thể đăng nhập ngay.");
+            toast.success(res.data.message || "Khôi phục mật khẩu thành công! Bạn có thể đăng nhập ngay.");
             navigate('/login');
         } catch (err) {
-            alert(err.response?.data?.message || "Lỗi khôi phục mật khẩu.");
+            toast.warning(err.response?.data?.message || "Lỗi khôi phục mật khẩu.");
         }
     };
 

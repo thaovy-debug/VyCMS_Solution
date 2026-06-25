@@ -11,121 +11,463 @@ Ngay thuc hien: 15/05/2026
     Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
 }
 
-<div class="py-4"> @* Vùng đệm dọc cho trang *@
-    <div class="d-flex justify-content-between align-items-center mb-3"> @* Bố cục căn ngang hai đầu *@
-        <h2 class="text-primary">QUẢN LÝ SẢN PHẨM</h2> @* Tiêu đề quản lý sản phẩm *@
-        <a asp-action="Create" class="btn btn-success"> @* Nút thêm sản phẩm mới *@
-            <i class="bi bi-plus-circle"></i> Thêm sản phẩm mới
-        </a> @* Kết thúc nút thêm *@
-    </div> @* Kết thúc tiêu đề *@
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    <table class="table table-striped table-bordered align-middle"> @* Bảng kẻ sọc, có viền, căn giữa dọc *@
-        <thead class="table-light"> @* Phần đầu bảng *@
-            <tr> @* Dòng tiêu đề *@
-                <th style="width:70px">ID</th> @* Cột ID *@
-                <th style="width:100px">Hình ảnh</th> @* Cột ảnh đại diện *@
-                <th>Tên sản phẩm</th> @* Cột tên sản phẩm *@
-                <th>Loại sản phẩm</th> @* Cột loại danh mục sản phẩm *@
-                <th style="width:150px">Đơn giá (VNĐ)</th> @* Cột đơn giá *@
-                <th style="width:150px">Giá Sale (VNĐ)</th> @* Cột giá khuyến mãi *@
-                <th style="width:100px">Số lượng</th> @* Cột tồn kho *@
-                <th style="width:140px">Trạng thái</th> @* Cột bật tắt trạng thái *@
-                <th style="width:180px">Thao tác</th> @* Cột thao tác *@
-            </tr> @* Đóng dòng *@
-        </thead> @* Đóng đầu *@
-        <tbody> @* Phần thân *@
-            @foreach (var item in Model) @* Duyệt danh sách các sản phẩm *@
-            {
-                <tr> @* Dòng dữ liệu *@
-                    <td>@item.Id</td> @* Ô hiển thị mã Id *@
-                    <td class="text-center"> @* Ô hiển thị ảnh đại diện *@
-                        @if (!string.IsNullOrEmpty(item.ImageUrl)) @* Kiểm tra đường dẫn ảnh *@
-                        {
-                            <img src="@item.ImageUrl" alt="@item.Name" class="img-thumbnail" style="max-height: 50px; max-width: 80px;" /> @* Hiển thị ảnh thu nhỏ *@
-                        }
-                        else @* Ngược lại nếu chưa có ảnh *@
-                        {
-                            <span class="text-muted small">No Image</span> @* Hiển thị chữ tạm *@
-                        }
-                    </td>
-                    <td> @* Ô hiển thị tên sản phẩm *@
-                        <div class="fw-bold">@item.Name</div> @* Tên sản phẩm chính *@
-                        @if (!string.IsNullOrEmpty(item.Description)) @* Hiển thị mô tả ngắn ở dưới *@
-                        {
-                            <span class="text-muted small d-inline-block text-truncate" style="max-width: 300px;" title="@item.Description">
-                                @item.Description
-                            </span>
-                        }
-                    </td>
-                    <td>@item.CategoryProduct?.Name</td> @* Ô hiển thị tên loại sản phẩm *@
-                    <td class="text-end fw-semibold text-danger">@item.Price.ToString("N0") đ</td> @* Định dạng tiền tệ VNĐ không chữ thập phân *@
-                    <td class="text-end fw-semibold text-success" id="salePrice_@item.Id">
-                        @if (item.DiscountPercent > 0)
-                        {
-                            var salePrice = Math.Round((decimal)item.Price * (100 - item.DiscountPercent) / 100);
-                            <text>@salePrice.ToString("N0") đ</text>
-                        }
-                        else
-                        {
-                            <span class="text-muted small">Không</span>
-                        }
-                    </td>
-                    <td class="text-center"> @* Ô hiển thị số lượng kho *@
-                        @if (item.StockQuantity <= 5) @* Nếu tồn kho quá ít dưới 5 cái *@
-                        {
-                            <span class="badge bg-danger">Chỉ còn @item.StockQuantity</span> @* Hiển thị badge màu đỏ cảnh báo *@
-                        }
-                        else @* Ngược lại *@
-                        {
-                            <span class="badge bg-primary">@item.StockQuantity</span> @* Hiển thị badge màu xanh *@
-                        }
-                    </td>
-                    <td>
-                        <div class="form-check form-switch mb-1">
-                            <input class="form-check-input chk-new" type="checkbox" data-id="@item.Id" @(item.IsNew ? "checked" : "")>
-                            <label class="form-check-label small text-muted">Mới (New)</label>
-                        </div>
-                        <div class="form-check form-switch mb-1">
-                            <input class="form-check-input chk-hot" type="checkbox" data-id="@item.Id" @(item.IsHot ? "checked" : "")>
-                            <label class="form-check-label small text-muted">Bán chạy</label>
-                        </div>
-                        <div class="form-check form-switch mb-1">
-                            <input class="form-check-input chk-visible" type="checkbox" data-id="@item.Id" @(item.IsVisible ? "checked" : "")>
-                            <label class="form-check-label small text-muted">Hiển thị web</label>
-                        </div>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input chk-sale" type="checkbox" data-id="@item.Id" data-price="@item.Price" @(item.DiscountPercent > 0 ? "checked" : "")>
-                            <label class="form-check-label small text-muted">Khuyến mãi <span class="discount-badge badge bg-warning text-dark @(item.DiscountPercent > 0 ? "" : "d-none")">@item.DiscountPercent%</span></label>
-                        </div>
-                    </td>
-                    <td> @* Ô chứa các nút thao tác sửa xóa *@
-                        @* Nút sửa *@
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Sửa</a>
-                        
-                        @* Nút xóa *@
-                        <a asp-action="Delete" asp-route-id="@item.Id"
-                           class="btn btn-sm btn-outline-danger"
-                           onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm @item.Name không?')">Xóa</a>
-                    </td> @* Đóng ô thao tác *@
-                </tr> @* Đóng dòng *@
-            } @* Đóng vòng lặp *@
-        </tbody> @* Đóng thân *@
-    </table> @* Đóng bảng *@
-    
-    @* Phân trang *@
-    @if (ViewBag.TotalPages > 1)
-    {
-        <nav>
-            <ul class="pagination justify-content-center">
-                @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                {
-                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
-                    </li>
-                }
-            </ul>
-        </nav>
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-success: #4CAF50;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+        --th-info: #2196F3;
+        --th-purple: #9C27B0;
     }
+
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        font-size: 42px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 0;
+    }
+
+    /* Card styling */
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    /* Filter Bar */
+    .th-filter-bar {
+        padding: 24px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .th-input {
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid var(--th-border);
+        padding: 0 16px;
+        font-size: 14px;
+        color: var(--th-text-main);
+        box-shadow: none !important;
+    }
+    
+    .th-input:focus {
+        border-color: var(--th-primary);
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .th-btn-primary {
+        background-color: var(--th-primary);
+        color: white;
+    }
+
+    .th-btn-primary:hover {
+        background-color: #724c30;
+        color: white;
+    }
+
+    .th-btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--th-border);
+        color: var(--th-text-main);
+    }
+
+    .th-btn-outline:hover {
+        background-color: #f5f5f5;
+    }
+
+    /* Table */
+    .th-table-container {
+        overflow-x: auto;
+    }
+
+    .th-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .th-table th {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--th-text-sub);
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--th-border);
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .th-table td {
+        padding: 12px;
+        font-size: 13px;
+        color: var(--th-text-main);
+        border-bottom: 1px solid var(--th-border);
+        vertical-align: middle;
+        background: #FFFFFF;
+    }
+
+    .th-table tr {
+        height: 96px;
+        transition: background-color 0.2s ease;
+    }
+
+    .th-table tbody tr:hover td {
+        background-color: #FDFBFA;
+    }
+
+    /* Product Details */
+    .th-product-img {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid var(--th-border);
+    }
+
+    .th-product-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .th-product-desc {
+        font-size: 13px;
+        color: var(--th-text-sub);
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Status Toggles */
+    .th-status-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .th-toggle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .th-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+        margin: 0;
+    }
+
+    .th-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .th-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #E0E0E0;
+        transition: .4s;
+        border-radius: 24px;
+    }
+
+    .th-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    .th-switch input:checked + .th-slider:before {
+        transform: translateX(20px);
+    }
+
+    .th-switch input.toggle-new:checked + .th-slider { background-color: var(--th-info); }
+    .th-switch input.toggle-hot:checked + .th-slider { background-color: var(--th-warning); }
+    .th-switch input.toggle-visible:checked + .th-slider { background-color: var(--th-success); }
+    .th-switch input.toggle-sale:checked + .th-slider { background-color: var(--th-purple); }
+
+    .th-toggle-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--th-text-sub);
+        margin: 0;
+        cursor: pointer;
+    }
+    
+    .th-switch input:checked ~ .th-toggle-label {
+        color: var(--th-text-main);
+    }
+
+    /* Actions */
+    .th-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .th-btn-action {
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .th-btn-view {
+        border: 1px solid var(--th-text-sub);
+        color: var(--th-text-sub);
+    }
+    .th-btn-view:hover { background: var(--th-text-sub); color: white; }
+
+    .th-btn-edit {
+        border: 1px solid var(--th-warning);
+        color: var(--th-warning);
+    }
+    .th-btn-edit:hover { background: var(--th-warning); color: white; }
+
+    .th-btn-delete {
+        border: 1px solid var(--th-danger);
+        color: var(--th-danger);
+    }
+    .th-btn-delete:hover { background: var(--th-danger); color: white; }
+
+    .discount-badge {
+        background-color: #FFF3E0;
+        color: #E65100;
+        border: 1px solid #FFE0B2;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-left: 8px;
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">Quản lý Sản phẩm</h1>
+        <div class="d-flex gap-3">
+            <button id="btnBulkDelete" class="th-btn th-btn-outline" style="color: var(--th-danger); border-color: var(--th-danger);" class="d-none">
+                <i class="bi bi-trash"></i> Xóa mục đã chọn
+            </button>
+            <a asp-action="Trash" class="th-btn th-btn-outline">
+                <i class="bi bi-archive"></i> Thùng rác
+            </a>
+            <a asp-action="Create" class="th-btn th-btn-primary">
+                <i class="bi bi-plus-lg"></i> Thêm sản phẩm mới
+            </a>
+        </div>
+    </div>
+
+    <div class="th-card">
+        <form method="get" asp-action="Index">
+            <div class="th-filter-bar">
+                <div style="flex: 1; min-width: 250px;">
+                    <input type="text" name="searchString" class="form-control th-input w-100" placeholder="Tìm kiếm tên sản phẩm..." value="@ViewBag.CurrentSearch" />
+                </div>
+                <div style="width: 200px;">
+                    <select name="categoryId" class="form-select th-input">
+                        <option value="">-- Tất cả danh mục --</option>
+                        @if (ViewBag.CategoriesProducts != null)
+                        {
+                            foreach (var cat in ViewBag.CategoriesProducts)
+                            {
+                                if (ViewBag.CurrentCategory != null && ViewBag.CurrentCategory == cat.Id)
+                                {
+                                    <option value="@cat.Id" selected>@cat.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                <div style="width: 220px;">
+                    <select name="stockStatus" class="form-select th-input">
+                        @{
+                            var currentStatus = ViewBag.CurrentStockStatus as int?;
+                        }
+                        @if (!currentStatus.HasValue) { <option value="" selected>-- Tình trạng kho --</option> } else { <option value="">-- Tình trạng kho --</option> }
+                        @if (currentStatus == 1) { <option value="1" selected>Còn hàng an toàn (&gt;5)</option> } else { <option value="1">Còn hàng an toàn (&gt;5)</option> }
+                        @if (currentStatus == 2) { <option value="2" selected>Sắp hết hàng (&lt;=5)</option> } else { <option value="2">Sắp hết hàng (&lt;=5)</option> }
+                        @if (currentStatus == 3) { <option value="3" selected>Đã hết hàng (0)</option> } else { <option value="3">Đã hết hàng (0)</option> }
+                    </select>
+                </div>
+                <button type="submit" class="th-btn th-btn-primary"><i class="bi bi-funnel"></i> Lọc</button>
+                <a asp-action="Index" class="th-btn th-btn-outline"><i class="bi bi-arrow-counterclockwise"></i> Đặt lại</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="th-card th-table-container">
+        <table class="th-table">
+            <thead>
+                <tr>
+                    <th style="width:40px; text-align:center;"><input type="checkbox" id="selectAll" class="form-check-input" style="width:16px;height:16px;" /></th>
+                    <th style="width:50px">ID</th>
+                    <th style="width:90px">Hình ảnh</th>
+                    <th>Sản phẩm</th>
+                    <th style="width:100px">Danh mục</th>
+                    <th style="width:110px">Đơn giá</th>
+                    <th style="width:110px">Giá Sale</th>
+                    <th style="width:80px">Tồn kho</th>
+                    <th style="width:130px">Trạng thái</th>
+                    <th style="width:80px; text-align:center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="text-align:center;"><input type="checkbox" class="form-check-input chk-item" style="width:16px;height:16px;" value="@item.Id" /></td>
+                        <td class="fw-semibold text-muted">#@item.Id</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" alt="@item.Name" class="th-product-img" />
+                            }
+                            else
+                            {
+                                <div class="th-product-img d-flex align-items-center justify-content-center bg-light text-muted small">N/A</div>
+                            }
+                        </td>
+                        <td>
+                            <div class="th-product-name" title="@item.Name">@item.Name</div>
+                            @if (!string.IsNullOrEmpty(item.Description))
+                            {
+                                <div class="th-product-desc" title="@item.Description">@item.Description</div>
+                            }
+                        </td>
+                        <td><span class="badge bg-light text-dark border">@item.CategoryProduct?.Name</span></td>
+                        <td class="fw-bold" style="color: var(--th-text-main);">@item.Price.ToString("N0") VNĐ</td>
+                        <td class="fw-bold" style="color: var(--th-danger);" id="salePrice_@item.Id">
+                            @if (item.DiscountPercent > 0)
+                            {
+                                var salePrice = Math.Round((decimal)item.Price * (100 - item.DiscountPercent) / 100);
+                                <text>@salePrice.ToString("N0") VNĐ</text>
+                            }
+                            else
+                            {
+                                <span class="text-muted fw-normal" style="font-size: 13px;">Không</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.StockQuantity <= 5)
+                            {
+                                <span style="color: var(--th-danger); font-weight: 600; font-size: 14px;">@item.StockQuantity (Thấp)</span>
+                            }
+                            else
+                            {
+                                <span style="color: var(--th-success); font-weight: 600; font-size: 14px;">@item.StockQuantity</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="th-status-stack">
+                                <label class="th-toggle">
+                                    <div class="th-switch">
+                                        <input type="checkbox" class="chk-new toggle-new" data-id="@item.Id" @(item.IsNew ? "checked" : "")>
+                                        <span class="th-slider"></span>
+                                    </div>
+                                    <span class="th-toggle-label">Mới</span>
+                                </label>
+                                <label class="th-toggle">
+                                    <div class="th-switch">
+                                        <input type="checkbox" class="chk-hot toggle-hot" data-id="@item.Id" @(item.IsHot ? "checked" : "")>
+                                        <span class="th-slider"></span>
+                                    </div>
+                                    <span class="th-toggle-label">Bán chạy</span>
+                                </label>
+                                <label class="th-toggle">
+                                    <div class="th-switch">
+                                        <input type="checkbox" class="chk-visible toggle-visible" data-id="@item.Id" @(item.IsVisible ? "checked" : "")>
+                                        <span class="th-slider"></span>
+                                    </div>
+                                    <span class="th-toggle-label">Hiển thị web</span>
+                                </label>
+                                <label class="th-toggle">
+                                    <div class="th-switch">
+                                        <input type="checkbox" class="chk-sale toggle-sale" data-id="@item.Id" data-price="@item.Price" @(item.DiscountPercent > 0 ? "checked" : "")>
+                                        <span class="th-slider"></span>
+                                    </div>
+                                    <span class="th-toggle-label">Khuyến mãi <span class="discount-badge @(item.DiscountPercent > 0 ? "" : "d-none")">@item.DiscountPercent%</span></span>
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="th-actions justify-content-center">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="th-btn-action th-btn-view">Xem</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="th-btn-action th-btn-edit">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="th-btn-action th-btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm @item.Name không?')">Xóa</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div> @* Đóng khối py-4 *@
 
 <!-- Modal Nhập Giá Khuyến Mãi -->
@@ -246,6 +588,45 @@ Ngay thuc hien: 15/05/2026
                         modalIns.hide();
                     } else {
                         alert("Lỗi khi lưu thông tin khuyến mãi!");
+                    }
+                });
+            });
+
+            // Chọn tất cả
+            $('#selectAll').change(function () {
+                $('.chk-item').prop('checked', $(this).prop('checked'));
+                toggleBulkDeleteBtn();
+            });
+
+            $('.chk-item').change(function () {
+                if ($('.chk-item:checked').length === $('.chk-item').length) {
+                    $('#selectAll').prop('checked', true);
+                } else {
+                    $('#selectAll').prop('checked', false);
+                }
+                toggleBulkDeleteBtn();
+            });
+
+            function toggleBulkDeleteBtn() {
+                if ($('.chk-item:checked').length > 0) {
+                    $('#btnBulkDelete').removeClass('d-none');
+                } else {
+                    $('#btnBulkDelete').addClass('d-none');
+                }
+            }
+
+            $('#btnBulkDelete').click(function () {
+                if (!confirm("Bạn có chắc chắn muốn xóa (vào thùng rác) các mục đã chọn không?")) return;
+                var selectedIds = [];
+                $('.chk-item:checked').each(function () {
+                    selectedIds.push($(this).val());
+                });
+                
+                $.post('/Product/BulkDelete', { ids: selectedIds }, function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message || "Đã xảy ra lỗi");
                     }
                 });
             });

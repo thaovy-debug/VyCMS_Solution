@@ -68,12 +68,12 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             return View(model); // Trả về View kèm lỗi nếu không hợp lệ
         }
 
-        public IActionResult Delete(int id) // Hàm xử lý xóa khách hàng dựa trên Id
+        public IActionResult ToggleLock(int id) // Hàm xử lý khóa/mở khóa khách hàng dựa trên Id
         {
             var customer = _context.Customers.Find(id); // Tìm khách hàng theo Id
             if (customer != null)
             {
-                _context.Customers.Remove(customer); // Thực hiện xóa khách hàng khỏi DbContext
+                customer.IsLocked = !customer.IsLocked; // Đảo ngược trạng thái khóa
                 _context.SaveChanges(); // Lưu thay đổi xuống CSDL
             }
             return RedirectToAction("Index"); // Quay lại trang danh sách khách hàng

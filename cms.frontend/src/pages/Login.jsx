@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ export default function Login() {
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerLogin`, { email, password });
             if (res.status === 200) {
-                alert("Đăng nhập thành công!");
+                toast.success("Đăng nhập thành công!");
                 const customer = res.data.customer;
                 localStorage.setItem('customer', JSON.stringify(customer));
                 
@@ -42,7 +43,7 @@ export default function Login() {
                 window.location.href = '/'; 
             }
         } catch (err) {
-            alert(err.response?.data?.message || "Lỗi đăng nhập. Vui lòng thử lại.");
+            toast.warning(err.response?.data?.message || "Lỗi đăng nhập. Vui lòng thử lại.");
         }
     };
 

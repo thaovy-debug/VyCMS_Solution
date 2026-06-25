@@ -1,0 +1,289 @@
+@model IEnumerable<CMS.Data.Entities.Post>
+@{
+    Layout = "_LayoutAdmin";
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+        --th-success: #4CAF50;
+    }
+
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        font-size: 42px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 0;
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .th-btn-outline {
+        background-color: transparent;
+        border: 1px solid #BDB5AF;
+        color: var(--th-text-sub);
+    }
+
+    .th-btn-outline:hover {
+        border-color: var(--th-text-main);
+        color: var(--th-text-main);
+    }
+    
+    .th-btn-danger {
+        background-color: var(--th-danger);
+        color: white;
+    }
+    
+    .th-btn-danger:hover {
+        background-color: #D32F2F;
+        color: white;
+    }
+    
+    .th-btn-success {
+        background-color: var(--th-success);
+        color: white;
+    }
+    
+    .th-btn-success:hover {
+        background-color: #388E3C;
+        color: white;
+    }
+
+    /* Card styling */
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .th-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+    }
+
+    .th-card-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid var(--th-border);
+        filter: grayscale(100%);
+        opacity: 0.8;
+    }
+
+    .th-card-body {
+        padding: 24px;
+    }
+
+    .th-badge {
+        background-color: #F2F0ED;
+        color: var(--th-text-sub);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .th-card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--th-text-sub);
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+
+    .th-card-text {
+        font-size: 14px;
+        color: #BDB5AF;
+        margin-bottom: 20px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .th-btn-action {
+        height: 36px;
+        border-radius: 10px;
+        padding: 0 16px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        background-color: transparent;
+        text-decoration: none;
+    }
+    
+    .th-btn-restore {
+        border: 1px solid var(--th-success);
+        color: var(--th-success);
+    }
+    .th-btn-restore:hover { background: var(--th-success); color: white; }
+
+    .th-btn-del {
+        border: 1px solid var(--th-danger);
+        color: var(--th-danger);
+    }
+    .th-btn-del:hover { background: var(--th-danger); color: white; }
+</style>
+
+<div class="admin-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title text-danger"><i class="bi bi-trash3 me-2"></i> Thùng rác Bài viết</h1>
+        <a asp-action="Index" class="th-btn th-btn-outline">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mb-4" style="border-radius: 12px;">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="d-flex align-items-center mb-4 p-3" style="background-color: #FFFFFF; border-radius: 16px; border: 1px solid var(--th-border);">
+        <div class="form-check m-0 me-4 d-flex align-items-center gap-2">
+            <input type="checkbox" id="selectAll" class="form-check-input m-0 shadow-sm" style="width: 20px; height: 20px; cursor: pointer;" />
+            <label class="form-check-label fw-bold m-0" style="color: var(--th-text-main); font-size: 15px; cursor: pointer;" for="selectAll">Chọn tất cả</label>
+        </div>
+        <button id="btnBulkRestore" class="th-btn th-btn-success d-none m-0 me-2" style="height: 40px; padding: 0 16px;">
+            <i class="bi bi-arrow-counterclockwise"></i> Khôi phục đã chọn
+        </button>
+        <button id="btnBulkForceDelete" class="th-btn th-btn-danger d-none m-0" style="height: 40px; padding: 0 16px;">
+            <i class="bi bi-x-circle"></i> Xóa vĩnh viễn đã chọn
+        </button>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4">
+                <div class="th-card h-100 d-flex flex-column position-relative" style="background-color: #FDFBFA;">
+                    <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
+                        <input type="checkbox" class="form-check-input chk-item m-0 shadow-sm" style="width: 24px; height: 24px; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;" value="@item.Id" />
+                    </div>
+                    
+                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/images/placeholder.png") : item.ImageUrl)" class="th-card-img" alt="Thumbnail">
+                    
+                    <div class="th-card-body flex-grow-1">
+                        <span class="th-badge">Đã xóa</span>
+                        <h5 class="th-card-title">@item.Title</h5>
+                        @{
+                            var plainText = !string.IsNullOrEmpty(item.Content) 
+                                ? System.Text.RegularExpressions.Regex.Replace(item.Content, "<.*?>", string.Empty) 
+                                : string.Empty;
+                        }
+                        <p class="th-card-text" title="@plainText">@plainText</p>
+                        
+                        <div class="text-muted small mb-4">
+                            <i class="bi bi-calendar3 me-1"></i> Ngày đăng: @item.CreatedDate.ToString("dd/MM/yyyy")
+                        </div>
+                        
+                        <div class="d-flex flex-wrap gap-2 mt-auto">
+                            <a asp-action="Restore" asp-route-id="@item.Id" class="th-btn-action th-btn-restore flex-grow-1">
+                                <i class="bi bi-arrow-counterclockwise"></i> Khôi phục
+                            </a>
+                            <a asp-action="ForceDelete" asp-route-id="@item.Id" class="th-btn-action th-btn-del flex-grow-1" onclick="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn bài viết này?')">
+                                <i class="bi bi-trash"></i> Xóa vĩnh viễn
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center p-5 mt-4" style="background-color: #FFFFFF; border-radius: 20px; border: 1px dashed var(--th-border);">
+            <i class="bi bi-inbox text-muted" style="font-size: 64px; opacity: 0.3;"></i>
+            <h4 class="mt-3 text-muted" style="font-weight: 600;">Thùng rác trống</h4>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#selectAll').change(function () {
+                $('.chk-item').prop('checked', $(this).prop('checked'));
+                toggleBulkBtns();
+            });
+
+            $('.chk-item').change(function () {
+                if ($('.chk-item:checked').length === $('.chk-item').length) {
+                    $('#selectAll').prop('checked', true);
+                } else {
+                    $('#selectAll').prop('checked', false);
+                }
+                toggleBulkBtns();
+            });
+
+            function toggleBulkBtns() {
+                if ($('.chk-item:checked').length > 0) {
+                    $('#btnBulkRestore, #btnBulkForceDelete').removeClass('d-none');
+                } else {
+                    $('#btnBulkRestore, #btnBulkForceDelete').addClass('d-none');
+                }
+            }
+
+            $('#btnBulkRestore').click(function () {
+                if (!confirm("Khôi phục các mục đã chọn?")) return;
+                var selectedIds = [];
+                $('.chk-item:checked').each(function () { selectedIds.push($(this).val()); });
+                
+                $.post('/Post/BulkRestore', { ids: selectedIds }, function (res) {
+                    if (res.success) location.reload();
+                    else alert(res.message);
+                });
+            });
+
+            $('#btnBulkForceDelete').click(function () {
+                if (!confirm("CẢNH BÁO: Hành động này sẽ xóa vĩnh viễn các mục đã chọn và không thể khôi phục! Tiếp tục?")) return;
+                var selectedIds = [];
+                $('.chk-item:checked').each(function () { selectedIds.push($(this).val()); });
+                
+                $.post('/Post/BulkForceDelete', { ids: selectedIds }, function (res) {
+                    if (res.success) location.reload();
+                    else alert(res.message);
+                });
+            });
+        });
+    </script>
+}

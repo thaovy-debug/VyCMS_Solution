@@ -42,6 +42,8 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
         public string? ResetOtp { get; set; } // Mã OTP khôi phục mật khẩu
         public DateTime? ResetOtpExpiry { get; set; } // Thời hạn của mã OTP
 
+        public bool IsLocked { get; set; } = false; // Trạng thái khóa tài khoản khách hàng
+
         // Quan hệ một - nhiều: Một khách hàng có thể thực hiện mua sắm và tạo nhiều đơn hàng (Orders)
         public virtual ICollection<Order>? Orders { get; set; }
     }

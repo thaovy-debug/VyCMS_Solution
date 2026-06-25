@@ -1,9 +1,20 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import VariantModal from './VariantModal';
+import { toast } from 'react-toastify';
 
-const ProductCard = ({ item }) => {
+const ProductCard = ({ item, colClass = 'col-lg-3 col-md-4 col-sm-6 mb-4' }) => {
     const navigate = useNavigate();
     const [isFavorite, setIsFavorite] = React.useState(false);
+    const [showVariantModal, setShowVariantModal] = React.useState(false);
+
+    const hasVariants = React.useMemo(() => {
+        let parsedColors = [];
+        try { if (item.colors) parsedColors = JSON.parse(item.colors); } catch(e){}
+        const sizes = item.sizes ? item.sizes.split(',').filter(s => s.trim()) : [];
+        return parsedColors.length > 0 || sizes.length > 0;
+    }, [item]);
+
 
     React.useEffect(() => {
         const customer = JSON.parse(localStorage.getItem('customer'));
@@ -40,15 +51,35 @@ const ProductCard = ({ item }) => {
 
     const handleBuyNow = (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        
         if (item.stockQuantity < 1) {
-            alert('Số lượng sản phẩm trong kho không đủ!');
+            toast.warning('Số lượng sản phẩm trong kho không đủ!');
             return;
         }
 
+        if (hasVariants) {
+            setShowVariantModal(true);
+        } else {
+            navigate('/checkout', {
+                state: {
+                    directBuyItem: {
+                        ...item,
+                        quantity: 1
+                    }
+                }
+            });
+        }
+    };
+
+    const handleConfirmVariant = (color, size) => {
+        setShowVariantModal(false);
         navigate('/checkout', {
             state: {
                 directBuyItem: {
                     ...item,
+                    color: color,
+                    size: size,
                     quantity: 1
                 }
             }
@@ -56,7 +87,7 @@ const ProductCard = ({ item }) => {
     };
 
     return (
-        <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
+        <div className={colClass}>
             <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--thieuhoa-card-bg)' }}>
                 {/* Khung chứa ảnh */}
                 <Link to={`/product/${item.id}`} className="position-relative overflow-hidden d-block text-decoration-none" style={{ height: '260px', backgroundColor: '#F8F6F2' }}>
@@ -97,7 +128,7 @@ const ProductCard = ({ item }) => {
                     </div>
                 </Link>
 
-                {/* Thân card chứa thông tin */}
+                {/* Thân card chứa thông tái */}
                 <div className="card-body p-3 d-flex flex-column justify-content-between">
                     <div>
                         <div className="small text-uppercase font-weight-bold text-muted mb-1" style={{ fontSize: '0.68rem', letterSpacing: '1px' }}>THIỀU HOA DESIGN</div>
@@ -116,11 +147,43 @@ const ProductCard = ({ item }) => {
                             )}
                         </div>
 
-                        <div className="d-flex align-items-center mb-2" style={{ gap: '5px' }}>
-                            <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#e28743', cursor: 'pointer' }} title="Màu cam đất"></span>
-                            <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#1e3d59', cursor: 'pointer' }} title="Màu xanh navy"></span>
-                            <span className="rounded-circle border" style={{ width: '12px', height: '12px', backgroundColor: '#111111', cursor: 'pointer' }} title="Màu đen sang trọng"></span>
-                        </div>
+                        {(() => {
+                            let parsedColors = [];
+                            if (item.colors) {
+                                try { parsedColors = JSON.parse(item.colors); } catch(e) {}
+                            }
+                            
+                            const getColorHex = (cName) => {
+                                const n = cName.toLowerCase();
+                                if (n.includes('đỏ')) return '#e74c3c';
+                                if (n.includes('cam')) return '#e67e22';
+                                if (n.includes('vàng')) return '#f1c40f';
+                                if (n.includes('xanh lá') || n.includes('lục')) return '#2ecc71';
+                                if (n.includes('xanh navy') || n.includes('xanh đen')) return '#2c3e50';
+                                if (n.includes('xanh dương') || n.includes('xanh biển')) return '#3498db';
+                                if (n.includes('tím')) return '#9b59b6';
+                                if (n.includes('hồng')) return '#ff9ff3';
+                                if (n.includes('đen')) return '#111111';
+                                if (n.includes('trắng')) return '#ffffff';
+                                if (n.includes('xám') || n.includes('ghi') || n.includes('xanh đá')) return '#95a5a6';
+                                if (n.includes('nâu')) return '#8b4513';
+                                if (n.includes('be') || n.includes('kem')) return '#f5f5dc';
+                                return '#cccccc';
+                            };
+
+                            if (parsedColors.length > 0) {
+                                return (
+                                    <div className="d-flex align-items-center mb-2" style={{ gap: '5px' }}>
+                                        {parsedColors.slice(0, 5).map((c, idx) => (
+                                            <span key={idx} className="rounded-circle border shadow-sm" style={{ width: '12px', height: '12px', backgroundColor: getColorHex(c.name), cursor: 'pointer' }} title={c.name}></span>
+                                        ))}
+                                        {parsedColors.length > 5 && <span className="small text-muted" style={{fontSize: '10px'}}>+{parsedColors.length - 5}</span>}
+                                    </div>
+                                );
+                            } else {
+                                return <div className="d-flex align-items-center mb-2" style={{ gap: '5px', height: '12px' }}></div>;
+                            }
+                        })()}
                     </div>
                     <p className="card-text small text-muted mt-2 mb-0" style={{ fontSize: '0.78rem' }}>
                         <i className="fa-solid fa-boxes-stacked mr-1"></i> Số lượng tồn kho: {item.stockQuantity ?? item.stock} sản phẩm
@@ -144,6 +207,14 @@ const ProductCard = ({ item }) => {
                     )}
                 </div>
             </div>
+
+            <VariantModal
+                show={showVariantModal}
+                onClose={() => setShowVariantModal(false)}
+                item={item}
+                title="Chọn phân loại"
+                onConfirm={handleConfirmVariant}
+            />
         </div>
     );
 };

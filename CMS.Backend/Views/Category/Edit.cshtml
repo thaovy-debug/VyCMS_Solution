@@ -11,24 +11,133 @@ Ngay thuc hien: 15/05/2026
     Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
 }
 
-<div class="container mt-4"> @* Vùng chứa chính, canh lề trên mt-4 sử dụng Bootstrap *@
-    <h2 class="text-warning">CHỈNH SỬA DANH MỤC</h2> @* Tiêu đề chỉnh sửa danh mục chữ màu cảnh báo (vàng) *@
-    <hr /> @* Thẻ phân cách đường kẻ ngang *@
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    <form asp-action="Edit" method="post"> @* Thẻ form gửi yêu cầu POST đến Action Edit của Controller *@
-        <input type="hidden" asp-for="Id" /> @* Thẻ input ẩn chứa mã định danh Id của danh mục cần sửa *@
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+        --th-success: #4CAF50;
+    }
 
-        <div class="mb-3"> @* Nhóm Bootstrap mb-3 cho ô nhập liệu tên *@
-            <label class="form-label fw-bold">Tên danh mục:</label> @* Nhãn hiển thị cho ô nhập tên danh mục *@
-            <input asp-for="Name" class="form-control" /> @* Ô nhập văn bản liên kết với thuộc tính Name của Model *@
-        </div> @* Đóng nhóm nhập liệu tên *@
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+    }
 
-        <div class="mb-3"> @* Nhóm Bootstrap mb-3 cho ô nhập liệu mô tả *@
-            <label class="form-label fw-bold">Mô tả:</label> @* Nhãn hiển thị cho ô nhập mô tả danh mục *@
-            <textarea asp-for="Description" class="form-control" rows="3"></textarea> @* Khung văn bản nhiều dòng liên kết với thuộc tính Description *@
-        </div> @* Đóng nhóm nhập liệu mô tả *@
+    .page-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 24px;
+    }
 
-        <button type="submit" class="btn btn-warning">Cập nhật thay đổi</button> @* Nút bấm loại submit gửi form lên máy chủ *@
-        <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a> @* Thẻ liên kết chuyển hướng quay lại danh sách danh mục (Action Index) *@
-    </form> @* Đóng thẻ form *@
-</div> @* Đóng thẻ vùng chứa chính *@
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        padding: 32px;
+        max-width: 800px;
+    }
+
+    .th-form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--th-text-main);
+        margin-bottom: 8px;
+    }
+
+    .th-form-control {
+        border-radius: 12px;
+        border: 1px solid var(--th-border);
+        padding: 12px 16px;
+        font-size: 14px;
+        color: var(--th-text-main);
+        background-color: #FAF8F5;
+        transition: all 0.2s ease;
+        width: 100%;
+        box-shadow: none !important;
+    }
+
+    .th-form-control:focus {
+        border-color: var(--th-primary);
+        background-color: #FFFFFF;
+        outline: none;
+    }
+    
+    .th-form-control::placeholder {
+        color: #BDB5AF;
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .th-btn-primary {
+        background-color: var(--th-primary);
+        color: white;
+    }
+
+    .th-btn-primary:hover {
+        background-color: #724c30;
+        color: white;
+    }
+
+    .th-btn-outline {
+        background-color: transparent;
+        border: 1px solid #BDB5AF;
+        color: var(--th-text-sub);
+    }
+
+    .th-btn-outline:hover {
+        border-color: var(--th-text-main);
+        color: var(--th-text-main);
+    }
+</style>
+
+<div class="admin-wrapper">
+    <h1 class="page-title">CHỈNH SỬA DANH MỤC</h1>
+    
+    <div class="th-card">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div class="mb-4">
+                <label class="th-form-label">Tên danh mục:</label>
+                <input asp-for="Name" class="th-form-control" />
+                <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+            </div>
+
+            <div class="mb-4">
+                <label class="th-form-label">Mô tả:</label>
+                <textarea asp-for="Description" class="th-form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger small mt-1 d-block"></span>
+            </div>
+
+            <div class="d-flex gap-3 mt-4 pt-3 border-top" style="border-color: var(--th-border) !important;">
+                <button type="submit" class="th-btn th-btn-primary">Cập nhật thay đổi</button>
+                <a asp-action="Index" class="th-btn th-btn-outline">Hủy bỏ</a>
+            </div>
+        </form>
+    </div>
+</div>

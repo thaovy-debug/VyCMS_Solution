@@ -28,22 +28,46 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             _context = context; // Gán DbContext
         }
 
-        public IActionResult Index(int page = 1) // Hàm hiển thị danh sách toàn bộ sản phẩm có phân trang
+        public IActionResult Index(string searchString, int? categoryId, int? stockStatus)
         {
-            int pageSize = 5; // Số sản phẩm trên mỗi trang
-            var totalItems = _context.Products.Count();
-            
-            var products = _context.Products // Lấy dữ liệu từ bảng Products
-                .Include(p => p.CategoryProduct) // Nạp kèm danh mục sản phẩm liên kết
-                .OrderByDescending(p => p.Id)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-                
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-            
-            return View(products); // Trả về View Index
+            var query = _context.Products.Include(p => p.CategoryProduct).Where(p => !p.IsDeleted).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(p => p.Name.Contains(searchString));
+            }
+
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(p => p.CategoryProductId == categoryId.Value);
+            }
+
+            if (stockStatus.HasValue)
+            {
+                if (stockStatus.Value == 1) query = query.Where(p => p.StockQuantity > 5);
+                else if (stockStatus.Value == 2) query = query.Where(p => p.StockQuantity > 0 && p.StockQuantity <= 5);
+                else if (stockStatus.Value == 3) query = query.Where(p => p.StockQuantity == 0);
+            }
+
+            var products = query.OrderByDescending(p => p.Id).ToList();
+
+            ViewBag.CategoriesProducts = _context.CategoriesProducts.ToList();
+            ViewBag.CurrentSearch = searchString;
+            ViewBag.CurrentCategory = categoryId;
+            ViewBag.CurrentStockStatus = stockStatus;
+
+            return View(products);
+        }
+
+        // Xem chi tiết sản phẩm
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+            var product = await _context.Products
+                .Include(p => p.CategoryProduct)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (product == null) return NotFound();
+            return View(product);
         }
 
         [HttpGet] // Nhận HTTP GET
@@ -171,6 +195,8 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                 existingProduct.StockQuantity = model.StockQuantity;
                 existingProduct.CategoryProductId = model.CategoryProductId;
                 existingProduct.Sizes = model.Sizes; // Cập nhật Sizes
+                existingProduct.Colors = model.Colors; // Cập nhật Colors
+                existingProduct.VariantStocks = model.VariantStocks; // Cập nhật Tồn kho chi tiết
                 existingProduct.IsNew = model.IsNew; // Cập nhật trạng thái sản phẩm mới
 
                 if (uploadImages != null && uploadImages.Count > 0) // Nếu người dùng có chọn file ảnh mới
@@ -202,22 +228,107 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
             return View(model); // Trả về View cùng thông báo lỗi
         }
 
-        public IActionResult Delete(int id) // Hàm xử lý xóa sản phẩm theo Id
+        public IActionResult Delete(int id) // Hàm xử lý xóa mềm sản phẩm theo Id
         {
             var product = _context.Products.Find(id); // Tìm sản phẩm theo Id
+            if (product != null)
+            {
+                product.IsDeleted = true; // Xóa mềm
+                _context.SaveChanges(); // Lưu thay đổi xuống CSDL
+            }
+            return RedirectToAction("Index"); // Quay lại trang danh sách sản phẩm
+        }
+
+        // TRANG THÙNG RÁC SẢN PHẨM
+        public IActionResult Trash()
+        {
+            var products = _context.Products.Include(p => p.CategoryProduct).Where(p => p.IsDeleted).OrderByDescending(p => p.Id).ToList();
+            return View(products);
+        }
+
+        // KHÔI PHỤC SẢN PHẨM
+        public IActionResult Restore(int id)
+        {
+            var product = _context.Products.Find(id);
+            if (product != null)
+            {
+                product.IsDeleted = false;
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Trash");
+        }
+
+        // XÓA VĨNH VIỄN SẢN PHẨM
+        public IActionResult ForceDelete(int id)
+        {
+            var product = _context.Products.Find(id);
             if (product != null)
             {
                 bool hasOrders = _context.OrderDetails.Any(od => od.ProductId == id);
                 if (hasOrders)
                 {
-                    TempData["ErrorMessage"] = "Không thể xóa sản phẩm này vì đang có đơn hàng liên quan!";
-                    return RedirectToAction("Index");
+                    TempData["ErrorMessage"] = "Không thể xóa vĩnh viễn sản phẩm này vì đang có đơn hàng liên quan!";
+                    return RedirectToAction("Trash");
                 }
-
-                _context.Products.Remove(product); // Xóa sản phẩm khỏi DbContext
-                _context.SaveChanges(); // Lưu thay đổi xuống CSDL
+                _context.Products.Remove(product);
+                _context.SaveChanges();
             }
-            return RedirectToAction("Index"); // Quay lại trang danh sách sản phẩm
+            return RedirectToAction("Trash");
+        }
+
+        // XÓA MỀM HÀNG LOẠT
+        [HttpPost]
+        public IActionResult BulkDelete(List<int> ids)
+        {
+            if (ids != null && ids.Any())
+            {
+                var products = _context.Products.Where(p => ids.Contains(p.Id)).ToList();
+                foreach (var product in products)
+                {
+                    product.IsDeleted = true;
+                }
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Không có mục nào được chọn" });
+        }
+
+        // KHÔI PHỤC HÀNG LOẠT
+        [HttpPost]
+        public IActionResult BulkRestore(List<int> ids)
+        {
+            if (ids != null && ids.Any())
+            {
+                var products = _context.Products.Where(p => ids.Contains(p.Id)).ToList();
+                foreach (var product in products)
+                {
+                    product.IsDeleted = false;
+                }
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Không có mục nào được chọn" });
+        }
+
+        // XÓA VĨNH VIỄN HÀNG LOẠT
+        [HttpPost]
+        public IActionResult BulkForceDelete(List<int> ids)
+        {
+            if (ids != null && ids.Any())
+            {
+                var products = _context.Products.Where(p => ids.Contains(p.Id)).ToList();
+                foreach (var product in products)
+                {
+                    bool hasOrders = _context.OrderDetails.Any(od => od.ProductId == product.Id);
+                    if (!hasOrders)
+                    {
+                        _context.Products.Remove(product);
+                    }
+                }
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Không có mục nào được chọn" });
         }
 
         [HttpPost]

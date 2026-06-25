@@ -28,5 +28,7 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         [System.ComponentModel.DataAnnotations.Display(Name = "Hiển thị bài viết")]
         public bool IsVisible { get; set; } = true; // Thuộc tính quyết định ẩn hiện bài viết
+
+        public bool IsDeleted { get; set; } = false; // Thuộc tính cờ xóa mềm (soft delete)
     }
 }

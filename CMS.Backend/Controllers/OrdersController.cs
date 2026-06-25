@@ -83,7 +83,8 @@ namespace CMS.Backend.Controllers
                         ProductId = item.ProductId,
                         Quantity = item.Quantity,
                         UnitPrice = product.Price, // Đề bài yêu cầu lấy đúng giá Price
-                        Size = item.Size // Lưu lại size khách chọn
+                        Size = item.Size, // Lưu lại size khách chọn
+                        Color = item.Color // Lưu lại màu sắc khách chọn
                     };
 
                     _context.OrderDetails.Add(orderDetail);
@@ -92,9 +93,18 @@ namespace CMS.Backend.Controllers
                     product.StockQuantity -= item.Quantity;
 
                     // 4. Tạo HTML cho email
+                    string variantText = "";
+                    if (!string.IsNullOrEmpty(item.Color) && !string.IsNullOrEmpty(item.Size)) {
+                        variantText = $" (Màu: {item.Color}, Size: {item.Size})";
+                    } else if (!string.IsNullOrEmpty(item.Color)) {
+                        variantText = $" (Màu: {item.Color})";
+                    } else if (!string.IsNullOrEmpty(item.Size)) {
+                        variantText = $" (Size: {item.Size})";
+                    }
+
                     productRowsHtml += $@"
                         <tr>
-                            <td style='padding: 10px 0; border-bottom: 1px dashed #eee;'>{product.Name} {(!string.IsNullOrEmpty(item.Size) ? $"(Size: {item.Size})" : "")}</td>
+                            <td style='padding: 10px 0; border-bottom: 1px dashed #eee;'>{product.Name}{variantText}</td>
                             <td style='padding: 10px 0; border-bottom: 1px dashed #eee; text-align: center;'>{item.Quantity}</td>
                             <td style='padding: 10px 0; border-bottom: 1px dashed #eee; text-align: right;'>{product.Price:N0} đ</td>
                             <td style='padding: 10px 0; border-bottom: 1px dashed #eee; text-align: right;'>{(product.Price * item.Quantity):N0} đ</td>
@@ -203,7 +213,8 @@ namespace CMS.Backend.Controllers
                         ImageUrl = od.Product.ImageUrl,
                         od.Quantity,
                         od.UnitPrice,
-                        od.Size
+                        od.Size,
+                        od.Color
                     })
                 })
                 .ToListAsync();
@@ -226,5 +237,6 @@ namespace CMS.Backend.Controllers
         public int ProductId { get; set; }
         public int Quantity { get; set; }
         public string? Size { get; set; } // Thêm trường Size
+        public string? Color { get; set; } // Thêm trường Color
     }
 }

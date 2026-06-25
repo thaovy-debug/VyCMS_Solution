@@ -14,44 +14,158 @@ Ngay thuc hien: 15/05/2026
     ViewData["Title"] = "Chỉnh sửa thành viên"; @* Thiết lập tiêu đề trang cho layout *@
 }
 
-<div class="container mt-4"> @* Vùng chứa chính *@
-    <div class="card shadow"> @* Thẻ card có bóng mờ *@
-        <div class="card-header bg-warning text-dark"> @* Đầu thẻ card nền vàng cảnh báo, chữ tối *@
-            <h5 class="mb-0">CẬP NHẬT THÔNG TIN THÀNH VIÊN</h5> @* Tiêu đề biểu mẫu *@
-        </div> @* Kết thúc đầu thẻ *@
-        <div class="card-body"> @* Thân thẻ card *@
-            <form asp-action="Edit" method="post"> @* Form gửi POST đến Action Edit cập nhật thông tin *@
-                <input type="hidden" asp-for="Id" /> @* Thẻ ẩn để lưu giữ khóa chính Id phục vụ cập nhật *@
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+        --th-success: #4CAF50;
+    }
+
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+    }
+
+    .page-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        padding: 40px;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .th-form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--th-text-main);
+        margin-bottom: 8px;
+    }
+
+    .th-form-control {
+        border-radius: 12px;
+        border: 1px solid var(--th-border);
+        padding: 12px 16px;
+        font-size: 14px;
+        color: var(--th-text-main);
+        background-color: #FAF8F5;
+        transition: all 0.2s ease;
+        width: 100%;
+        box-shadow: none !important;
+    }
+
+    .th-form-control:focus {
+        border-color: var(--th-primary);
+        background-color: #FFFFFF;
+        outline: none;
+    }
+    
+    .th-form-control:read-only {
+        background-color: #F8F3ED;
+        color: var(--th-text-sub);
+        cursor: not-allowed;
+    }
+
+    .th-form-control::placeholder {
+        color: #BDB5AF;
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .th-btn-warning {
+        background-color: var(--th-warning);
+        color: #FFFFFF;
+    }
+
+    .th-btn-warning:hover {
+        background-color: #E6A100;
+        color: #FFFFFF;
+    }
+
+    .th-btn-outline {
+        background-color: transparent;
+        border: 1px solid #BDB5AF;
+        color: var(--th-text-sub);
+    }
+
+    .th-btn-outline:hover {
+        border-color: var(--th-text-main);
+        color: var(--th-text-main);
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div>
+        <h1 class="page-title">Cập Nhật Thành Viên</h1>
+        
+        <div class="th-card">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
                 
-                <div class="row mb-3"> @* Dòng chứa tài khoản và mật khẩu *@
-                    <div class="col-md-6"> @* Cột tài khoản *@
-                        <label class="fw-bold">Tên đăng nhập:</label> @* Nhãn *@
-                        <input asp-for="Username" class="form-control" readonly /> @* Ô hiển thị Username chỉ đọc (readonly) không cho thay đổi *@
-                        <small class="text-muted">Tên đăng nhập không được phép sửa.</small> @* Ghi chú chỉ dẫn *@
-                    </div> @* Kết thúc cột *@
-                    <div class="col-md-6"> @* Cột nhập mật khẩu mới *@
-                        <label class="fw-bold">Mật khẩu mới:</label> @* Nhãn mật khẩu mới *@
-                        <input type="password" name="NewPassword" class="form-control" placeholder="Để trống nếu không muốn đổi" /> @* Ô nhập mật khẩu mới, ánh xạ với tham số NewPassword của Controller *@
-                    </div> @* Kết thúc cột *@
-                </div> @* Kết thúc dòng *@
-
-                <div class="row mb-3"> @* Dòng chứa họ tên và vai trò *@
-                    <div class="col-md-6"> @* Cột họ tên *@
-                        <label class="fw-bold">Họ và Tên:</label> @* Nhãn *@
-                        <input asp-for="FullName" class="form-control" required /> @* Ô nhập họ tên *@
-                    </div> @* Kết thúc cột *@
-                    <div class="col-md-6"> @* Cột vai trò *@
-                        <label class="fw-bold">Vai trò:</label> @* Nhãn vai trò *@
-                        <select asp-for="Role" class="form-select" required> @* Hộp chọn vai trò *@
-                            <option value="Admin">Admin</option> @* Tùy chọn quyền Admin *@
-                            <option value="Editor">Editor</option> @* Tùy chọn quyền Editor *@
-                        </select> @* Kết thúc hộp chọn *@
-                    </div> @* Kết thúc cột *@
-                </div> @* Kết thúc dòng *@
-
-                <button type="submit" class="btn btn-primary">Cập nhật</button> @* Nút cập nhật thay đổi *@
-                <a asp-action="Index" class="btn btn-secondary">Quay lại</a> @* Nút quay lại danh sách *@
-            </form> @* Kết thúc form *@
-        </div> @* Kết thúc thân thẻ *@
-    </div> @* Kết thúc thẻ *@
-</div> @* Kết thúc vùng chứa *@
+                <div class="mb-4">
+                    <label class="th-form-label">Tên đăng nhập</label>
+                    <input asp-for="Username" class="th-form-control" readonly />
+                    <small class="text-muted d-block mt-2" style="font-size: 12px;">Tên đăng nhập không được phép sửa.</small>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="th-form-label">Mật khẩu mới</label>
+                    <input type="password" name="NewPassword" class="th-form-control" placeholder="Để trống nếu không muốn đổi mật khẩu" />
+                </div>
+                
+                <div class="mb-4">
+                    <label class="th-form-label">Họ và Tên</label>
+                    <input asp-for="FullName" class="th-form-control" required />
+                </div>
+                
+                <div class="mb-5">
+                    <label class="th-form-label">Vai trò</label>
+                    <select asp-for="Role" class="th-form-control form-select" required>
+                        <option value="Admin">Quản trị viên (Admin)</option>
+                        <option value="Editor">Biên tập viên (Editor)</option>
+                    </select>
+                </div>
+                
+                <div class="d-flex gap-3">
+                    <button type="submit" class="th-btn th-btn-warning flex-grow-1">Cập nhật thay đổi</button>
+                    <a asp-action="Index" class="th-btn th-btn-outline flex-grow-1">Hủy bỏ</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

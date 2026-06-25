@@ -41,6 +41,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId, // Lấy mã danh mục sản phẩm liên kết
                     p.Sizes, // Thêm danh sách size
                     p.Colors, // Thêm danh sách màu sắc
+                    p.VariantStocks, // Thêm dữ liệu tồn kho phân loại
                     p.CreatedDate, // Thêm ngày tạo
                     p.IsNew, // Thêm trạng thái sản phẩm mới
                     p.IsHot // Thêm trạng thái bán chạy
@@ -65,6 +66,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId, // Lấy mã danh mục sản phẩm liên kết
                     p.Sizes, // Thêm danh sách size
                     p.Colors, // Thêm danh sách màu sắc
+                    p.VariantStocks, // Thêm dữ liệu tồn kho phân loại
                     p.CreatedDate, // Thêm ngày tạo
                     p.IsNew, // Thêm trạng thái sản phẩm mới
                     p.IsHot
@@ -91,6 +93,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId,
                     p.Sizes,
                     p.Colors,
+                    p.VariantStocks,
                     p.CreatedDate,
                     p.IsNew,
                     p.IsHot
@@ -117,6 +120,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId,
                     p.Sizes,
                     p.Colors,
+                    p.VariantStocks,
                     p.CreatedDate,
                     p.IsNew,
                     p.IsHot
@@ -143,6 +147,7 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                     p.CategoryProductId,
                     p.Sizes,
                     p.Colors,
+                    p.VariantStocks,
                     p.CreatedDate,
                     p.IsNew,
                     p.IsHot

@@ -36,6 +36,7 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                 // Nếu không có id danh mục được chọn, trả về toàn bộ bài viết sắp xếp theo ngày tạo giảm dần
                 var all = _context.Posts // Truy vấn bảng Posts
                     .Include(p => p.Category) // Tải kèm theo thông tin của danh mục liên quan (Category)
+                    .Where(p => !p.IsDeleted) // Lọc bỏ các bài viết đã xóa mềm
                     .OrderByDescending(p => p.CreatedDate) // Sắp xếp giảm dần theo ngày tạo (CreatedDate)
                     .ToList(); // Tải dữ liệu và chuyển đổi thành danh sách
                 return View(all); // Trả về View Index hiển thị tất cả bài viết
@@ -43,7 +44,7 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
 
             // Nếu có truyền vào id danh mục, tiến hành lọc các bài viết thuộc danh mục đó
             var posts = _context.Posts // Truy vấn bảng Posts
-                .Where(p => p.CategoryId == id) // Lọc những bài viết có CategoryId bằng với id truyền vào
+                .Where(p => p.CategoryId == id && !p.IsDeleted) // Lọc những bài viết theo danh mục và chưa bị xóa mềm
                 .Include(p => p.Category) // Tải kèm theo thông tin danh mục liên quan
                 .OrderByDescending(p => p.CreatedDate) // Sắp xếp theo ngày tạo giảm dần
                 .ToList(); // Chuyển đổi kết quả thành danh sách
@@ -160,20 +161,98 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
         }
 
         // Action xử lý xóa bài viết trực tiếp theo Id
-        public IActionResult Delete(int id) // Hàm xử lý xóa bài viết dựa trên Id nhận được
+        public IActionResult Delete(int id) // Hàm xử lý xóa mềm bài viết dựa trên Id nhận được
         {
-            // 1. Tìm bài viết theo Id trong cơ sở dữ liệu
-            var post = _context.Posts.Find(id); // Sử dụng phương thức Find tìm nhanh theo khóa chính
+            var post = _context.Posts.Find(id);
 
-            if (post != null) // Nếu tìm thấy bài viết hợp lệ
+            if (post != null)
             {
-                // 2. Thực hiện xóa khỏi DbContext bộ nhớ tạm
-                _context.Posts.Remove(post); // Xóa thực thể bài viết khỏi tập hợp quản lý
-                
-                // 3. Thực thi lưu thay đổi thực sự xuống SQL Server
-                _context.SaveChanges(); // Lưu thay đổi
+                post.IsDeleted = true; // Xóa mềm
+                _context.SaveChanges();
             }
-            return RedirectToAction("Index"); // Quay về giao diện danh sách bài viết Index
+            return RedirectToAction("Index");
+        }
+
+        // TRANG THÙNG RÁC BÀI VIẾT
+        public IActionResult Trash()
+        {
+            var posts = _context.Posts.Include(p => p.Category).Where(p => p.IsDeleted).OrderByDescending(p => p.CreatedDate).ToList();
+            return View(posts);
+        }
+
+        // KHÔI PHỤC BÀI VIẾT
+        public IActionResult Restore(int id)
+        {
+            var post = _context.Posts.Find(id);
+            if (post != null)
+            {
+                post.IsDeleted = false;
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Trash");
+        }
+
+        // XÓA VĨNH VIỄN BÀI VIẾT
+        public IActionResult ForceDelete(int id)
+        {
+            var post = _context.Posts.Find(id);
+            if (post != null)
+            {
+                _context.Posts.Remove(post);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Trash");
+        }
+
+        // XÓA MỀM HÀNG LOẠT
+        [HttpPost]
+        public IActionResult BulkDelete(List<int> ids)
+        {
+            if (ids != null && ids.Any())
+            {
+                var posts = _context.Posts.Where(p => ids.Contains(p.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    post.IsDeleted = true;
+                }
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Không có mục nào được chọn" });
+        }
+
+        // KHÔI PHỤC HÀNG LOẠT
+        [HttpPost]
+        public IActionResult BulkRestore(List<int> ids)
+        {
+            if (ids != null && ids.Any())
+            {
+                var posts = _context.Posts.Where(p => ids.Contains(p.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    post.IsDeleted = false;
+                }
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Không có mục nào được chọn" });
+        }
+
+        // XÓA VĨNH VIỄN HÀNG LOẠT
+        [HttpPost]
+        public IActionResult BulkForceDelete(List<int> ids)
+        {
+            if (ids != null && ids.Any())
+            {
+                var posts = _context.Posts.Where(p => ids.Contains(p.Id)).ToList();
+                foreach (var post in posts)
+                {
+                    _context.Posts.Remove(post);
+                }
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false, message = "Không có mục nào được chọn" });
         }
         // Action xử lý tải ảnh lên từ CKEditor
         [HttpPost]

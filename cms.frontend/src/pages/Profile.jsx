@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
+import { toast } from 'react-toastify';
 
 function Profile() {
     const navigate = useNavigate();
@@ -156,7 +157,7 @@ function Profile() {
     const handleUpdatePassword = async (e) => {
         e.preventDefault();
         if (!passwordData.oldPassword || !passwordData.password) {
-            alert("Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới");
+            toast.warning("Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới");
             return;
         }
         setUpdating(true);
@@ -197,7 +198,7 @@ function Profile() {
                     }
                 } catch (error) {
                     console.error("Lỗi cập nhật ảnh đại diện", error);
-                    alert("Không thể cập nhật ảnh đại diện");
+                    toast("Không thể cập nhật ảnh đại diện");
                 } finally {
                     setUpdating(false);
                 }
@@ -209,7 +210,7 @@ function Profile() {
     const handleSaveAddress = async (e) => {
         e.preventDefault();
         if (!newAddress.province || !newAddress.district || !newAddress.ward || !newAddress.specific) {
-            alert("Vui lòng điền đầy đủ thông tin địa chỉ");
+            toast.warning("Vui lòng điền đầy đủ thông tin địa chỉ");
             return;
         }
         setUpdating(true);
@@ -240,7 +241,7 @@ function Profile() {
             }
         } catch (error) {
             console.error("Lỗi cập nhật sổ địa chỉ", error);
-            alert("Có lỗi xảy ra, vui lòng thử lại.");
+            toast.warning("Có lỗi xảy ra, vui lòng thử lại.");
         } finally {
             setUpdating(false);
         }
@@ -612,28 +613,48 @@ function Profile() {
                                                     </div>
                                                     
                                                     {expandedOrderId === order.id && order.details && order.details.map((d, idx) => (
-                                                        <div key={idx} className="d-flex justify-content-between align-items-center mb-3 bg-light p-2 rounded">
-                                                            <div className="d-flex align-items-center">
-                                                                <div className="d-flex align-items-center justify-content-center border rounded mr-3 bg-white" style={{ width: '60px', height: '60px', overflow: 'hidden' }}>
+                                                        <div key={idx} className="d-flex align-items-center mb-3 bg-white border-bottom pb-3">
+                                                            <div className="d-flex flex-grow-1 align-items-center">
+                                                                <div className="mr-3 shadow-sm" style={{ width: '80px', height: '80px', flexShrink: 0, borderRadius: '8px', overflow: 'hidden' }}>
                                                                     {d.imageUrl ? (
                                                                         <img src={d.imageUrl.split(',')[0].startsWith('http') ? d.imageUrl.split(',')[0] : `${import.meta.env.VITE_API_URL}${d.imageUrl.split(',')[0]}`} alt={d.productName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                                     ) : (
-                                                                        <i className="fa-regular fa-image text-muted"></i>
+                                                                        <div className="w-100 h-100 bg-light d-flex align-items-center justify-content-center"><i className="fa-regular fa-image text-muted"></i></div>
                                                                     )}
                                                                 </div>
-                                                                <div>
-                                                                    <h6 className="font-weight-bold mb-1 text-dark" style={{ fontSize: '0.9rem' }}>{d.productName}</h6>
-                                                                    <div className="text-muted small">Size: {d.size || 'Mặc định'} x {d.quantity}</div>
+                                                                <div className="d-flex flex-column justify-content-center">
+                                                                    <h6 className="font-weight-bold mb-2 text-dark" style={{ fontSize: '1rem' }}>{d.productName}</h6>
+                                                                    <div className="d-flex flex-wrap align-items-center mb-2" style={{ gap: '8px' }}>
+                                                                        {d.color && (
+                                                                            <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Màu: {d.color}</span>
+                                                                        )}
+                                                                        {d.size && (
+                                                                            <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Size: {d.size}</span>
+                                                                        )}
+                                                                        {(!d.color && !d.size) && (
+                                                                            <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Phân loại: Mặc định</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="text-secondary" style={{ fontSize: '0.85rem' }}>ID sản phẩm: {d.productId}</div>
                                                                 </div>
                                                             </div>
-                                                            <div className="font-weight-bold" style={{ color: 'var(--thieuhoa-primary) !important' }}>
-                                                                {(d.unitPrice * d.quantity).toLocaleString('vi-VN')}đ
+                                                            
+                                                            <div className="d-flex align-items-center justify-content-end text-right ml-4" style={{ gap: '30px', minWidth: '300px' }}>
+                                                                <div className="text-muted" style={{ fontSize: '0.95rem' }}>
+                                                                    {d.unitPrice.toLocaleString('vi-VN')} VNĐ
+                                                                </div>
+                                                                <div className="font-weight-bold text-dark" style={{ width: '30px', textAlign: 'center', fontSize: '1.05rem' }}>
+                                                                    {d.quantity}
+                                                                </div>
+                                                                <div className="font-weight-bold" style={{ color: 'var(--thieuhoa-primary)', minWidth: '120px', fontSize: '1.05rem' }}>
+                                                                    {(d.unitPrice * d.quantity).toLocaleString('vi-VN')} VNĐ
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     ))}
                                                     <div className="border-top pt-3 mt-2 d-flex justify-content-end align-items-center">
                                                         <span className="mr-3 text-dark">Tổng số tiền:</span>
-                                                        <span className="h5 mb-0 font-weight-bold" style={{ color: 'var(--thieuhoa-primary)' }}>{order.totalAmount?.toLocaleString('vi-VN')}đ</span>
+                                                        <span className="h5 mb-0 font-weight-bold" style={{ color: 'var(--thieuhoa-primary)' }}>{order.totalAmount?.toLocaleString('vi-VN')} VNĐ</span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -711,7 +732,7 @@ function Profile() {
                                     ) : (
                                         <div className="row">
                                             {favorites.map(item => (
-                                                <ProductCard key={item.id} item={item} />
+                                                <ProductCard key={item.id} item={item} colClass="col-lg-4 col-md-6 mb-4" />
                                             ))}
                                         </div>
                                     )}

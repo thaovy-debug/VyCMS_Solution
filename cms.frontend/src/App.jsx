@@ -28,6 +28,8 @@ import bannerService from './services/bannerService'; // Nhập dịch vụ lấ
 import menuService from './services/menuService'; // Nhập dịch vụ lấy menu
 import logoImg from './assets/imgs/logo.png'; // Logo hình ảnh
 import './App.css'; // Nhập tệp cấu hình CSS giao diện bổ trợ của Thiều Hoa
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() { // Định nghĩa component chính App của dự án
     // Khai báo state để chứa danh mục phục vụ hiển thị trên Menu ngang
@@ -63,7 +65,7 @@ function App() { // Định nghĩa component chính App của dự án
         }
         localStorage.setItem(cartKey, JSON.stringify(currentCart));
         window.dispatchEvent(new Event('cartUpdated'));
-        alert(`Đã thêm ${product.name} vào giỏ hàng!`);
+        toast.success(`Đã thêm ${product.name} vào giỏ hàng!`);
     };
     const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Khai báo state selectedCategoryId lưu trữ mã danh mục đang lọc (mặc định null hiển thị tất cả)
     const [customFilterType, setCustomFilterType] = useState(null); // Bộ lọc loại danh mục tự định nghĩa (new, sale, hot, gift)
@@ -206,6 +208,7 @@ function App() { // Định nghĩa component chính App của dự án
 
     return ( // Trả về cấu trúc giao diện JSX của website
         <div className="w-100 min-vh-100 d-flex flex-column" style={{ backgroundColor: 'var(--thieuhoa-bg)' }}> {/* Thẻ bao bọc toàn bộ trang web full-width */}
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />
             
             {/* PHẦN 1: THANH THÔNG BÁO KHUYẾN MÃI TRÊN CÙNG (TOP BAR) */}
             <div className="thieuhoa-topbar text-center"> {/* Thanh thông báo đỏ nâu chữ trắng nhỏ */}
@@ -288,30 +291,78 @@ function App() { // Định nghĩa component chính App của dự án
                                                 {menu.name} <i className="fa-solid fa-chevron-down ml-1" style={{ fontSize: '0.7rem' }}></i>
                                             </Link>
                                             
-                                            {/* Cấu trúc Mega Menu Dropdown hiển thị danh mục từ DATABASE */}
-                                            <div className="thieuhoa-mega-menu-dropdown bg-white shadow"> {/* Khung dropdown nền trắng đổ bóng */}
-                                                <div className="container py-4"> {/* Khung đệm phía trong */}
-                                                    <div className="row text-left"> {/* Dòng cột */}
-                                                        {categories.map((cat) => (
-                                                            <div className="col-lg-3 col-md-4 col-sm-6 mb-4" key={cat.id}> {/* Ô cột cố định kích thước để bằng nhau */}
-                                                                <div className="d-flex flex-column h-100 pr-3"> {/* Thêm padding right để tạo khoảng cách giữa các cột */}
-                                                                    <Link 
-                                                                        to={`/san-pham?category=${cat.id}`}
-                                                                        className="font-weight-bold text-dark text-uppercase d-block" 
-                                                                        style={{ fontSize: '0.85rem', borderBottom: '1px solid #e0e0e0', paddingBottom: '8px', textDecoration: 'none', marginBottom: '12px' }}
-                                                                    >
-                                                                        {cat.name}
-                                                                    </Link>
-                                                                    <p className="text-secondary flex-grow-1" style={{ fontSize: '0.75rem', lineHeight: '1.6', marginBottom: '12px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                                                        {cat.description || `Khám phá các mẫu ${cat.name.toLowerCase()} mới nhất với thiết kế thanh lịch.`}
-                                                                    </p>
-                                                                    <Link to={`/san-pham?category=${cat.id}`} className="font-weight-bold text-dark mt-auto" style={{ fontSize: '0.75rem', textDecoration: 'none' }}>
-                                                                        Xem tất cả &rarr;
-                                                                    </Link>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                            {/* Cấu trúc Dropdown Menu 1 cấp dạng list của SẢN PHẨM */}
+                                            <div className="zeychic-dropdown bg-white">
+                                                <div className="d-flex flex-column zeychic-dropdown-list">
+                                                    {(() => {
+                                                        const order = ["đầm", "quần", "áo", "phụ kiện", "chân váy", "áo khoác", "sale-off"];
+                                                        let sortedCategories = [];
+                                                        order.forEach(keyword => {
+                                                            const found = categories.find(c => c.name.toLowerCase() === keyword || c.name.toLowerCase().includes(keyword));
+                                                            if (found && !sortedCategories.some(sc => sc.id === found.id)) {
+                                                                sortedCategories.push(found);
+                                                            }
+                                                        });
+                                                        categories.forEach(c => {
+                                                            if (!sortedCategories.some(sc => sc.id === c.id)) {
+                                                                sortedCategories.push(c);
+                                                            }
+                                                        });
+                                                        return sortedCategories.map((cat) => {
+                                                            const iconMap = {
+                                                                "đầm": "fa-solid fa-person-dress",
+                                                                "quần": "fa-solid fa-socks",
+                                                                "áo": "fa-solid fa-shirt",
+                                                                "phụ kiện": "fa-solid fa-bag-shopping",
+                                                                "chân váy": "fa-solid fa-person-half-dress",
+                                                                "áo khoác": "fa-solid fa-vest",
+                                                                "sale": "fa-solid fa-tag",
+                                                                "giảm": "fa-solid fa-tag"
+                                                            };
+                                                            let iconClass = "fa-solid fa-layer-group";
+                                                            const nameLower = cat.name.toLowerCase();
+                                                            Object.keys(iconMap).forEach(k => {
+                                                                if (nameLower.includes(k)) iconClass = iconMap[k];
+                                                            });
+                                                            
+                                                            const descMap = {
+                                                                "đầm": "Khẳng định khí chất, tôn vinh vẻ đẹp nữ tính",
+                                                                "quần": "Thanh lịch, năng động và thoải mái",
+                                                                "áo": "Sự hòa quyện giữa nét thanh lịch và hiện đại",
+                                                                "phụ kiện": "Điểm nhấn hoàn hảo cho mọi trang phục",
+                                                                "chân váy": "Bí quyết hoàn thiện bản phối thời trang",
+                                                                "áo khoác": "Nâng tầm phong cách, giữ ấm ngày đông",
+                                                                "sale": "Cơ hội sở hữu những sản phẩm ưu đãi",
+                                                                "giảm": "Cơ hội sở hữu những sản phẩm ưu đãi"
+                                                            };
+                                                            let description = cat.description;
+                                                            if (!description) {
+                                                                Object.keys(descMap).forEach(k => {
+                                                                    if (nameLower.includes(k)) description = descMap[k];
+                                                                });
+                                                                if (!description) description = `Khám phá các mẫu ${cat.name.toLowerCase()} mới nhất với thiết kế thanh lịch.`;
+                                                            }
+
+                                                            return (
+                                                                <Link 
+                                                                    key={cat.id}
+                                                                    to={`/san-pham?category=${cat.id}`}
+                                                                    className="zeychic-dropdown-item text-decoration-none d-flex align-items-center justify-content-between"
+                                                                >
+                                                                    <div className="d-flex align-items-center">
+                                                                        <div className="zeychic-dropdown-icon mr-4 d-flex align-items-center justify-content-center text-center" style={{ color: '#8B5E3C', width: '30px' }}>
+                                                                            <i className={iconClass} style={{ fontSize: '20px', color: '#8B5E3C' }}></i>
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 className="font-weight-bold mb-1" style={{ fontSize: '18px', color: '#333' }}>{cat.name.toUpperCase()}</h6>
+                                                                            <p className="mb-0 text-muted" style={{ fontSize: '13px' }}>{description}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <i className="fa-solid fa-chevron-right text-muted" style={{ fontSize: '14px', opacity: '0.5' }}></i>
+                                                                </Link>
+                                                            );
+                                                        });
+                                                    })()}
                                                 </div>
                                             </div>
                                         </div>

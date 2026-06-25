@@ -137,7 +137,7 @@ const ProductList = ({ selectedCategoryId, customFilterType, searchQuery, minPri
                 </div>
             ) : ( // Ngược lại nếu mảng chứa dữ liệu sản phẩm từ database
                 currentProducts.map((item) => ( // Duyệt mảng sản phẩm hiện tại để tạo các card hiển thị tương ứng
-                    <ProductCard key={item.id} item={item} />
+                    <ProductCard key={item.id} item={item} colClass="col-lg-4 col-md-6 mb-4" />
                 )) // Kết thúc vòng lặp map
             )} {/* Kết thúc khối biểu thức điều kiện */}
             

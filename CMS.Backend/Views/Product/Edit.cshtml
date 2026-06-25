@@ -6,109 +6,415 @@ Mo ta: Giao diện chỉnh sửa thông tin sản phẩm (Đã áp dụng Layout
 Ngay thuc hien: 15/05/2026
 *@
 @model CMS.Data.Entities.Product
-@* Khai báo Model kiểu Product *@
 @{
-    Layout = "_LayoutAdmin"; @* Áp dụng layout quản trị Admin *@
+    Layout = "_LayoutAdmin"; 
 }
 
-<div class="container mt-4 mb-5"> @* Vùng chứa chính, margin-top mt-4, bottom mb-5 *@
-    <h2 class="text-warning">CHỈNH SỬA SẢN PHẨM</h2> @* Tiêu đề *@
-    <hr /> @* Kẻ đường ngang *@
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    <form asp-action="Edit" method="post" enctype="multipart/form-data"> @* Form gửi yêu cầu POST hỗ trợ upload ảnh *@
-        <input type="hidden" asp-for="Id" /> @* Khóa chính ẩn *@
-        <input type="hidden" asp-for="ImageUrl" /> @* Lưu giữ đường dẫn ảnh hiện tại *@
+    :root {
+        --th-bg: #FAF8F5;
+        --th-primary: #8B5E3C;
+        --th-secondary: #D9C3B0;
+        --th-border: #EEE7E1;
+        --th-text-main: #2C2C2C;
+        --th-text-sub: #8A817C;
+        --th-danger: #F44336;
+        --th-warning: #FFB300;
+        --th-success: #4CAF50;
+    }
 
-        <div class="row"> @* Dòng lưới chia hai cột *@
-            <div class="col-md-8"> @* Cột bên trái chiếm 8/12 cột *@
-                <div class="mb-3"> @* Tên sản phẩm *@
-                    <label class="form-label fw-bold">Tên sản phẩm:</label>
-                    <input asp-for="Name" class="form-control" required />
-                    <span asp-validation-for="Name" class="text-danger small"></span>
+    .admin-wrapper {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--th-bg);
+        padding: 32px;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--th-text-main);
+        margin-bottom: 24px;
+    }
+
+    .th-card {
+        background-color: #FFFFFF;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        border: 1px solid var(--th-border);
+        padding: 32px;
+    }
+
+    .th-form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--th-text-main);
+        margin-bottom: 8px;
+    }
+
+    .th-form-control {
+        border-radius: 12px;
+        border: 1px solid var(--th-border);
+        padding: 12px 16px;
+        font-size: 14px;
+        color: var(--th-text-main);
+        background-color: #FAF8F5;
+        transition: all 0.2s ease;
+        width: 100%;
+        box-shadow: none !important;
+    }
+
+    .th-form-control:focus {
+        border-color: var(--th-primary);
+        background-color: #FFFFFF;
+        outline: none;
+    }
+
+    .th-btn {
+        height: 48px;
+        border-radius: 12px;
+        padding: 0 24px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .th-btn-warning {
+        background-color: var(--th-warning);
+        color: #FFFFFF;
+    }
+
+    .th-btn-warning:hover {
+        background-color: #E6A100;
+        color: #FFFFFF;
+    }
+
+    .th-btn-outline {
+        background-color: transparent;
+        border: 1px solid #BDB5AF;
+        color: var(--th-text-sub);
+    }
+
+    .th-btn-outline:hover {
+        border-color: var(--th-text-main);
+        color: var(--th-text-main);
+    }
+    
+    .th-table th {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--th-text-sub);
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--th-border);
+        white-space: nowrap;
+    }
+
+    .th-table td {
+        padding: 16px 12px;
+        font-size: 14px;
+        color: var(--th-text-main);
+        border-bottom: 1px solid var(--th-border);
+        vertical-align: middle;
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title mb-0">Chỉnh Sửa Sản Phẩm</h1>
+        <a asp-action="Index" class="th-btn th-btn-outline">
+            <i class="bi bi-arrow-left"></i> Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="th-card">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editForm">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ImageUrl" />
+            <input type="hidden" asp-for="Colors" id="Colors" />
+            <input type="hidden" asp-for="VariantStocks" id="VariantStocks" />
+
+            <div class="row g-5">
+                <div class="col-md-8">
+                    <div class="mb-4">
+                        <label class="th-form-label">Tên sản phẩm:</label>
+                        <input asp-for="Name" class="th-form-control" required />
+                        <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="th-form-label">Mô tả sản phẩm:</label>
+                        <textarea asp-for="Description" class="th-form-control" rows="5"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    
+                    <!-- Bảng quản lý Tồn kho Chi tiết -->
+                    <div class="mb-4" style="border: 1px solid var(--th-border); border-radius: 16px; overflow: hidden;">
+                        <div style="background-color: #FDFBFA; padding: 16px 20px; font-weight: 600; color: var(--th-text-main); border-bottom: 1px solid var(--th-border);">Quản lý Phân Loại & Tồn Kho (Màu sắc x Size)</div>
+                        <div style="padding: 24px;">
+                            
+                            <!-- Quản lý Màu Sắc -->
+                            <div class="mb-4">
+                                <label class="th-form-label d-block">Màu sắc hiện có:</label>
+                                <div id="colorContainer" class="d-flex flex-wrap gap-2 mb-2"></div>
+                                
+                                <div class="input-group mt-3" style="max-width: 500px;">
+                                    <input type="text" id="newColorName" class="th-form-control" placeholder="Tên màu (VD: Đen)" style="border-top-right-radius: 0; border-bottom-right-radius: 0;" />
+                                    <input type="text" id="newColorImage" class="th-form-control" placeholder="Link ảnh (Tùy chọn)" style="border-radius: 0;" />
+                                    <button type="button" class="th-btn" style="background-color: #F8F3ED; border: 1px solid var(--th-border); border-left: none; color: var(--th-primary); border-top-left-radius: 0; border-bottom-left-radius: 0;" onclick="addColor()">Thêm màu</button>
+                                </div>
+                            </div>
+
+                            <!-- Quản lý Size -->
+                            <div class="mb-4">
+                                <label class="th-form-label">Các Size hiện có (cách nhau bởi dấu phẩy):</label>
+                                <input asp-for="Sizes" id="sizesInput" class="th-form-control" placeholder="VD: S, M, L, XL" onkeyup="renderVariantGrid()" />
+                                <span asp-validation-for="Sizes" class="text-danger small mt-1 d-block"></span>
+                            </div>
+                            
+                            <div class="alert alert-info py-2 small" style="background-color: #E3F2FD; border-color: #BBDEFB; color: #0D47A1; border-radius: 8px;">Điền số lượng tồn kho cho từng phân loại bên dưới. Các ô trống sẽ được tính là 0. Số lượng tổng sẽ được tự động tính từ bảng này (ghi đè "Số lượng nhập kho" chung).</div>
+
+                            <!-- Bảng Tồn kho theo Biến thể -->
+                            <div class="table-responsive">
+                                <table class="th-table w-100 text-center align-middle" id="variantGrid">
+                                    <thead style="background-color: #FDFBFA;">
+                                        <tr id="variantGridHeader">
+                                            <!-- Rendered by JS -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="variantGridBody">
+                                        <!-- Rendered by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="mb-3"> @* Mô tả chi tiết *@
-                    <label class="form-label fw-bold">Mô tả sản phẩm:</label>
-                    <textarea asp-for="Description" class="form-control" rows="5"></textarea>
-                    <span asp-validation-for="Description" class="text-danger small"></span>
+                <div class="col-md-4">
+                    <div class="th-card" style="background-color: #FDFBFA; padding: 24px; border-radius: 16px;">
+                        <div class="mb-4">
+                            <label class="th-form-label">Loại sản phẩm:</label>
+                            <select asp-for="CategoryProductId" class="th-form-control form-select" required>
+                                <option value="">-- Chọn loại sản phẩm --</option>
+                                @if (ViewBag.CategoriesProducts != null)
+                                {
+                                    foreach (var cat in (IEnumerable<CMS.Data.Entities.CategoryProduct>)ViewBag.CategoriesProducts)
+                                    {
+                                        <option value="@cat.Id">@cat.Name</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryProductId" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="th-form-label">Đơn giá (VNĐ):</label>
+                            <input asp-for="Price" class="th-form-control" type="number" step="1000" required />
+                            <span asp-validation-for="Price" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="th-form-label">Phần trăm giảm giá (%):</label>
+                            <input asp-for="DiscountPercent" class="th-form-control" type="number" min="0" max="100" />
+                            <span asp-validation-for="DiscountPercent" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="th-form-label">Số lượng nhập kho (Tổng):</label>
+                            <input asp-for="StockQuantity" id="StockQuantity" class="th-form-control" type="number" readonly required style="background-color: #F2F0ED;" />
+                            <span asp-validation-for="StockQuantity" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="th-form-label">Hình ảnh sản phẩm (có thể chọn nhiều ảnh thay thế):</label>
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <div class="mb-3 d-flex flex-wrap" style="gap: 10px;">
+                                    @foreach(var img in Model.ImageUrl.Split(','))
+                                    {
+                                        <img src="@img" alt="@Model.Name" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--th-border);" />
+                                    }
+                                </div>
+                            }
+                            <input type="file" name="uploadImages" class="th-form-control" accept="image/*" multiple style="background-color: #FFFFFF;" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="th-form-label">Ảnh bảng size / Mô tả thêm:</label>
+                            @if (!string.IsNullOrEmpty(Model.SizeGuideImageUrl))
+                            {
+                                <div class="mb-3">
+                                    <img src="@Model.SizeGuideImageUrl" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid var(--th-border);" />
+                                </div>
+                            }
+                            <input type="file" name="uploadSizeGuide" class="th-form-control" accept="image/*" style="background-color: #FFFFFF;" />
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch d-flex align-items-center gap-2">
+                                <input class="form-check-input m-0" type="checkbox" asp-for="IsNew" />
+                                <label class="form-check-label m-0 fw-bold" asp-for="IsNew" style="color: var(--th-text-main);">Đánh dấu là Sản phẩm mới</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="th-btn th-btn-warning w-100" style="height: 56px; font-size: 16px;" onclick="prepareSubmit()">
+                            <i class="bi bi-cloud-arrow-up"></i> Lưu Cập Nhật
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <div class="col-md-4"> @* Cột bên phải chiếm 4/12 cột *@
-                <div class="mb-3"> @* Loại sản phẩm *@
-                    <label class="form-label fw-bold">Loại sản phẩm:</label>
-                    <select asp-for="CategoryProductId" class="form-select" required>
-                        <option value="">-- Chọn loại sản phẩm --</option>
-                        @if (ViewBag.CategoriesProducts != null)
-                        {
-                            foreach (var cat in (IEnumerable<CMS.Data.Entities.CategoryProduct>)ViewBag.CategoriesProducts)
-                            {
-                                <option value="@cat.Id">@cat.Name</option>
-                            }
-                        }
-                    </select>
-                    <span asp-validation-for="CategoryProductId" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3"> @* Đơn giá *@
-                    <label class="form-label fw-bold">Đơn giá (VNĐ):</label>
-                    <input asp-for="Price" class="form-control" type="number" step="1000" required />
-                    <span asp-validation-for="Price" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3"> @* Giảm giá *@
-                    <label class="form-label fw-bold">Phần trăm giảm giá (%):</label>
-                    <input asp-for="DiscountPercent" class="form-control" type="number" min="0" max="100" />
-                    <span asp-validation-for="DiscountPercent" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3"> @* Số lượng *@
-                    <label class="form-label fw-bold">Số lượng nhập kho:</label>
-                    <input asp-for="StockQuantity" class="form-control" type="number" required />
-                    <span asp-validation-for="StockQuantity" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3"> @* Ảnh sản phẩm tải từ máy *@
-                    <label class="form-label fw-bold">Hình ảnh sản phẩm (có thể chọn nhiều ảnh thay thế):</label>
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                    {
-                        <div class="mb-2 d-flex flex-wrap" style="gap: 10px;">
-                            @foreach(var img in Model.ImageUrl.Split(','))
-                            {
-                                <img src="@img" alt="@Model.Name" class="img-thumbnail" style="max-height: 120px;" />
-                            }
-                        </div>
-                    }
-                    <input type="file" name="uploadImages" class="form-control" accept="image/*" multiple />
-                </div>
-
-                <div class="mb-3"> @* Bảng size / Mô tả *@
-                    <label class="form-label fw-bold">Ảnh bảng size / Mô tả thêm:</label>
-                    @if (!string.IsNullOrEmpty(Model.SizeGuideImageUrl))
-                    {
-                        <div class="mb-2">
-                            <img src="@Model.SizeGuideImageUrl" class="img-thumbnail" style="max-height: 120px;" />
-                        </div>
-                    }
-                    <input type="file" name="uploadSizeGuide" class="form-control" accept="image/*" />
-                </div>
-
-                <div class="mb-3"> @* Phân loại Size *@
-                    <label class="form-label fw-bold">Các Size hiện có (cách nhau bởi dấu phẩy):</label>
-                    <input asp-for="Sizes" class="form-control" placeholder="VD: S, M, L, XL" />
-                    <span asp-validation-for="Sizes" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3 form-check"> @* Trạng thái sản phẩm mới *@
-                    <input class="form-check-input" asp-for="IsNew" />
-                    <label class="form-check-label fw-bold" asp-for="IsNew">Đánh dấu là Sản phẩm mới (Sẽ hiện ở mục Hàng mới về)</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-3"> @* Các nút thao tác *@
-            <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
-            <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        let colors = @Html.Raw(string.IsNullOrEmpty(Model.Colors) ? "[]" : Model.Colors);
+        let variantStocks = @Html.Raw(string.IsNullOrEmpty(Model.VariantStocks) ? "{}" : Model.VariantStocks);
+
+        function renderColors() {
+            const container = document.getElementById('colorContainer');
+            container.innerHTML = '';
+            colors.forEach((c, index) => {
+                container.innerHTML += `
+                    <div class="d-flex align-items-center mb-2" style="gap: 10px; background: #FFFFFF; padding: 10px; border-radius: 12px; border: 1px solid var(--th-border); width: 100%;">
+                        ${c.image ? `<img src="${c.image}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;" />` : `<div style="width:40px;height:40px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;">Trống</div>`}
+                        <div class="flex-grow-1">
+                            <div class="fw-bold text-dark mb-1" style="font-size: 14px;">${c.name}</div>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text" style="background-color: #F8F3ED; border-color: var(--th-border); border-top-left-radius: 8px; border-bottom-left-radius: 8px; font-weight: 600; color: var(--th-primary);">Link ảnh</span>
+                                <input type="text" class="th-form-control" style="border-top-right-radius: 8px; border-bottom-right-radius: 8px; height: 31px; padding: 4px 8px; font-size: 13px;" value="${c.image || ''}" onchange="updateColorImage(${index}, this.value)" placeholder="Nhập link ảnh mới..." />
+                            </div>
+                        </div>
+                        <button type="button" class="th-btn" style="background-color: transparent; border: 1px solid var(--th-danger); color: var(--th-danger); height: 36px; padding: 0 12px; font-size: 13px;" onclick="removeColor(${index})">
+                            <i class="bi bi-trash"></i> Xóa
+                        </button>
+                    </div>
+                `;
+            });
+            renderVariantGrid();
+        }
+
+        function updateColorImage(index, newUrl) {
+            colors[index].image = newUrl;
+            renderColors();
+        }
+
+        function addColor() {
+            const name = document.getElementById('newColorName').value.trim();
+            const image = document.getElementById('newColorImage').value.trim();
+            if (!name) {
+                alert("Vui lòng nhập tên màu!"); return;
+            }
+            if (colors.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                alert("Màu này đã tồn tại!"); return;
+            }
+            colors.push({ name: name, image: image });
+            document.getElementById('newColorName').value = '';
+            document.getElementById('newColorImage').value = '';
+            renderColors();
+        }
+
+        function removeColor(index) {
+            if(confirm("Bạn có chắc muốn xóa màu này?")) {
+                colors.splice(index, 1);
+                renderColors();
+            }
+        }
+
+        function renderVariantGrid() {
+            const sizesStr = document.getElementById('sizesInput').value;
+            const sizes = sizesStr.split(',').map(s => s.trim()).filter(s => s !== '');
+            
+            const header = document.getElementById('variantGridHeader');
+            const body = document.getElementById('variantGridBody');
+            
+            if (colors.length === 0 && sizes.length === 0) {
+                header.innerHTML = '<th>Không có phân loại</th>';
+                body.innerHTML = '<tr><td class="text-muted">Vui lòng thêm Size hoặc Màu sắc</td></tr>';
+                return;
+            }
+
+            // Build Header
+            let thHTML = '<th>Tồn Kho</th>';
+            if (colors.length > 0) thHTML = '<th>Màu Sắc</th>';
+            sizes.forEach(s => {
+                thHTML += `<th>Size ${s}</th>`;
+            });
+            if (sizes.length === 0 && colors.length > 0) thHTML += `<th>Kho</th>`; // Just colors
+            header.innerHTML = thHTML;
+
+            // Build Body
+            let tbHTML = '';
+            if (colors.length > 0) {
+                colors.forEach(c => {
+                    tbHTML += `<tr><td class="fw-bold">${c.name}</td>`;
+                    if (sizes.length > 0) {
+                        sizes.forEach(s => {
+                            const key = `${c.name}-${s}`;
+                            const val = variantStocks[key] || 0;
+                            tbHTML += `<td><input type="number" class="th-form-control text-center mx-auto variant-input" style="width: 80px;" data-key="${key}" value="${val}" onchange="updateTotal()" min="0"></td>`;
+                        });
+                    } else {
+                        const key = `${c.name}-`;
+                        const val = variantStocks[key] || 0;
+                        tbHTML += `<td><input type="number" class="th-form-control text-center mx-auto variant-input" style="width: 80px;" data-key="${key}" value="${val}" onchange="updateTotal()" min="0"></td>`;
+                    }
+                    tbHTML += `</tr>`;
+                });
+            } else {
+                // Only sizes
+                tbHTML += `<tr>`;
+                sizes.forEach(s => {
+                    const key = `-${s}`;
+                    const val = variantStocks[key] || 0;
+                    tbHTML += `<td><input type="number" class="th-form-control text-center mx-auto variant-input" style="width: 80px;" data-key="${key}" value="${val}" onchange="updateTotal()" min="0"></td>`;
+                });
+                tbHTML += `</tr>`;
+            }
+            body.innerHTML = tbHTML;
+            updateTotal();
+        }
+
+        function updateTotal() {
+            let total = 0;
+            const inputs = document.querySelectorAll('.variant-input');
+            inputs.forEach(inp => {
+                const val = parseInt(inp.value) || 0;
+                total += val;
+            });
+            document.getElementById('StockQuantity').value = total;
+        }
+
+        function prepareSubmit() {
+            document.getElementById('Colors').value = JSON.stringify(colors);
+            
+            // Build VariantStocks JSON
+            const newVariantStocks = {};
+            const inputs = document.querySelectorAll('.variant-input');
+            inputs.forEach(inp => {
+                const val = parseInt(inp.value) || 0;
+                if (val > 0) {
+                    newVariantStocks[inp.getAttribute('data-key')] = val;
+                }
+            });
+            document.getElementById('VariantStocks').value = JSON.stringify(newVariantStocks);
+        }
+
+        // Init
+        renderColors();
+    </script>
+}
