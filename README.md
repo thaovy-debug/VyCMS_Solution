@@ -40,20 +40,22 @@ graph TD
 VyCMS_Solution/
 ├── VyCMS_Solution.sln           # File Solution tổng quản lý các project
 ├── CMS.Data/                    # Project Class Library (.NET 8)
-│   └── Entities/                # Định nghĩa 10 lớp thực thể cốt lõi
-├── CMS.Backend/                 # Project ASP.NET Core 8 Web App (MVC)
+│   └── Entities/                # Định nghĩa các lớp thực thể cốt lõi
+├── CMS.Backend/                 # Project ASP.NET Core 8 Web App (MVC & Web API)
 │   ├── Controllers/             # Logic xử lý điều hướng & cung cấp API
 │   ├── Models/                  # Các ViewModel truyền dữ liệu
 │   ├── Views/                   # Giao diện quản trị Admin Panel (.cshtml)
 │   └── appsettings.json         # Cấu hình hệ thống & chuỗi kết nối Database
-└── cms.frontend/                # Project ReactJS (Client)
-    ├── public/                  # Tài nguyên tĩnh của React
-    └── src/                     # Mã nguồn logic giao diện người dùng
-        ├── api/                 # Cấu hình gọi API
-        ├── assets/              # Tài nguyên tĩnh (hình ảnh, css)
-        ├── components/          # Các thành phần giao diện tái sử dụng
-        ├── pages/               # Các trang chức năng (Home, Cart, Product...)
-        └── services/            # Các service gọi API lấy dữ liệu
+├── cms.frontend/                # Project ReactJS (Client)
+│   ├── public/                  # Tài nguyên tĩnh của React
+│   └── src/                     # Mã nguồn logic giao diện người dùng
+│       ├── api/                 # Cấu hình gọi API
+│       ├── assets/              # Tài nguyên tĩnh (hình ảnh, css)
+│       ├── components/          # Các thành phần giao diện tái sử dụng
+│       ├── pages/               # Các trang chức năng (Home, Cart, Product...)
+│       └── services/            # Các service gọi API lấy dữ liệu
+├── ImageDownloader/             # Công cụ Console hỗ trợ tải ảnh hàng loạt
+└── TempSqlRunner/               # Công cụ Console hỗ trợ chạy script SQL tùy chỉnh
 ```
 
 ---
