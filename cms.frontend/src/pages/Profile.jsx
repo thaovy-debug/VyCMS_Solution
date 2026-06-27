@@ -19,9 +19,8 @@ function Profile() {
     const [addressBook, setAddressBook] = useState([]);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
     const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
-    const [wards, setWards] = useState([]);
-    const [newAddress, setNewAddress] = useState({ province: '', district: '', ward: '', specific: '', isDefault: false });
+        const [wards, setWards] = useState([]);
+    const [newAddress, setNewAddress] = useState({ province: '', ward: '', specific: '', isDefault: false });
 
     useEffect(() => {
         if (location.state && location.state.tab) {
@@ -96,7 +95,7 @@ function Profile() {
 
         const fetchProvinces = async () => {
             try {
-                const res = await axios.get('https://provinces.open-api.vn/api/?depth=3');
+                const res = await axios.get('https://provinces.open-api.vn/api/v2/?depth=2');
                 setProvinces(res.data);
             } catch (err) {
                 console.error("Failed to load provinces", err);
@@ -108,19 +107,10 @@ function Profile() {
     useEffect(() => {
         if (newAddress.province) {
             const p = provinces.find(p => p.name === newAddress.province);
-            setDistricts(p ? p.districts : []);
-            setWards([]);
-            setNewAddress(prev => ({ ...prev, district: '', ward: '' }));
-        }
-    }, [newAddress.province, provinces]);
-
-    useEffect(() => {
-        if (newAddress.district) {
-            const d = districts.find(d => d.name === newAddress.district);
-            setWards(d ? d.wards : []);
+            setWards(p ? p.wards : []);
             setNewAddress(prev => ({ ...prev, ward: '' }));
         }
-    }, [newAddress.district, districts]);
+    }, [newAddress.province, provinces]);
 
     const handleLogout = () => {
         if (window.confirm('Bạn có chắc muốn đăng xuất?')) {
@@ -209,7 +199,7 @@ function Profile() {
 
     const handleSaveAddress = async (e) => {
         e.preventDefault();
-        if (!newAddress.province || !newAddress.district || !newAddress.ward || !newAddress.specific) {
+        if (!newAddress.province || !newAddress.ward || !newAddress.specific) {
             toast.warning("Vui lòng điền đầy đủ thông tin địa chỉ");
             return;
         }
@@ -227,7 +217,7 @@ function Profile() {
                 addressBook: JSON.stringify(updatedAddressBook)
             };
             if (addressToSave.isDefault) {
-                updatePayload.address = `${addressToSave.specific}, ${addressToSave.ward}, ${addressToSave.district}, ${addressToSave.province}`;
+                updatePayload.address = `${addressToSave.specific}, ${addressToSave.ward}, ${''}, ${addressToSave.province}`;
             }
 
             const response = await axios.put(`${import.meta.env.VITE_API_URL}/api/Auth/CustomerUpdate/${customer.id}`, updatePayload);
@@ -236,7 +226,7 @@ function Profile() {
                 setCustomer(response.data.customer);
                 setAddressBook(updatedAddressBook);
                 setIsAddingAddress(false);
-                setNewAddress({ province: '', district: '', ward: '', specific: '', isDefault: false });
+                setNewAddress({ province: '', ward: '', specific: '', isDefault: false });
                 if (addressToSave.isDefault) setFormData(prev => ({ ...prev, address: updatePayload.address }));
             }
         } catch (error) {
@@ -285,6 +275,16 @@ function Profile() {
             content = `Đơn hàng #${o.id} đang trên đường giao đến bạn. Vui lòng chú ý điện thoại.`;
             color = 'primary';
             icon = 'fa-truck-fast';
+        } else if (o.status === 4 || o.status === 7) {
+            title = 'Đơn hàng đã bị hủy';
+            content = `Đơn hàng #${o.id} đã được hủy.`;
+            color = 'danger';
+            icon = 'fa-ban';
+        } else if (o.status === 6) {
+            title = 'Đơn hàng đang cập nhật';
+            content = `Đơn hàng #${o.id} đang được cửa hàng cập nhật theo yêu cầu của bạn.`;
+            color = 'info';
+            icon = 'fa-pen-to-square';
         } else {
             title = 'Giao hàng thành công';
             content = `Đơn hàng #${o.id} đã được giao thành công. Cảm ơn bạn đã mua sắm tại hệ thống!`;
@@ -316,7 +316,7 @@ function Profile() {
 
     const menuItems = [
         { id: 'account', icon: 'fa-regular fa-user', label: 'Thông tin tài khoản' },
-        { id: 'address', icon: 'fa-solid fa-location-dot', label: 'Sổ địa chỉ' },
+        // { id: 'address', icon: 'fa-solid fa-location-dot', label: 'Sổ địa chỉ' },
         { id: 'orders', icon: 'fa-solid fa-file-invoice', label: 'Đơn hàng của tôi' },
         { id: 'wishlist', icon: 'fa-regular fa-heart', label: 'Sản phẩm yêu thích' },
         { id: 'password', icon: 'fa-solid fa-lock', label: 'Đổi mật khẩu' },
@@ -335,7 +335,7 @@ function Profile() {
                             <div className="card-body d-flex align-items-center">
                                 <label style={{ cursor: 'pointer', margin: 0, position: 'relative' }} title="Thay đổi ảnh đại diện">
                                     <img src={avatarUrl} alt="Avatar" className="rounded-circle mr-3 border" style={{ width: '60px', height: '60px', objectFit: 'cover' }} />
-                                    <div className="position-absolute d-flex align-items-center justify-content-center rounded-circle" style={{ bottom: 0, right: '12px', width: '20px', height: '20px', backgroundColor: 'var(--thieuhoa-primary)', color: 'white', fontSize: '10px' }}>
+                                    <div className="position-absolute d-flex align-items-center justify-content-center rounded-circle" style={{ bottom: 0, right: '12px', width: '20px', height: '20px', backgroundColor: 'var(--zeychic-primary)', color: 'white', fontSize: '10px' }}>
                                         <i className="fa-solid fa-camera"></i>
                                     </div>
                                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
@@ -357,7 +357,7 @@ function Profile() {
                                         key={item.id}
                                         className={`list-group-item list-group-item-action d-flex align-items-center justify-content-between border-0 py-3 ${activeTab === item.id ? 'active text-white' : 'text-dark'}`}
                                         style={{ 
-                                            backgroundColor: activeTab === item.id ? 'var(--thieuhoa-primary)' : 'transparent',
+                                            backgroundColor: activeTab === item.id ? 'var(--zeychic-primary)' : 'transparent',
                                             cursor: 'pointer',
                                             fontSize: '0.95rem'
                                         }}
@@ -368,7 +368,7 @@ function Profile() {
                                             <span className={activeTab === item.id ? 'font-weight-bold' : ''}>{item.label}</span>
                                         </div>
                                         {item.badge && (
-                                            <span className="badge badge-danger badge-pill" style={{ backgroundColor: activeTab === item.id ? '#fff' : 'var(--thieuhoa-primary)', color: activeTab === item.id ? 'var(--thieuhoa-primary)' : '#fff' }}>
+                                            <span className="badge badge-danger badge-pill" style={{ backgroundColor: activeTab === item.id ? '#fff' : 'var(--zeychic-primary)', color: activeTab === item.id ? 'var(--zeychic-primary)' : '#fff' }}>
                                                 {item.badge}
                                             </span>
                                         )}
@@ -443,7 +443,7 @@ function Profile() {
                                                     </div>
 
                                                     <div className="d-flex mt-4 pt-2">
-                                                        <button type="submit" className="btn text-white font-weight-bold px-4 py-2 mr-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }} disabled={updating}>
+                                                        <button type="submit" className="btn text-white font-weight-bold px-4 py-2 mr-3" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px' }} disabled={updating}>
                                                             <i className="fa-regular fa-floppy-disk mr-2"></i> {updating ? 'Đang lưu...' : 'Cập nhật thông tin'}
                                                         </button>
                                                         <button type="button" className="btn btn-light font-weight-bold px-4 py-2" style={{ border: '1px solid #ddd', borderRadius: '8px' }} onClick={() => {
@@ -467,7 +467,7 @@ function Profile() {
                                                     </div>
                                                     <h6 className="font-weight-bold text-dark">Ảnh đại diện</h6>
                                                     <p className="text-muted small text-center mb-3">JPG, PNG tối đa 2MB</p>
-                                                    <div className="btn btn-outline-danger font-weight-bold py-1 px-4" style={{ borderRadius: '20px', borderColor: 'var(--thieuhoa-primary)', color: 'var(--thieuhoa-primary)' }}>
+                                                    <div className="btn btn-outline-danger font-weight-bold py-1 px-4" style={{ borderRadius: '20px', borderColor: 'var(--zeychic-primary)', color: 'var(--zeychic-primary)' }}>
                                                         <i className="fa-solid fa-upload mr-2"></i> Đổi ảnh
                                                     </div>
                                                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
@@ -487,7 +487,7 @@ function Profile() {
                                     <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                                         <p className="text-muted mb-0">Quản lý các địa chỉ nhận hàng của bạn.</p>
                                         {!isAddingAddress && (
-                                            <button className="btn btn-sm text-white" style={{ backgroundColor: 'var(--thieuhoa-primary)' }} onClick={() => setIsAddingAddress(true)}>
+                                            <button className="btn btn-sm text-white" style={{ backgroundColor: 'var(--zeychic-primary)' }} onClick={() => setIsAddingAddress(true)}>
                                                 <i className="fa-solid fa-plus mr-1"></i> Thêm địa chỉ mới
                                             </button>
                                         )}
@@ -498,23 +498,16 @@ function Profile() {
                                             <h6 className="font-weight-bold mb-3">Thêm địa chỉ mới</h6>
                                             <form onSubmit={handleSaveAddress}>
                                                 <div className="row">
-                                                    <div className="col-md-4 form-group mb-3">
+                                                    <div className="col-md-6 form-group mb-3">
                                                         <label className="small font-weight-bold">Tỉnh / Thành phố <span className="text-danger">*</span></label>
                                                         <select className="form-control shadow-none" value={newAddress.province} onChange={(e) => setNewAddress({ ...newAddress, province: e.target.value })} required>
                                                             <option value="">Chọn Tỉnh / Thành</option>
                                                             {provinces.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
                                                         </select>
                                                     </div>
-                                                    <div className="col-md-4 form-group mb-3">
-                                                        <label className="small font-weight-bold">Quận / Huyện <span className="text-danger">*</span></label>
-                                                        <select className="form-control shadow-none" value={newAddress.district} onChange={(e) => setNewAddress({ ...newAddress, district: e.target.value })} required disabled={!newAddress.province}>
-                                                            <option value="">Chọn Quận / Huyện</option>
-                                                            {districts.map(d => <option key={d.code} value={d.name}>{d.name}</option>)}
-                                                        </select>
-                                                    </div>
-                                                    <div className="col-md-4 form-group mb-3">
+                                                    <div className="col-md-6 form-group mb-3">
                                                         <label className="small font-weight-bold">Phường / Xã <span className="text-danger">*</span></label>
-                                                        <select className="form-control shadow-none" value={newAddress.ward} onChange={(e) => setNewAddress({ ...newAddress, ward: e.target.value })} required disabled={!newAddress.district}>
+                                                        <select className="form-control shadow-none" value={newAddress.ward} onChange={(e) => setNewAddress({ ...newAddress, ward: e.target.value })} required disabled={!newAddress.province}>
                                                             <option value="">Chọn Phường / Xã</option>
                                                             {wards.map(w => <option key={w.code} value={w.name}>{w.name}</option>)}
                                                         </select>
@@ -529,7 +522,7 @@ function Profile() {
                                                     <label className="form-check-label small" htmlFor="isDefaultAddr">Đặt làm địa chỉ mặc định</label>
                                                 </div>
                                                 <div className="d-flex">
-                                                    <button type="submit" className="btn text-white px-4 py-2 mr-2" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }} disabled={updating}>Lưu địa chỉ</button>
+                                                    <button type="submit" className="btn text-white px-4 py-2 mr-2" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px' }} disabled={updating}>Lưu địa chỉ</button>
                                                     <button type="button" className="btn btn-outline-secondary px-4 py-2" style={{ borderRadius: '8px' }} onClick={() => setIsAddingAddress(false)}>Hủy</button>
                                                 </div>
                                             </form>
@@ -558,7 +551,7 @@ function Profile() {
                                                                 </button>
                                                             </div>
                                                             <p className="small text-muted mb-1">{customer.phone}</p>
-                                                            <p className="small mb-0">{addr.specific}, {addr.ward}, {addr.district}, {addr.province}</p>
+                                                            <p className="small mb-0">{addr.specific}, {addr.ward}, {addr.province}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -577,7 +570,7 @@ function Profile() {
                                     
                                     {loadingOrders ? (
                                         <div className="text-center py-5">
-                                            <div className="spinner-border text-danger mb-3" role="status" style={{ color: 'var(--thieuhoa-primary)' }}></div>
+                                            <div className="spinner-border text-danger mb-3" role="status" style={{ color: 'var(--zeychic-primary)' }}></div>
                                             <p className="text-muted">Đang tải lịch sử đơn hàng...</p>
                                         </div>
                                     ) : orders.length === 0 ? (
@@ -587,7 +580,7 @@ function Profile() {
                                             </div>
                                             <h6 className="font-weight-bold">Chưa có đơn hàng nào</h6>
                                             <p className="text-muted mb-4">Bạn chưa thực hiện giao dịch nào trên hệ thống.</p>
-                                            <button className="btn text-white font-weight-bold px-4 py-2" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }} onClick={() => navigate('/san-pham')}>
+                                            <button className="btn text-white font-weight-bold px-4 py-2" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px' }} onClick={() => navigate('/san-pham')}>
                                                 Tiếp tục mua sắm
                                             </button>
                                         </div>
@@ -605,8 +598,8 @@ function Profile() {
                                                             <span className="text-muted small">| Ngày đặt: {new Date(order.orderDate).toLocaleDateString('vi-VN')}</span>
                                                         </div>
                                                         <div className="d-flex align-items-center">
-                                                            <span className={`badge px-3 py-2 mr-3 ${order.status === 0 ? 'badge-warning text-dark' : order.status === 1 ? 'badge-primary' : 'badge-success'}`} style={{ borderRadius: '20px' }}>
-                                                                {order.status === 0 ? 'Chờ xác nhận' : order.status === 1 ? 'Đang giao' : 'Hoàn thành'}
+                                                            <span className={`badge px-3 py-2 mr-3 ${order.status === 0 ? 'badge-warning text-dark' : order.status === 1 ? 'badge-info' : order.status === 2 ? 'badge-primary' : order.status === 3 ? 'badge-success' : (order.status === 4 || order.status === 7) ? 'badge-danger' : order.status === 6 ? 'badge-info' : 'badge-secondary'}`} style={{ borderRadius: '20px' }}>
+                                                                {order.status === 0 ? 'Chờ xác nhận' : order.status === 1 ? 'Chờ giao hàng' : order.status === 2 ? 'Đang giao hàng' : order.status === 3 ? 'Đã giao' : (order.status === 4 || order.status === 7) ? 'Đã hủy' : order.status === 6 ? 'Đang cập nhật' : 'Hoàn thành'}
                                                             </span>
                                                             <i className={`fa-solid fa-chevron-${expandedOrderId === order.id ? 'up' : 'down'} text-muted`}></i>
                                                         </div>
@@ -646,7 +639,7 @@ function Profile() {
                                                                 <div className="font-weight-bold text-dark" style={{ width: '30px', textAlign: 'center', fontSize: '1.05rem' }}>
                                                                     {d.quantity}
                                                                 </div>
-                                                                <div className="font-weight-bold" style={{ color: 'var(--thieuhoa-primary)', minWidth: '120px', fontSize: '1.05rem' }}>
+                                                                <div className="font-weight-bold" style={{ color: 'var(--zeychic-primary)', minWidth: '120px', fontSize: '1.05rem' }}>
                                                                     {(d.unitPrice * d.quantity).toLocaleString('vi-VN')} VNĐ
                                                                 </div>
                                                             </div>
@@ -654,7 +647,7 @@ function Profile() {
                                                     ))}
                                                     <div className="border-top pt-3 mt-2 d-flex justify-content-end align-items-center">
                                                         <span className="mr-3 text-dark">Tổng số tiền:</span>
-                                                        <span className="h5 mb-0 font-weight-bold" style={{ color: 'var(--thieuhoa-primary)' }}>{order.totalAmount?.toLocaleString('vi-VN')} VNĐ</span>
+                                                        <span className="h5 mb-0 font-weight-bold" style={{ color: 'var(--zeychic-primary)' }}>{order.totalAmount?.toLocaleString('vi-VN')} VNĐ</span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -703,10 +696,10 @@ function Profile() {
                                                 />
                                             </div>
                                             <div className="d-flex align-items-center justify-content-between">
-                                                <button type="submit" className="btn text-white font-weight-bold px-4 py-2" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }} disabled={updating}>
+                                                <button type="submit" className="btn text-white font-weight-bold px-4 py-2" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px' }} disabled={updating}>
                                                     <i className="fa-solid fa-key mr-2"></i> {updating ? 'Đang cập nhật...' : 'Xác nhận đổi mật khẩu'}
                                                 </button>
-                                                <Link to="/forgot-password" state={{ defaultEmail: customer.email }} style={{ color: 'var(--thieuhoa-primary)', fontSize: '0.9rem', fontWeight: 'bold' }}>Quên mật khẩu?</Link>
+                                                <Link to="/forgot-password" state={{ defaultEmail: customer.email }} style={{ color: 'var(--zeychic-primary)', fontSize: '0.9rem', fontWeight: 'bold' }}>Quên mật khẩu?</Link>
                                             </div>
                                         </form>
                                 </div>
@@ -725,7 +718,7 @@ function Profile() {
                                             </div>
                                             <h6 className="font-weight-bold">Chưa có sản phẩm yêu thích</h6>
                                             <p className="text-muted mb-4">Hãy thêm những sản phẩm bạn yêu thích vào danh sách này nhé.</p>
-                                            <button className="btn text-white font-weight-bold px-4 py-2" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }} onClick={() => navigate('/san-pham')}>
+                                            <button className="btn text-white font-weight-bold px-4 py-2" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px' }} onClick={() => navigate('/san-pham')}>
                                                 Khám phá ngay
                                             </button>
                                         </div>

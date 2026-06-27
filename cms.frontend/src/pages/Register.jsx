@@ -25,7 +25,7 @@ export default function Register() {
     return (
         <main className="container py-5 flex-grow-1 d-flex justify-content-center align-items-center">
             <div className="card shadow-sm border-0 p-4" style={{ width: '100%', maxWidth: '500px', borderRadius: '12px' }}>
-                <h3 className="text-center mb-4 font-weight-bold" style={{ color: 'var(--thieuhoa-primary)' }}>ĐĂNG KÝ TÀI KHOẢN</h3>
+                <h3 className="text-center mb-4 font-weight-bold" style={{ color: 'var(--zeychic-primary)' }}>ĐĂNG KÝ TÀI KHOẢN</h3>
                 <form onSubmit={handleRegister}>
                     <div className="form-group mb-3">
                         <label className="font-weight-bold">Họ và tên</label>
@@ -47,10 +47,10 @@ export default function Register() {
                         <label className="font-weight-bold">Địa chỉ nhận hàng</label>
                         <input name="address" type="text" className="form-control" onChange={handleChange} required placeholder="Nhập địa chỉ nhận hàng chi tiết..." />
                     </div>
-                    <button type="submit" className="btn btn-block text-white font-weight-bold py-2 mb-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }}>ĐĂNG KÝ</button>
+                    <button type="submit" className="btn btn-block text-white font-weight-bold py-2 mb-3" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px' }}>ĐĂNG KÝ</button>
                     <div className="text-center">
                         <span className="text-muted">Đã có tài khoản? </span>
-                        <Link to="/login" style={{ color: 'var(--thieuhoa-primary)', fontWeight: 'bold' }}>Đăng nhập</Link>
+                        <Link to="/login" style={{ color: 'var(--zeychic-primary)', fontWeight: 'bold' }}>Đăng nhập</Link>
                     </div>
                 </form>
             </div>

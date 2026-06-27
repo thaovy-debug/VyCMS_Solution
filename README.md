@@ -8,13 +8,13 @@
 
 ## 👤 THÔNG TIN SINH VIÊN
 
-| Thông tin                  | Chi tiết             |
-| :------------------------- | :------------------- |
+| Thông tin                          | Chi tiết               |
+| :---------------------------------- | :---------------------- |
 | **Sinh viên thực hiện**    | Nguyễn Quỳnh Thảo Vy |
-| **Mã số sinh viên (MSSV)** | 2123110158           |
-| **Lớp**                    | CCQ2311E             |
-| **Môn học**                | Chuyên đề ASP.NET    |
-| **Tên Solution**           | VyCMS_Solution       |
+| **Mã số sinh viên (MSSV)** | 2123110158              |
+| **Lớp**                      | CCQ2311E                |
+| **Môn học**                 | Chuyên đề ASP.NET    |
+| **Tên Solution**             | VyCMS_Solution          |
 
 ---
 
@@ -64,18 +64,18 @@ VyCMS_Solution/
 
 Thư mục `Entities` định nghĩa 10 bảng dữ liệu cốt lõi, phục vụ cho hai phân hệ nghiệp vụ chính là **Tin tức**, **Bán hàng** và **Giao diện**:
 
-| Tên Model (Entity)    | Chức năng nghiệp vụ                              | Mối quan hệ                                           |
-| :-------------------- | :----------------------------------------------- | :---------------------------------------------------- |
-| **`Category`**        | Quản lý danh mục bài viết / tin tức              | Quan hệ 1 - N với `Post`                              |
-| **`Post`**            | Quản lý nội dung bài viết tin tức                | Quan hệ N - 1 với `Category`                          |
-| **`CategoryProduct`** | Quản lý nhóm / danh mục của sản phẩm             | Quan hệ 1 - N với `Product`                           |
-| **`Product`**         | Quản lý thông tin hàng hóa, sản phẩm             | Quan hệ N - 1 với `CategoryProduct`                   |
-| **`Customer`**        | Thông tin khách hàng đặt mua                     | Quan hệ 1 - N với `Order`                             |
-| **`Order`**           | Quản lý hóa đơn / đơn hàng tổng                  | Quan hệ N - 1 với `Customer`, 1 - N với `OrderDetail` |
-| **`OrderDetail`**     | Chi tiết từng mặt hàng trong đơn hàng            | Quan hệ N - 1 với `Order`, N - 1 với `Product`        |
-| **`User`**            | Quản lý tài khoản đăng nhập (Admin)              | Độc lập                                               |
-| **`Menu`**            | Quản lý menu điều hướng hiển thị ở giao diện     | Độc lập                                               |
-| **`Banner`**          | Quản lý hình ảnh banner quảng cáo trên trang chủ | Độc lập                                               |
+| Tên Model (Entity)           | Chức năng nghiệp vụ                                  | Mối quan hệ                                               |
+| :---------------------------- | :------------------------------------------------------- | :---------------------------------------------------------- |
+| **`Category`**        | Quản lý danh mục bài viết / tin tức                | Quan hệ 1 - N với`Post`                                 |
+| **`Post`**            | Quản lý nội dung bài viết tin tức                  | Quan hệ N - 1 với`Category`                             |
+| **`CategoryProduct`** | Quản lý nhóm / danh mục của sản phẩm              | Quan hệ 1 - N với`Product`                              |
+| **`Product`**         | Quản lý thông tin hàng hóa, sản phẩm              | Quan hệ N - 1 với`CategoryProduct`                      |
+| **`Customer`**        | Thông tin khách hàng đặt mua                        | Quan hệ 1 - N với`Order`                                |
+| **`Order`**           | Quản lý hóa đơn / đơn hàng tổng                 | Quan hệ N - 1 với`Customer`, 1 - N với `OrderDetail` |
+| **`OrderDetail`**     | Chi tiết từng mặt hàng trong đơn hàng             | Quan hệ N - 1 với`Order`, N - 1 với `Product`        |
+| **`User`**            | Quản lý tài khoản đăng nhập (Admin)               | Độc lập                                                  |
+| **`Menu`**            | Quản lý menu điều hướng hiển thị ở giao diện   | Độc lập                                                  |
+| **`Banner`**          | Quản lý hình ảnh banner quảng cáo trên trang chủ | Độc lập                                                  |
 
 ---
 

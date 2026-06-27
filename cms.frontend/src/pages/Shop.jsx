@@ -65,7 +65,7 @@ export default function Shop() {
     const [availableColors, setAvailableColors] = useState([]);
 
     const getCategoryBannerInfo = () => {
-        let bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/04/web.webp";
+        let bannerUrl = "";
         let title = "Thời Trang Trung Niên";
         let desc = "Xu hướng thời trang trung niên cao cấp, tôn vinh vẻ đẹp mặn mà của phái đẹp Việt.";
 
@@ -77,38 +77,38 @@ export default function Shop() {
                 bannerUrl = cat.imageUrl.startsWith('http') ? cat.imageUrl : `${import.meta.env.VITE_API_URL || 'https://localhost:7030'}${cat.imageUrl}`;
             } else {
                 if (catName.includes("Đầm")) {
-                    bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp";
+                    bannerUrl = "";
                     desc = "Bộ sưu tập đầm trung niên dáng suông, đầm xòe, đầm dự tiệc thêu hoa sang trọng che khuyết điểm.";
                 } else if (catName.includes("Áo")) {
-                    bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/01/ao-kieu-trung-nien.webp";
+                    bannerUrl = "";
                     desc = "Các thiết kế áo kiểu trung niên, áo thun in, áo sơ mi lụa mềm mại mang lại sự thoải mái tự tin.";
                 } else if (catName.includes("Bộ")) {
-                    bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/do-bo-trung-nien-thieu-hoa.webp";
+                    bannerUrl = "";
                     desc = "Thiết kế đồ bộ mặc nhà, dạo phố rộng rãi mát mẻ từ chất liệu thun cotton, lụa satin tơ tằm.";
                 } else if (catName.includes("Túi")) {
-                    bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/tui-xach-camie-thieu-hoa.webp";
+                    bannerUrl = "";
                     desc = "Dòng túi xách Camie thiết kế thanh lịch, phụ kiện hoàn hảo cho set đồ trung niên quý phái.";
                 } else if (catName.includes("Khăn")) {
-                    bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/khan-choang-co-thieu-hoa.webp";
+                    bannerUrl = "";
                     desc = "Khăn choàng cổ lụa tơ tằm, khăn len cashmere giữ ấm và làm điểm nhấn quý phái cho trang phục.";
                 }
             }
         } else {
             if (customFilterType === "new") {
                 title = "HÀNG MỚI VỀ";
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp";
-                desc = "Khám phá ngay các mẫu thiết kế quần áo, váy trung niên mới nhất vừa lên kệ của Thiều Hoa.";
+                bannerUrl = "";
+                desc = "Khám phá ngay các mẫu thiết kế quần áo, váy trung niên mới nhất vừa lên kệ của ZeyChíc.";
             } else if (customFilterType === "sale") {
                 title = "SALE - OFF";
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/01/ao-kieu-trung-nien.webp";
+                bannerUrl = "";
                 desc = "Ưu đãi cực khủng lên đến 50% dành cho các sản phẩm thời trang trung niên thiết kế độc quyền.";
             } else if (customFilterType === "hot") {
                 title = "BÁN CHẠY";
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/tui-xach-camie-thieu-hoa.webp";
+                bannerUrl = "";
                 desc = "Tổng hợp những mẫu đầm suông, áo kiểu được hàng ngàn khách hàng yêu thích và săn lùng.";
             } else if (customFilterType === "gift") {
                 title = "QUÀ TẶNG MẸ";
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/khan-choang-co-thieu-hoa.webp";
+                bannerUrl = "";
                 desc = "Gợi ý những set quà tặng ý nghĩa, tinh tế nhất gửi gắm tình yêu kính đến những người mẹ thân thương.";
             }
         }
@@ -136,23 +136,25 @@ export default function Shop() {
                             </li>
                         </ol>
                     </nav>
-                    <div className="card border-0 rounded-lg overflow-hidden mb-4 shadow-sm" style={{ backgroundColor: '#F8F6F2' }}>
+                    <div className="card border-0 rounded-lg overflow-hidden mb-4 shadow-sm" style={{ backgroundColor: '#F5F5F5' }}>
                         <div className="row no-gutters align-items-center">
-                            <div className="col-md-7 p-5 text-left">
-                                <span className="badge badge-danger text-uppercase px-3 py-1 font-weight-bold mb-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem' }}>
+                            <div className={getCategoryBannerInfo().bannerUrl ? "col-md-7 p-5 text-left" : "col-12 p-5 text-left text-center"}>
+                                <span className="badge badge-danger text-uppercase px-3 py-1 font-weight-bold mb-3" style={{ backgroundColor: 'var(--zeychic-primary)', fontSize: '0.7rem' }}>
                                     Bộ Sưu Tập
                                 </span>
                                 <h2 className="font-weight-bold text-dark mb-3" style={{ fontSize: '2rem' }}>{getCategoryBannerInfo().title}</h2>
                                 <p className="text-muted leading-relaxed mb-0" style={{ fontSize: '0.95rem' }}>{getCategoryBannerInfo().desc}</p>
                             </div>
-                            <div className="col-md-5" style={{ height: '240px' }}>
-                                <img 
-                                    src={getCategoryBannerInfo().bannerUrl} 
-                                    alt={getCategoryBannerInfo().title} 
-                                    className="w-100 h-100" 
-                                    style={{ objectFit: 'cover' }} 
-                                />
-                            </div>
+                            {getCategoryBannerInfo().bannerUrl && (
+                                <div className="col-md-5 p-3" style={{ height: '240px' }}>
+                                    <img 
+                                        src={getCategoryBannerInfo().bannerUrl} 
+                                        alt={getCategoryBannerInfo().title} 
+                                        className="w-100 h-100" 
+                                        style={{ objectFit: 'contain' }} 
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -169,7 +171,7 @@ export default function Shop() {
                     <div className="card border-0 shadow-sm mb-4">
                         <div 
                             className="card-header bg-white font-weight-bold text-uppercase py-3 d-flex justify-content-between align-items-center" 
-                            style={{ color: 'var(--thieuhoa-primary)', borderBottom: '2px solid var(--thieuhoa-primary)', cursor: 'pointer' }}
+                            style={{ color: 'var(--zeychic-primary)', borderBottom: '2px solid var(--zeychic-primary)', cursor: 'pointer' }}
                             onClick={() => setIsProductFilterOpen(!isProductFilterOpen)}
                         >
                             <span><i className="fa-solid fa-list-ul mr-2"></i> Lọc sản phẩm</span>
@@ -178,16 +180,16 @@ export default function Shop() {
                         {isProductFilterOpen && (
                             <div className="card-body p-0">
                                 <ul className="list-group list-group-flush">
-                                    <button className={`list-group-item list-group-item-action border-0 py-3 ${selectedCategoryId === null && customFilterType === null ? 'font-weight-bold' : ''}`} onClick={() => navigate('/san-pham')} style={selectedCategoryId === null && customFilterType === null ? { color: 'var(--thieuhoa-primary)', backgroundColor: '#F8F6F2' } : {}}>
+                                    <button className={`list-group-item list-group-item-action border-0 py-3 ${selectedCategoryId === null && customFilterType === null ? 'font-weight-bold' : ''}`} onClick={() => navigate('/san-pham')} style={selectedCategoryId === null && customFilterType === null ? { color: 'var(--zeychic-primary)', backgroundColor: '#F5F5F5' } : {}}>
                                         <i className="fa-solid fa-angle-right mr-2" style={{ fontSize: '0.8rem', opacity: 0.5 }}></i> Tất cả sản phẩm
                                     </button>
-                                    <button className={`list-group-item list-group-item-action border-0 py-3 ${customFilterType === 'new' ? 'font-weight-bold' : ''}`} onClick={() => navigate('/san-pham?filter=new')} style={customFilterType === 'new' ? { color: 'var(--thieuhoa-primary)', backgroundColor: '#F8F6F2' } : {}}>
+                                    <button className={`list-group-item list-group-item-action border-0 py-3 ${customFilterType === 'new' ? 'font-weight-bold' : ''}`} onClick={() => navigate('/san-pham?filter=new')} style={customFilterType === 'new' ? { color: 'var(--zeychic-primary)', backgroundColor: '#F5F5F5' } : {}}>
                                         <i className="fa-solid fa-angle-right mr-2" style={{ fontSize: '0.8rem', opacity: 0.5 }}></i> Hàng mới về <span className="badge badge-danger float-right">NEW</span>
                                     </button>
-                                    <button className={`list-group-item list-group-item-action border-0 py-3 ${customFilterType === 'sale' ? 'font-weight-bold' : ''}`} onClick={() => navigate('/san-pham?filter=sale')} style={customFilterType === 'sale' ? { color: 'var(--thieuhoa-primary)', backgroundColor: '#F8F6F2' } : {}}>
+                                    <button className={`list-group-item list-group-item-action border-0 py-3 ${customFilterType === 'sale' ? 'font-weight-bold' : ''}`} onClick={() => navigate('/san-pham?filter=sale')} style={customFilterType === 'sale' ? { color: 'var(--zeychic-primary)', backgroundColor: '#F5F5F5' } : {}}>
                                         <i className="fa-solid fa-angle-right mr-2" style={{ fontSize: '0.8rem', opacity: 0.5 }}></i> Khuyến mãi <span className="badge badge-danger float-right">SALE</span>
                                     </button>
-                                    <button className={`list-group-item list-group-item-action border-0 py-3 ${customFilterType === 'hot' ? 'font-weight-bold' : ''}`} onClick={() => navigate('/san-pham?filter=hot')} style={customFilterType === 'hot' ? { color: 'var(--thieuhoa-primary)', backgroundColor: '#F8F6F2' } : {}}>
+                                    <button className={`list-group-item list-group-item-action border-0 py-3 ${customFilterType === 'hot' ? 'font-weight-bold' : ''}`} onClick={() => navigate('/san-pham?filter=hot')} style={customFilterType === 'hot' ? { color: 'var(--zeychic-primary)', backgroundColor: '#F5F5F5' } : {}}>
                                         <i className="fa-solid fa-angle-right mr-2" style={{ fontSize: '0.8rem', opacity: 0.5 }}></i> Bán chạy <span className="badge badge-danger float-right">HOT</span>
                                     </button>
                                 </ul>
@@ -207,7 +209,7 @@ export default function Shop() {
                         <div className="card border-0 shadow-sm mb-4">
                             <div 
                                 className="card-header bg-white font-weight-bold py-3 d-flex justify-content-between align-items-center" 
-                                style={{ borderBottom: '1px solid var(--thieuhoa-border)', cursor: 'pointer' }}
+                                style={{ borderBottom: '1px solid var(--zeychic-border)', cursor: 'pointer' }}
                                 onClick={() => setIsColorFilterOpen(!isColorFilterOpen)}
                             >
                                 Màu sắc
@@ -241,7 +243,7 @@ export default function Shop() {
                                                     className="btn btn-sm shadow-sm"
                                                     title={color.name}
                                                     style={{ 
-                                                        border: selectedColor === color.name ? '3px solid var(--thieuhoa-primary)' : '1px solid #ddd',
+                                                        border: selectedColor === color.name ? '3px solid var(--zeychic-primary)' : '1px solid #ddd',
                                                         backgroundColor: getColorHex(color.name),
                                                         width: '32px',
                                                         height: '32px',
@@ -264,7 +266,7 @@ export default function Shop() {
                         <div className="card border-0 shadow-sm mb-4">
                             <div 
                                 className="card-header bg-white font-weight-bold py-3 d-flex justify-content-between align-items-center" 
-                                style={{ borderBottom: '1px solid var(--thieuhoa-border)', cursor: 'pointer' }}
+                                style={{ borderBottom: '1px solid var(--zeychic-border)', cursor: 'pointer' }}
                                 onClick={() => setIsSizeFilterOpen(!isSizeFilterOpen)}
                             >
                                 Size
@@ -298,7 +300,7 @@ export default function Shop() {
                     <div className="card border-0 shadow-sm mb-4">
                         <div 
                             className="card-header bg-white font-weight-bold py-3 d-flex justify-content-between align-items-center" 
-                            style={{ borderBottom: '1px solid var(--thieuhoa-border)', cursor: 'pointer' }}
+                            style={{ borderBottom: '1px solid var(--zeychic-border)', cursor: 'pointer' }}
                             onClick={() => setIsPriceFilterOpen(!isPriceFilterOpen)}
                         >
                             Lọc theo giá
@@ -323,7 +325,7 @@ export default function Shop() {
                                         onChange={(e) => setMaxPrice(e.target.value)} 
                                     />
                                 </div>
-                                <button className="btn btn-sm btn-outline-danger w-100 mt-2" onClick={handleApplyPriceFilter} style={{ borderColor: 'var(--thieuhoa-primary)', color: 'var(--thieuhoa-primary)' }}>
+                                <button className="btn btn-sm btn-outline-danger w-100 mt-2" onClick={handleApplyPriceFilter} style={{ borderColor: 'var(--zeychic-primary)', color: 'var(--zeychic-primary)' }}>
                                     Áp dụng
                                 </button>
                             </div>
@@ -332,7 +334,7 @@ export default function Shop() {
                 </aside>
                 <section className="col-lg-9 col-md-8">
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h4 className="font-weight-bold text-uppercase m-0" style={{ color: 'var(--thieuhoa-primary)' }}>
+                        <h4 className="font-weight-bold text-uppercase m-0" style={{ color: 'var(--zeychic-primary)' }}>
                             {searchQuery ? `Kết quả tìm kiếm: "${searchQuery}"` :
                              selectedCategoryId !== null ? 'Danh mục sản phẩm' :
                              customFilterType === 'new' ? 'Hàng mới về' :

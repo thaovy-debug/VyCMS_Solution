@@ -92,7 +92,9 @@ namespace CMS.Backend.Controllers
                     customer.FullName,
                     customer.Email,
                     customer.Phone,
-                    customer.Address
+                    customer.Address,
+                    customer.AvatarUrl,
+                    customer.AddressBook
                 }
             });
         }

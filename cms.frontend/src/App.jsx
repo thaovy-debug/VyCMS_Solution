@@ -2,7 +2,7 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Component chính App tích hợp toàn bộ giao diện Thiều Hoa kết nối Database API, đảm bảo giao diện sang trọng, chuyên nghiệp
+Mo ta: Component chính App tích hợp toàn bộ giao diện ZeyChíc kết nối Database API, đảm bảo giao diện sang trọng, chuyên nghiệp
 Ngay thuc hien: 15/05/2026
 */
 
@@ -26,8 +26,9 @@ import categoryProductService from './services/categoryProductService'; // Nhậ
 import productService from './services/productService'; // Nhập dịch vụ lấy sản phẩm từ Backend CSDL
 import bannerService from './services/bannerService'; // Nhập dịch vụ lấy banner
 import menuService from './services/menuService'; // Nhập dịch vụ lấy menu
+import notificationService from './services/notificationService'; // Nhập dịch vụ lấy thông báo
 import logoImg from './assets/imgs/logo.png'; // Logo hình ảnh
-import './App.css'; // Nhập tệp cấu hình CSS giao diện bổ trợ của Thiều Hoa
+import './App.css'; // Nhập tệp cấu hình CSS giao diện bổ trợ của ZeyChíc
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -35,12 +36,44 @@ function App() { // Định nghĩa component chính App của dự án
     // Khai báo state để chứa danh mục phục vụ hiển thị trên Menu ngang
     const [categories, setCategories] = useState([]); // Khởi tạo state categories và hàm setCategories
     const [menus, setMenus] = useState([]); // State chứa các menu động từ database
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
     const [cartCount, setCartCount] = useState(() => {
         const customer = JSON.parse(localStorage.getItem('customer'));
         const cartKey = customer ? `cart_${customer.id}` : 'cart_guest';
         const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
         return cart.reduce((sum, item) => sum + item.quantity, 0);
     });
+
+    useEffect(() => {
+        const loadNotifications = async () => {
+            const currentCustomer = JSON.parse(localStorage.getItem('customer'));
+            if (currentCustomer && currentCustomer.id) {
+                try {
+                    const data = await notificationService.getNotifications(currentCustomer.id);
+                    setNotifications(data);
+                } catch (error) {
+                    console.error("Lỗi khi tải thông báo:", error);
+                }
+            } else {
+                setNotifications([]);
+            }
+        };
+
+        loadNotifications();
+        const intervalId = setInterval(loadNotifications, 10000);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    const handleMarkAsRead = async (id) => {
+        try {
+            await notificationService.markAsRead(id);
+            setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+        } catch (error) {
+            console.error("Lỗi cập nhật thông báo:", error);
+        }
+    };
 
     useEffect(() => {
         const updateCartCount = () => {
@@ -147,7 +180,7 @@ function App() { // Định nghĩa component chính App của dự án
     }; // Kết thúc định nghĩa hàm handleCategoryClick
 
     const getCategoryBannerInfo = () => { // Hàm trả về thông tin banner của danh mục
-        let bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/04/web.webp"; // Link banner mặc định
+        let bannerUrl = ""; // Link banner mặc định
         let title = "Thời Trang Trung Niên"; // Tiêu đề mặc định
         let desc = "Xu hướng thời trang trung niên cao cấp, tôn vinh vẻ đẹp mặn mà của phái đẹp Việt."; // Mô tả mặc định
 
@@ -155,37 +188,37 @@ function App() { // Định nghĩa component chính App của dự án
             const catName = categories.find(c => c.id === selectedCategoryId)?.name || ""; // Tìm tên danh mục
             title = catName; // Gán tiêu đề bằng tên danh mục
             if (catName.includes("Đầm")) { // Nếu là đầm
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp";
+                bannerUrl = "";
                 desc = "Bộ sưu tập đầm trung niên dáng suông, đầm xòe, đầm dự tiệc thêu hoa sang trọng che khuyết điểm.";
             } else if (catName.includes("Áo")) { // Nếu là áo
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/01/ao-kieu-trung-nien.webp";
+                bannerUrl = "";
                 desc = "Các thiết kế áo kiểu trung niên, áo thun in, áo sơ mi lụa mềm mại mang lại sự thoải mái tự tin.";
             } else if (catName.includes("Bộ")) { // Nếu là đồ bộ
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/do-bo-trung-nien-thieu-hoa.webp";
+                bannerUrl = "";
                 desc = "Thiết kế đồ bộ mặc nhà, dạo phố rộng rãi mát mẻ từ chất liệu thun cotton, lụa satin tơ tằm.";
             } else if (catName.includes("Túi")) { // Nếu là túi xách
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/tui-xach-camie-thieu-hoa.webp";
+                bannerUrl = "";
                 desc = "Dòng túi xách Camie thiết kế thanh lịch, phụ kiện hoàn hảo cho set đồ trung niên quý phái.";
             } else if (catName.includes("Khăn")) { // Nếu là khăn
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/khan-choang-co-thieu-hoa.webp";
+                bannerUrl = "";
                 desc = "Khăn choàng cổ lụa tơ tằm, khăn len cashmere giữ ấm và làm điểm nhấn quý phái cho trang phục.";
             } // Kết thúc lọc danh mục
         } else { // Ngược lại nếu là bộ lọc đặc biệt
             if (customFilterType === "new") { // Nếu là mới
                 title = "HÀNG MỚI VỀ"; // Đặt tiêu đề
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp"; // Banner cho hàng mới
-                desc = "Khám phá ngay các mẫu thiết kế quần áo, váy trung niên mới nhất vừa lên kệ của Thiều Hoa."; // Mô tả
+                bannerUrl = ""; // Banner cho hàng mới
+                desc = "Khám phá ngay các mẫu thiết kế quần áo, váy trung niên mới nhất vừa lên kệ của ZeyChíc."; // Mô tả
             } else if (customFilterType === "sale") { // Nếu là sale
                 title = "SALE - OFF"; // Tiêu đề
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/01/ao-kieu-trung-nien.webp"; // Banner sale
+                bannerUrl = ""; // Banner sale
                 desc = "Ưu đãi cực khủng lên đến 50% dành cho các sản phẩm thời trang trung niên thiết kế độc quyền."; // Mô tả
             } else if (customFilterType === "hot") { // Nếu là bán chạy
                 title = "BÁN CHẠY"; // Tiêu đề
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/tui-xach-camie-thieu-hoa.webp"; // Banner hot
+                bannerUrl = ""; // Banner hot
                 desc = "Tổng hợp những mẫu đầm suông, áo kiểu được hàng ngàn khách hàng yêu thích và săn lùng."; // Mô tả
             } else if (customFilterType === "gift") { // Nếu là quà tặng mẹ
                 title = "QUÀ TẶNG MẸ"; // Tiêu đề
-                bannerUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/khan-choang-co-thieu-hoa.webp"; // Banner quà tặng
+                bannerUrl = ""; // Banner quà tặng
                 desc = "Gợi ý những set quà tặng ý nghĩa, tinh tế nhất gửi gắm tình yêu kính đến những người mẹ thân thương."; // Mô tả
             } // Kết thúc kiểm tra bộ lọc đặc biệt
         } // Kết thúc kiểm tra danh mục
@@ -207,18 +240,18 @@ function App() { // Định nghĩa component chính App của dự án
     };
 
     return ( // Trả về cấu trúc giao diện JSX của website
-        <div className="w-100 min-vh-100 d-flex flex-column" style={{ backgroundColor: 'var(--thieuhoa-bg)' }}> {/* Thẻ bao bọc toàn bộ trang web full-width */}
+        <div className="w-100 min-vh-100 d-flex flex-column" style={{ backgroundColor: 'var(--zeychic-bg)' }}> {/* Thẻ bao bọc toàn bộ trang web full-width */}
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />
             
             {/* PHẦN 1: THANH THÔNG BÁO KHUYẾN MÃI TRÊN CÙNG (TOP BAR) */}
-            <div className="thieuhoa-topbar text-center"> {/* Thanh thông báo đỏ nâu chữ trắng nhỏ */}
+            <div className="zeychic-topbar text-center"> {/* Thanh thông báo đỏ nâu chữ trắng nhỏ */}
                 <div className="container"> {/* Khung container căn chỉnh lề */}
-                    <span className="font-weight-bold"><i className="fa-solid fa-truck mr-2"></i> MIỄN PHÍ VẬN CHUYỂN CHO ĐƠN HÀNG TỪ 200K | ĐƯỢC KIỂM TRA HÀNG TRƯỚC KHI THANH TOÁN</span> {/* Nội dung khuyến mãi chuẩn Thiều Hoa */}
+                    <span className="font-weight-bold"><i className="fa-solid fa-truck mr-2"></i> MIỄN PHÍ VẬN CHUYỂN CHO ĐƠN HÀNG TỪ 200K | ĐƯỢC KIỂM TRA HÀNG TRƯỚC KHI THANH TOÁN</span> {/* Nội dung khuyến mãi chuẩn ZeyChíc */}
                 </div> {/* Kết thúc container */}
-            </div> {/* Kết thúc thieuhoa-topbar */}
+            </div> {/* Kết thúc zeychic-topbar */}
 
             {/* PHẦN 2: ĐẦU TRANG CHÍNH (HEADER) */}
-            <header className="bg-white py-3 shadow-sm" style={{ borderBottom: '1px solid var(--thieuhoa-border)' }}> {/* Khung header trắng bóng mờ */}
+            <header className="bg-white py-3 shadow-sm" style={{ borderBottom: '1px solid var(--zeychic-border)', position: 'relative', zIndex: 1050 }}> {/* Khung header trắng bóng mờ */}
                 <div className="container"> {/* Khung container căn chỉnh */}
                     <div className="row align-items-center"> {/* Hàng ngang đầu tiên chứa các thành phần chính */}
                         
@@ -226,21 +259,21 @@ function App() { // Định nghĩa component chính App của dự án
                         <div className="col-md-4 d-none d-md-flex align-items-center" style={{ gap: '20px' }}> {/* Chiếm 4/12 lưới, ẩn trên mobile */}
                             {/* Hệ thống cửa hàng */}
                             <Link to="/he-thong-cua-hang" className="d-flex align-items-center text-secondary text-decoration-none hover-link" style={{ fontSize: '0.85rem' }}> {/* Liên kết cửa hàng */}
-                                <i className="fa-solid fa-location-dot mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon định vị */}
+                                <i className="fa-solid fa-location-dot mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--zeychic-primary)' }}></i> {/* Icon định vị */}
                                 <span className="font-weight-bold">Cửa hàng</span> {/* Nhãn chữ */}
                             </Link> {/* Kết thúc liên kết */}
 
                             {/* Hotline hỗ trợ miễn phí */}
                             <div className="d-flex align-items-center text-secondary" style={{ fontSize: '0.85rem' }}> {/* Hotline */}
-                                <i className="fa-solid fa-headset mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon tai nghe */}
-                                <span className="font-weight-bold">Hotline: <span style={{ color: 'var(--thieuhoa-primary)' }}>1800 6246</span> (Miễn Phí)</span> {/* Số điện thoại */}
+                                <i className="fa-solid fa-headset mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--zeychic-primary)' }}></i> {/* Icon tai nghe */}
+                                <span className="font-weight-bold">Hotline: <span style={{ color: 'var(--zeychic-primary)' }}>1800 6246</span> (Miễn Phí)</span> {/* Số điện thoại */}
                             </div> {/* Kết thúc hotline */}
                         </div> {/* Kết thúc cột trái */}
 
-                        {/* Cột giữa: Logo thương hiệu Thiều Hoa chính thức */}
+                        {/* Cột giữa: Logo thương hiệu ZeyChíc chính thức */}
                         <div className="col-md-4 col-6 text-center"> {/* Chiếm 4/12 trên desktop, 6/12 trên mobile */}
                             <Link to="/" className="d-inline-block text-decoration-none py-2"> {/* Liên kết trang chủ */}
-                                <img src={logoImg} alt="Thiều Hoa - Xu Hướng Phái Đẹp" style={{ height: '85px', objectFit: 'contain' }} />
+                                <img src={logoImg} alt="ZeyChíc - Xu Hướng Phái Đẹp" style={{ height: '85px', objectFit: 'contain' }} />
                             </Link> {/* Kết thúc liên kết */}
                         </div> {/* Kết thúc cột giữa */}
 
@@ -249,20 +282,75 @@ function App() { // Định nghĩa component chính App của dự án
                             {/* Đăng nhập tài khoản thành viên */}
                             {customer ? (
                                 <Link to="/profile" className="d-flex align-items-center text-secondary text-decoration-none hover-link" style={{ cursor: 'pointer' }}>
-                                    <i className="fa-solid fa-user-check mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i>
+                                    <i className="fa-solid fa-user-check mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--zeychic-primary)' }}></i>
                                     <span className="d-none d-md-inline font-weight-bold" title="Trang cá nhân">Xin chào {customer.fullName}</span>
                                 </Link>
                             ) : (
                                 <Link to="/login" className="d-flex align-items-center text-secondary text-decoration-none hover-link"> {/* Nút liên kết đăng nhập */}
-                                    <i className="fa-regular fa-user mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon người dùng */}
+                                    <i className="fa-regular fa-user mr-2 text-danger" style={{ fontSize: '1.1rem', color: 'var(--zeychic-primary)' }}></i> {/* Icon người dùng */}
                                     <span className="d-none d-md-inline font-weight-bold">Tài khoản</span> {/* Nhãn chữ */}
                                 </Link>
                             )}
 
+                            {/* Chuông thông báo */}
+                            {customer && (
+                                <div className="position-relative" style={{ cursor: 'pointer' }}>
+                                    <div onClick={() => setShowNotifications(!showNotifications)} className="d-flex align-items-center text-dark hover-link position-relative">
+                                        <i className="fa-regular fa-bell text-danger" style={{ fontSize: '1.3rem', color: 'var(--zeychic-primary)' }}></i>
+                                        {notifications.filter(n => !n.isRead).length > 0 && (
+                                            <span className="position-absolute badge badge-danger badge-pill font-weight-bold" style={{ top: '-8px', right: '-8px', backgroundColor: 'var(--zeychic-primary)', fontSize: '0.65rem' }}>
+                                                {notifications.filter(n => !n.isRead).length}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {showNotifications && (
+                                        <div className="dropdown-menu dropdown-menu-right show shadow p-0" style={{ position: 'absolute', right: 0, top: '40px', width: '320px', zIndex: 1050, borderRadius: '8px', border: '1px solid #eee' }}>
+                                            <div className="p-3 border-bottom bg-light d-flex justify-content-between align-items-center" style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}>
+                                                <h6 className="m-0 font-weight-bold">Thông báo</h6>
+                                                <span 
+                                                    style={{ fontSize: '0.8rem', cursor: 'pointer', color: 'var(--zeychic-primary)' }} 
+                                                    onClick={async () => {
+                                                        try {
+                                                            await notificationService.markAllAsRead(customer.id);
+                                                            setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+                                                        } catch(e) {}
+                                                    }}
+                                                >
+                                                    Đánh dấu đã đọc
+                                                </span>
+                                            </div>
+                                            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                                {notifications.length === 0 ? (
+                                                    <div className="p-4 text-center text-muted">Không có thông báo nào</div>
+                                                ) : (
+                                                    notifications.map(n => (
+                                                        <div 
+                                                            key={n.id} 
+                                                            className={`p-3 border-bottom ${!n.isRead ? 'bg-white' : ''}`}
+                                                            style={{ cursor: 'pointer', backgroundColor: !n.isRead ? '#fff9f9' : '#fff', transition: 'background-color 0.2s' }}
+                                                            onClick={() => {
+                                                                if (!n.isRead) handleMarkAsRead(n.id);
+                                                                setShowNotifications(false);
+                                                                if (n.type === 'Order' || n.type === 'AdminMessage') navigate('/profile', { state: { tab: 'orders' } });
+                                                                if (n.type === 'Review') navigate(`/product/${n.relatedId}`);
+                                                            }}
+                                                        >
+                                                            <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.9rem', color: !n.isRead ? 'var(--zeychic-primary)' : '#333' }}>{n.title}</h6>
+                                                            <p className="mb-1 text-muted" style={{ fontSize: '0.85rem' }}>{n.message}</p>
+                                                            <small className="text-muted" style={{ fontSize: '0.75rem' }}>{new Date(n.createdDate).toLocaleString('vi-VN')}</small>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Giỏ hàng mua sắm */}
                             <Link to="/gio-hang" className="d-flex align-items-center text-dark text-decoration-none hover-link position-relative"> {/* Nút liên kết giỏ hàng */}
-                                <i className="fa-solid fa-bag-shopping text-danger" style={{ fontSize: '1.3rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon túi xách */}
-                                <span className="position-absolute badge badge-danger badge-pill font-weight-bold" style={{ top: '-8px', right: '-8px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.65rem' }}>{cartCount}</span> {/* Số lượng sản phẩm */}
+                                <i className="fa-solid fa-bag-shopping text-danger" style={{ fontSize: '1.3rem', color: 'var(--zeychic-primary)' }}></i> {/* Icon túi xách */}
+                                <span className="position-absolute badge badge-danger badge-pill font-weight-bold" style={{ top: '-8px', right: '-8px', backgroundColor: 'var(--zeychic-primary)', fontSize: '0.65rem' }}>{cartCount}</span> {/* Số lượng sản phẩm */}
                             </Link> {/* Kết thúc liên kết */}
                         </div> {/* Kết thúc cột phải */}
                         
@@ -271,7 +359,7 @@ function App() { // Định nghĩa component chính App của dự án
             </header> {/* Kết thúc header */}
 
             {/* PHẦN 3: THANH NAVBAR ĐIỀU HƯỚNG CHÍNH VÀ Ô TÌM KIẾM (HORIZONTAL NAVBAR & SEARCH ROW) */}
-            <nav className="thieuhoa-navbar sticky-top"> {/* Thanh menu ngang dính sát khi cuộn */}
+            <nav className="zeychic-navbar sticky-top"> {/* Thanh menu ngang dính sát khi cuộn */}
                 <div className="container"> {/* Khung container */}
                     <div className="d-flex flex-column flex-md-row justify-content-between align-items-center py-1 py-md-0" style={{ gap: '15px' }}> {/* Flexbox bố trí ngang trên desktop, dọc trên mobile */}
                         
@@ -285,7 +373,7 @@ function App() { // Định nghĩa component chính App của dự án
                                         <div key={menu.id} className="mega-menu-hover"> {/* Lớp cha hover */}
                                             <Link 
                                                 to={menu.link} 
-                                                className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${selectedCategoryId === null && customFilterType === null && window.location.pathname === '/san-pham' ? 'active' : ''}`} 
+                                                className={`btn zeychic-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${selectedCategoryId === null && customFilterType === null && window.location.pathname === '/san-pham' ? 'active' : ''}`} 
                                                 style={{ outline: 'none', padding: '14px 15px !important', textTransform: 'uppercase' }}
                                             >
                                                 {menu.name} <i className="fa-solid fa-chevron-down ml-1" style={{ fontSize: '0.7rem' }}></i>
@@ -376,7 +464,7 @@ function App() { // Định nghĩa component chính App của dự án
                                     <Link 
                                         key={menu.id}
                                         to={menu.link}
-                                        className={`btn thieuhoa-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${isActive ? 'active' : ''}`}
+                                        className={`btn zeychic-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${isActive ? 'active' : ''}`}
                                         style={{ outline: 'none', padding: '14px 15px !important', textTransform: 'uppercase' }}
                                     >
                                         {menu.name}
@@ -397,7 +485,7 @@ function App() { // Định nghĩa component chính App của dự án
                                     placeholder="Tìm kiếm sản phẩm..." // Gợi ý nhập liệu
                                     style={{
                                         borderRadius: '50px 0 0 50px', // Bo tròn hai góc bên trái
-                                        border: '1.5px solid var(--thieuhoa-border)', // Viền xám kem
+                                        border: '1.5px solid var(--zeychic-border)', // Viền xám kem
                                         borderRight: 'none', // Bỏ viền phải
                                         fontSize: '0.85rem', // Chữ nhỏ gọn
                                         paddingLeft: '15px', // Đệm lề trái
@@ -409,8 +497,8 @@ function App() { // Định nghĩa component chính App của dự án
                                         className="btn d-flex align-items-center justify-content-center" 
                                         type="submit"
                                         style={{
-                                            backgroundColor: 'var(--thieuhoa-primary)', // Nền đỏ nâu
-                                            borderColor: 'var(--thieuhoa-primary)', // Viền đỏ nâu
+                                            backgroundColor: 'var(--zeychic-primary)', // Nền đỏ nâu
+                                            borderColor: 'var(--zeychic-primary)', // Viền đỏ nâu
                                             borderRadius: '0 50px 50px 0', // Bo tròn hai góc bên phải
                                             padding: '0 16px', // Khoảng đệm ngang vừa vặn
                                             height: '100%' // Chiều cao full
@@ -448,7 +536,7 @@ function App() { // Định nghĩa component chính App của dự án
                             {banners.length > 1 && (
                                 <ol className="carousel-indicators">
                                     {banners.map((_, idx) => (
-                                        <li key={idx} data-target="#heroCarousel" data-slide-to={idx} className={idx === 0 ? "active" : ""} style={{ backgroundColor: 'var(--thieuhoa-primary)', height: '4px', borderRadius: '4px' }}></li>
+                                        <li key={idx} data-target="#heroCarousel" data-slide-to={idx} className={idx === 0 ? "active" : ""} style={{ backgroundColor: 'var(--zeychic-primary)', height: '4px', borderRadius: '4px' }}></li>
                                     ))}
                                 </ol>
                             )}
@@ -482,14 +570,14 @@ function App() { // Định nghĩa component chính App của dự án
                     ) : null}
 
             {/* PHẦN 5: CHÍNH SÁCH CAM KẾT THƯƠNG HIỆU (BRAND COMMITMENT) */}
-            <section className="py-4 shadow-sm" style={{ backgroundColor: '#f5f5f5', borderBottom: '1px solid var(--thieuhoa-border)' }}> {/* Phần cam kết nền xám nhạt tăng uy tín */}
+            <section className="py-4 shadow-sm" style={{ backgroundColor: '#f5f5f5', borderBottom: '1px solid var(--zeychic-border)' }}> {/* Phần cam kết nền xám nhạt tăng uy tín */}
                 <div className="container"> {/* Khung container */}
                     <div className="row text-center"> {/* Hàng ngang chứa các cam kết */}
                         
                         {/* Cam kết 1: Giá tốt nhất */}
-                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--thieuhoa-border)' }}> {/* Cột cam kết 1 */}
+                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--zeychic-border)' }}> {/* Cột cam kết 1 */}
                             <div className="d-flex align-items-center justify-content-center text-left px-2"> {/* Căn lề */}
-                                <i className="fa-solid fa-tags text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon thẻ giá */}
+                                <i className="fa-solid fa-tags text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--zeychic-primary)' }}></i> {/* Icon thẻ giá */}
                                 <div> {/* Thẻ bao */}
                                     <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.88rem' }}>Giá tốt nhất</h6> {/* Tiêu đề */}
                                     <p className="small text-muted mb-0" style={{ fontSize: '0.78rem' }}>Giảm 15% đơn hàng đầu tiên</p> {/* Mô tả */}
@@ -498,9 +586,9 @@ function App() { // Định nghĩa component chính App của dự án
                         </div> {/* Kết thúc cột cam kết 1 */}
 
                         {/* Cam kết 2: 100% Made in Viet Nam */}
-                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--thieuhoa-border)' }}> {/* Cột cam kết 2 */}
+                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--zeychic-border)' }}> {/* Cột cam kết 2 */}
                             <div className="d-flex align-items-center justify-content-center text-left px-2"> {/* Căn lề */}
-                                <i className="fa-solid fa-hand-holding-heart text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon trái tim nâng niu */}
+                                <i className="fa-solid fa-hand-holding-heart text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--zeychic-primary)' }}></i> {/* Icon trái tim nâng niu */}
                                 <div> {/* Thẻ bao */}
                                     <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.88rem' }}>100% Made in Viet Nam</h6> {/* Tiêu đề */}
                                     <p className="small text-muted mb-0" style={{ fontSize: '0.78rem' }}>Thử hàng và thanh toán khi nhận</p> {/* Mô tả */}
@@ -509,9 +597,9 @@ function App() { // Định nghĩa component chính App của dự án
                         </div> {/* Kết thúc cột cam kết 2 */}
 
                         {/* Cam kết 3: Cam kết 1 đổi 1 */}
-                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--thieuhoa-border)' }}> {/* Cột cam kết 3 */}
+                        <div className="col-lg-3 col-sm-6 mb-3 mb-lg-0 border-right" style={{ borderColor: 'var(--zeychic-border)' }}> {/* Cột cam kết 3 */}
                             <div className="d-flex align-items-center justify-content-center text-left px-2"> {/* Căn lề */}
-                                <i className="fa-solid fa-shield-halved text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon bảo vệ */}
+                                <i className="fa-solid fa-shield-halved text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--zeychic-primary)' }}></i> {/* Icon bảo vệ */}
                                 <div> {/* Thẻ bao */}
                                     <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.88rem' }}>Cam kết 1 đổi 1</h6> {/* Tiêu đề */}
                                     <p className="small text-muted mb-0" style={{ fontSize: '0.78rem' }}>Trong vòng 7 ngày đổi mẫu thoải mái</p> {/* Mô tả */}
@@ -522,7 +610,7 @@ function App() { // Định nghĩa component chính App của dự án
                         {/* Cam kết 4: Giao hàng 4H */}
                         <div className="col-lg-3 col-sm-6"> {/* Cột cam kết 4 */}
                             <div className="d-flex align-items-center justify-content-center text-left px-2"> {/* Căn lề */}
-                                <i className="fa-solid fa-clock text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--thieuhoa-primary)' }}></i> {/* Icon đồng hồ */}
+                                <i className="fa-solid fa-clock text-danger mr-3" style={{ fontSize: '2rem', color: 'var(--zeychic-primary)' }}></i> {/* Icon đồng hồ */}
                                 <div> {/* Thẻ bao */}
                                     <h6 className="font-weight-bold mb-1" style={{ fontSize: '0.88rem' }}>Giao hàng nhanh 4H</h6> {/* Tiêu đề */}
                                     <p className="small text-muted mb-0" style={{ fontSize: '0.78rem' }}>Nội thành Tp.HCM và Hà Nội</p> {/* Mô tả */}
@@ -534,12 +622,12 @@ function App() { // Định nghĩa component chính App của dự án
                 </div> {/* Kết thúc container */}
             </section> {/* Kết thúc chính sách cam kết */}
 
-            {/* PHẦN DANH MỤC THỜI TRANG TRUNG NIÊN - 10 HỘP ĐẶC TRƯNG PHONG CÁCH THIỀU HOA */}
-            <section className="py-5" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--thieuhoa-border)' }}> {/* Vùng danh mục nền trắng */}
+            {/* PHẦN DANH MỤC THỜI TRANG TRUNG NIÊN - 10 HỘP ĐẶC TRƯNG PHONG CÁCH ZEYCHÍC */}
+            <section className="py-5" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--zeychic-border)' }}> {/* Vùng danh mục nền trắng */}
                 <div className="container"> {/* Khung container */}
                     <div className="text-center mb-4"> {/* Căn giữa tiêu đề */}
                         <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1px', fontSize: '1.4rem' }}>Danh Mục Sản Phẩm</h3> {/* Tiêu đề chính */}
-                        <div className="mx-auto" style={{ width: '60px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div> {/* Dòng gạch dưới đỏ nâu */}
+                        <div className="mx-auto" style={{ width: '60px', height: '3px', backgroundColor: 'var(--zeychic-primary)' }}></div> {/* Dòng gạch dưới đỏ nâu */}
                     </div> {/* Kết thúc tiêu đề */}
 
                     <div className="d-flex flex-wrap justify-content-center mt-3" style={{ gap: '2rem' }}> {/* Sử dụng flexbox thay vì grid để tự động dàn đều trên 1 hàng ngang */}
@@ -572,19 +660,19 @@ function App() { // Định nghĩa component chính App của dự án
 
                             return sortedCategories.map((cat, index) => {
                                 // Cấu hình hình ảnh dựa vào DB hoặc mặc định
-                                let imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/04/web.webp";
+                                let imgUrl = "";
                                 if (cat.imageUrl) {
                                     imgUrl = cat.imageUrl.startsWith('http') ? cat.imageUrl : `${import.meta.env.VITE_API_URL}${cat.imageUrl}`;
                                 } else {
                                     const nameLower = cat.name.toLowerCase();
-                                    if (nameLower.includes("đầm")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp";
+                                    if (nameLower.includes("đầm")) imgUrl = "";
                                     else if (nameLower.includes("quần")) imgUrl = "https://file.hstatic.net/200000182297/article/quan-ong-rong-nu-cong-so_ba0dfcefc1fa4543afbe43b35123d51c.jpg";
-                                    else if (nameLower.includes("áo")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/01/ao-kieu-trung-nien.webp";
+                                    else if (nameLower.includes("áo")) imgUrl = "";
                                     else if (nameLower.includes("chân váy")) imgUrl = "https://file.hstatic.net/200000182297/article/chan-vay-xep-ly-dai_2c419356d2ee4fbcbb07deaf6bb2013f.jpg";
-                                    else if (nameLower.includes("phụ kiện") || nameLower.includes("túi")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/tui-xach-camie-thieu-hoa.webp";
+                                    else if (nameLower.includes("phụ kiện") || nameLower.includes("túi")) imgUrl = "";
                                     else if (nameLower.includes("sale")) imgUrl = "https://storage.googleapis.com/a1aa/image/eI5WqA4K2K20BS1b8XJ3WJ3rB2y2o1P1S3y2o1P1S3y2o1P.jpg"; // Ảnh icon SALE
-                                    else if (nameLower.includes("bộ")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/do-bo-trung-nien-thieu-hoa.webp";
-                                    else if (nameLower.includes("khăn")) imgUrl = "https://thieuhoa.com.vn/wp-content/uploads/2026/02/khan-choang-co-thieu-hoa.webp";
+                                    else if (nameLower.includes("bộ")) imgUrl = "";
+                                    else if (nameLower.includes("khăn")) imgUrl = "";
                                 }
 
                                 return (
@@ -608,7 +696,7 @@ function App() { // Định nghĩa component chính App của dự án
                                                 className="rounded-circle overflow-hidden mx-auto mb-2 shadow-sm d-flex align-items-center justify-content-center"
                                                 style={{ width: '110px', height: '110px', border: '3px solid #f2f0eb', backgroundColor: '#fff' }}
                                             >
-                                                <img src={imgUrl} alt={cat.name} className="w-100 h-100" style={{ objectFit: 'cover' }} />
+                                                {imgUrl ? <img src={imgUrl} alt={cat.name} className="w-100 h-100" style={{ objectFit: 'cover' }} /> : <span className="font-weight-bold" style={{ fontSize: '2.5rem', color: 'var(--zeychic-primary)' }}>{cat.name.charAt(0).toUpperCase()}</span>}
                                             </div>
                                             <span className="font-weight-bold text-dark d-block mt-2" style={{ fontSize: '0.9rem' }}>{cat.name}</span> {/* Nhãn chữ động */}
                                         </button> {/* Kết thúc nút */}
@@ -648,10 +736,10 @@ function App() { // Định nghĩa component chính App của dự án
                         </nav>
 
                         {/* Banner danh mục thời trang lớn tương ứng */}
-                        <div className="card border-0 rounded-lg overflow-hidden mb-4 shadow-sm" style={{ backgroundColor: '#F8F6F2' }}>
+                        <div className="card border-0 rounded-lg overflow-hidden mb-4 shadow-sm" style={{ backgroundColor: '#F5F5F5' }}>
                             <div className="row no-gutters align-items-center">
                                 <div className="col-md-7 p-5 text-left">
-                                    <span className="badge badge-danger text-uppercase px-3 py-1 font-weight-bold mb-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem' }}>
+                                    <span className="badge badge-danger text-uppercase px-3 py-1 font-weight-bold mb-3" style={{ backgroundColor: 'var(--zeychic-primary)', fontSize: '0.7rem' }}>
                                         Bộ Sưu Tập
                                     </span>
                                     <h2 className="font-weight-bold text-dark mb-3" style={{ fontSize: '2rem' }}>{getCategoryBannerInfo().title}</h2>
@@ -678,7 +766,7 @@ function App() { // Định nghĩa component chính App của dự án
                         <section id="hang-moi-ve-sec" className="mb-5 pb-3">
                             <div className="text-center mb-4">
                                 <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem' }}>HÀNG MỚI VỀ</h3>
-                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
+                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--zeychic-primary)' }}></div>
                             </div>
                             <div className="row">
                                 {renderHomepageProductGrid([...allProducts].filter(p => p.isNew).sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)).slice(0, 4))}
@@ -697,8 +785,8 @@ function App() { // Định nghĩa component chính App của dự án
                         {/* CỤM 2: SALE OFF */}
                         <section className="mb-5 pb-3" style={{ backgroundColor: '#FDFBF7', padding: '30px 15px', borderRadius: '12px' }}>
                             <div className="text-center mb-4">
-                                <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem', color: 'var(--thieuhoa-primary)' }}>SALE OFF</h3>
-                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
+                                <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem', color: 'var(--zeychic-primary)' }}>SALE OFF</h3>
+                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--zeychic-primary)' }}></div>
                             </div>
                             <div className="row">
                                 {renderHomepageProductGrid(allProducts.filter(p => p.discountPercent && p.discountPercent > 0).slice(0, 4))}
@@ -718,7 +806,7 @@ function App() { // Định nghĩa component chính App của dự án
                         <section id="ban-chay-sec" className="mb-5 pb-3">
                             <div className="text-center mb-4">
                                 <h3 className="text-uppercase font-weight-bold text-dark mb-1" style={{ letterSpacing: '1.5px', fontSize: '1.4rem' }}>BÁN CHẠY</h3>
-                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--thieuhoa-primary)' }}></div>
+                                <div className="mx-auto" style={{ width: '50px', height: '3px', backgroundColor: 'var(--zeychic-primary)' }}></div>
                             </div>
                             <div className="row">
                                 {renderHomepageProductGrid([...allProducts].filter(p => p.isHot).slice(0, 4))}
@@ -753,13 +841,13 @@ function App() { // Định nghĩa component chính App của dự án
                             <div className="card shadow-sm border-0 rounded-lg overflow-hidden mt-4 d-none d-md-block">
                                 <div className="position-relative" style={{ height: '340px' }}>
                                     <img 
-                                        src="https://thieuhoa.com.vn/wp-content/uploads/2026/02/dam-trung-nien-du-tiec-thiet-ke-peplum-phoi-dap-ly-sang-trong-dd5x0806-thieu-hoa-6.webp" 
+                                        src="" 
                                         className="w-100 h-100" 
                                         alt="Khuyến mãi" 
                                         style={{ objectFit: 'cover' }}
                                     />
                                     <div className="position-absolute w-100 h-100 d-flex flex-column justify-content-end p-4 text-white" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', top: 0, left: 0 }}>
-                                        <h6 className="font-weight-bold text-uppercase mb-1" style={{ color: 'var(--thieuhoa-light-gold)' }}>Đầm Thiết Kế Cao Cấp</h6>
+                                        <h6 className="font-weight-bold text-uppercase mb-1" style={{ color: 'var(--zeychic-light-gold)' }}>Đầm Thiết Kế Cao Cấp</h6>
                                         <p className="small mb-2" style={{ opacity: 0.85 }}>Tôn vinh vóc dáng ngọc ngà của quý cô</p>
                                         <button onClick={() => handleCategoryClick("Đầm")} className="btn btn-sm btn-thieuhoa font-weight-bold text-uppercase rounded-pill text-center py-2" style={{ fontSize: '0.75rem' }}>Xem ngay</button>
                                     </div>
@@ -770,7 +858,7 @@ function App() { // Định nghĩa component chính App của dự án
                         {/* Cột bên phải: Danh sách sản phẩm của danh mục được chọn (ProductList) */}
                         <section className="col-lg-9 col-md-8">
                             <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-                                <h4 className="text-uppercase font-weight-bold text-dark m-0" style={{ letterSpacing: '0.5px', fontSize: '1.2rem', color: 'var(--thieuhoa-primary)' }}>
+                                <h4 className="text-uppercase font-weight-bold text-dark m-0" style={{ letterSpacing: '0.5px', fontSize: '1.2rem', color: 'var(--zeychic-primary)' }}>
                                     {getCategoryBannerInfo().title}
                                 </h4>
                                 <span className="small text-muted font-weight-bold">
@@ -792,22 +880,22 @@ function App() { // Định nghĩa component chính App của dự án
                 } />
             </Routes>
 
-            {/* PHẦN 8: CHÂN TRANG THƯƠNG HIỆU THIỀU HOA (FOOTER) */}
-            <footer className="thieuhoa-footer pt-5 pb-4 mt-auto"> {/* Chân trang màu đen đỏ nâu, viền vàng kim */}
+            {/* PHẦN 8: CHÂN TRANG THƯƠNG HIỆU ZEYCHÍC (FOOTER) */}
+            <footer className="zeychic-footer pt-5 pb-4 mt-auto"> {/* Chân trang màu đen đỏ nâu, viền vàng kim */}
                 <div className="container"> {/* Khung container */}
                     <div className="row text-left"> {/* Hàng ngang căn lề trái */}
                         
                         {/* Cột 1: Thông tin liên hệ và cơ quan chủ quản */}
                         <div className="col-lg-4 col-md-6 mb-4 mb-lg-0"> {/* Cột 1 chiếm 4/12 */}
-                            <h5 className="thieuhoa-footer-title">THỜI TRANG THIỀU HOA</h5> {/* Tiêu đề cột */}
+                            <h5 className="zeychic-footer-title">THỜI TRANG ZEYCHÍC</h5> {/* Tiêu đề cột */}
                             <div className="small" style={{ lineHeight: '1.8' }}> {/* Khối nhỏ giãn dòng */}
-                                <p className="mb-2"><strong className="text-white">CÔNG TY CỔ PHẦN THỜI TRANG THIỀU HOA</strong></p> {/* Tên công ty */}
+                                <p className="mb-2"><strong className="text-white">CÔNG TY CỔ PHẦN THỜI TRANG ZEYCHÍC</strong></p> {/* Tên công ty */}
                                 <p className="mb-2"><i className="fa-solid fa-location-dot mr-2"></i> Văn phòng: 254 Nguyễn Đình Chiểu, Phường 6, Quận 3, TP. Hồ Chí Minh</p> {/* Địa chỉ văn phòng */}
                                 <p className="mb-2"><i className="fa-solid fa-phone mr-2"></i> Hotline đặt hàng: 1800 6246 (Miễn phí)</p> {/* Hotline */}
-                                <p className="mb-2"><i className="fa-solid fa-envelope mr-2"></i> Email: hotro@thieuhoa.com.vn</p> {/* Email công ty */}
+                                <p className="mb-2"><i className="fa-solid fa-envelope mr-2"></i> Email: hotro@zeychic.vn</p> {/* Email công ty */}
                                 <p className="mb-3"><i className="fa-solid fa-code-branch mr-2"></i> GPKD số: 0316123456 do Sở KH&ĐT TP.HCM cấp</p> {/* Giấy phép đăng ký kinh doanh */}
                                 
-                                {/* Huy hiệu Bộ Công Thương (Thiều Hoa luôn có huy hiệu Đã đăng ký ở footer) */}
+                                {/* Huy hiệu Bộ Công Thương (ZeyChíc luôn có huy hiệu Đã đăng ký ở footer) */}
                                 <a href="http://online.gov.vn/" target="_blank" rel="noreferrer"> {/* Liên kết ngoài đến trang bộ công thương */}
                                     <img // Ảnh huy hiệu đăng ký bộ công thương
                                         src="https://images.unsplash.com/photo-1557200134-90327ee9fafa?w=200" // Ảnh giả lập huy hiệu Bộ Công Thương (mẫu icon check)
@@ -819,9 +907,9 @@ function App() { // Định nghĩa component chính App của dự án
                             </div> {/* Kết thúc khối nhỏ */}
                         </div> {/* Kết thúc cột 1 */}
 
-                        {/* Cột 2: Danh sách các Showroom đại lý của Thiều Hoa */}
+                        {/* Cột 2: Danh sách các Showroom đại lý của ZeyChíc */}
                         <div className="col-lg-3 col-md-6 mb-4 mb-lg-0"> {/* Cột 2 chiếm 3/12 */}
-                            <h5 className="thieuhoa-footer-title">HỆ THỐNG CỬA HÀNG</h5> {/* Tiêu đề cột */}
+                            <h5 className="zeychic-footer-title">HỆ THỐNG CỬA HÀNG</h5> {/* Tiêu đề cột */}
                             <ul className="list-unstyled small" style={{ lineHeight: '1.8' }}> {/* Danh sách không đầu dòng */}
                                 <li className="mb-2"><strong className="text-white">TP. Hồ Chí Minh:</strong></li> {/* Nhãn TP.HCM */}
                                 <li className="mb-2"><i className="fa-solid fa-shop mr-2 text-warning"></i> 254 Nguyễn Đình Chiểu, P.6, Q.3</li> {/* Showroom Quận 3 */}
@@ -835,30 +923,30 @@ function App() { // Định nghĩa component chính App của dự án
 
                         {/* Cột 3: Chính sách mua sắm bảo mật */}
                         <div className="col-lg-3 col-md-6 mb-4 mb-md-0"> {/* Cột 3 chiếm 3/12 */}
-                            <h5 className="thieuhoa-footer-title">CHÍNH SÁCH MUA HÀNG</h5> {/* Tiêu đề cột */}
+                            <h5 className="zeychic-footer-title">CHÍNH SÁCH MUA HÀNG</h5> {/* Tiêu đề cột */}
                             <ul className="list-unstyled d-flex flex-column" style={{ gap: '10px' }}> {/* Sắp xếp cột dọc */}
-                                <li><Link to="/chinh-sach-bao-mat" className="thieuhoa-footer-link text-decoration-none">Chính sách bảo mật thông tin</Link></li> {/* Liên kết chính sách bảo mật */}
-                                <li><Link to="/chinh-sach-doi-tra" className="thieuhoa-footer-link text-decoration-none">Chính sách đổi trả sản phẩm</Link></li> {/* Liên kết chính sách đổi trả */}
-                                <li><Link to="/chinh-sach-bao-hanh" className="thieuhoa-footer-link text-decoration-none">Chính sách bảo hành sản phẩm</Link></li> {/* Liên kết chính sách bảo hành */}
-                                <li><Link to="/chinh-sach-van-chuyen" className="thieuhoa-footer-link text-decoration-none">Chính sách giao hàng toàn quốc</Link></li> {/* Liên kết chính sách vận chuyển */}
-                                <li><Link to="/dieu-khoan-dich-vu" className="thieuhoa-footer-link text-decoration-none">Điều khoản & Điều kiện dịch vụ</Link></li> {/* Liên kết điều khoản */}
-                                <li><Link to="/cau-hoi-thuong-gap" className="thieuhoa-footer-link text-decoration-none">Câu hỏi thường gặp (FAQs)</Link></li> {/* Liên kết FAQs */}
+                                <li><Link to="/chinh-sach-bao-mat" className="zeychic-footer-link text-decoration-none">Chính sách bảo mật thông tin</Link></li> {/* Liên kết chính sách bảo mật */}
+                                <li><Link to="/chinh-sach-doi-tra" className="zeychic-footer-link text-decoration-none">Chính sách đổi trả sản phẩm</Link></li> {/* Liên kết chính sách đổi trả */}
+                                <li><Link to="/chinh-sach-bao-hanh" className="zeychic-footer-link text-decoration-none">Chính sách bảo hành sản phẩm</Link></li> {/* Liên kết chính sách bảo hành */}
+                                <li><Link to="/chinh-sach-van-chuyen" className="zeychic-footer-link text-decoration-none">Chính sách giao hàng toàn quốc</Link></li> {/* Liên kết chính sách vận chuyển */}
+                                <li><Link to="/dieu-khoan-dich-vu" className="zeychic-footer-link text-decoration-none">Điều khoản & Điều kiện dịch vụ</Link></li> {/* Liên kết điều khoản */}
+                                <li><Link to="/cau-hoi-thuong-gap" className="zeychic-footer-link text-decoration-none">Câu hỏi thường gặp (FAQs)</Link></li> {/* Liên kết FAQs */}
                             </ul> {/* Kết thúc danh sách */}
                         </div> {/* Kết thúc cột 3 */}
 
                         {/* Cột 4: Kết nối với chúng tôi */}
                         <div className="col-lg-2 col-md-6"> {/* Cột 4 chiếm 2/12 */}
-                            <h5 className="thieuhoa-footer-title">MẠNG XÃ HỘI</h5> {/* Tiêu đề cột */}
+                            <h5 className="zeychic-footer-title">MẠNG XÃ HỘI</h5> {/* Tiêu đề cột */}
                             <div className="d-flex mb-3" style={{ gap: '10px' }}> {/* Nhóm các nút mạng xã hội nằm ngang */}
                                 <a href="https://facebook.com/" className="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px' }}><i className="fa-brands fa-facebook-f"></i></a> {/* Nút Facebook */}
                                 <a href="https://youtube.com/" className="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px' }}><i className="fa-brands fa-youtube"></i></a> {/* Nút Youtube */}
                                 <a href="https://instagram.com/" className="btn btn-outline-light btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px' }}><i className="fa-brands fa-instagram"></i></a> {/* Nút Instagram */}
                             </div> {/* Kết thúc nhóm mạng xã hội */}
-                            <p className="small text-muted mb-2" style={{ fontSize: '0.78rem' }}>Đăng ký nhận tin tức khuyến mãi mới nhất từ Thiều Hoa:</p> {/* Lời khuyên đăng ký email */}
+                            <p className="small text-muted mb-2" style={{ fontSize: '0.78rem' }}>Đăng ký nhận tin tức khuyến mãi mới nhất từ ZeyChíc:</p> {/* Lời khuyên đăng ký email */}
                             <div className="input-group"> {/* Nhóm đăng ký email */}
                                 <input type="email" className="form-control form-control-sm rounded-left border-0" placeholder="Email của bạn..." style={{ fontSize: '0.8rem' }} /> {/* Input email */}
                                 <div className="input-group-append"> {/* Khung ghép nút đăng ký */}
-                                    <button className="btn btn-sm btn-warning font-weight-bold" type="button" style={{ backgroundColor: 'var(--thieuhoa-gold)', border: 'none', color: '#333333' }}><i className="fa-solid fa-paper-plane"></i></button> {/* Nút gửi */}
+                                    <button className="btn btn-sm btn-warning font-weight-bold" type="button" style={{ backgroundColor: 'var(--zeychic-gold)', border: 'none', color: '#333333' }}><i className="fa-solid fa-paper-plane"></i></button> {/* Nút gửi */}
                                 </div> {/* Kết thúc ghép */}
                             </div> {/* Kết thúc nhóm đăng ký */}
                         </div> {/* Kết thúc cột 4 */}
@@ -867,7 +955,7 @@ function App() { // Định nghĩa component chính App của dự án
 
                     {/* Dòng bản quyền dưới cùng footer */}
                     <div className="border-top mt-4 pt-3 text-center text-muted small" style={{ borderColor: '#531E18' }}> {/* Đường phân cách ngang màu đỏ nâu sẫm */}
-                        <p className="mb-0">© 2026 THỜI TRANG THIỀU HOA. Bản quyền thuộc về Nguyễn Quỳnh Thảo Vy - Mã SV: 2123110158.</p> {/* Bản quyền */}
+                        <p className="mb-0">© 2026 THỜI TRANG ZEYCHÍC. Bản quyền thuộc về Nguyễn Quỳnh Thảo Vy - Mã SV: 2123110158.</p> {/* Bản quyền */}
                     </div> {/* Kết thúc dòng bản quyền */}
 
                 </div> {/* Kết thúc container */}

@@ -161,9 +161,23 @@ Ngay thuc hien: 15/05/2026
 <div class="admin-wrapper">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="page-title mb-0">Chi tiết Đơn hàng #@Model.Id</h1>
-        <a asp-action="Index" class="th-btn th-btn-outline">
-            <i class="bi bi-arrow-left"></i> Quay lại danh sách
-        </a>
+        <div class="d-flex gap-3">
+            @if (Model.Status == 7)
+            {
+                <button class="th-btn" style="background-color: var(--th-danger); color: white;" data-bs-toggle="modal" data-bs-target="#acceptCancelModal">
+                    <i class="bi bi-check-circle"></i> Chấp nhận hủy đơn
+                </button>
+            }
+            @if (Model.Status == 6)
+            {
+                <button type="button" class="th-btn" style="background-color: var(--th-success); color: white;" onclick="finishOrderUpdate()">
+                    <i class="bi bi-check2-all"></i> Hoàn tất cập nhật đơn
+                </button>
+            }
+            <a asp-action="Index" class="th-btn th-btn-outline">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
     </div>
 
     <div class="row g-4 mb-4">
@@ -230,6 +244,22 @@ Ngay thuc hien: 15/05/2026
                         {
                             <span class="status-badge" style="background-color: #E8F5E9; color: var(--th-success);">Đã giao</span>
                         }
+                        else if (Model.Status == 4)
+                        {
+                            <span class="status-badge" style="background-color: #FEECEB; color: var(--th-danger);">Đã hủy</span>
+                        }
+                        else if (Model.Status == 5)
+                        {
+                            <span class="status-badge" style="background-color: #FFF3E0; color: #FF9800;">Chờ khách xác nhận</span>
+                        }
+                        else if (Model.Status == 6)
+                        {
+                            <span class="status-badge" style="background-color: #E8F5E9; color: var(--th-success);">Khách đồng ý sửa đơn</span>
+                        }
+                        else if (Model.Status == 7)
+                        {
+                            <span class="status-badge" style="background-color: #FEECEB; color: var(--th-danger);">Khách yêu cầu hủy đơn</span>
+                        }
                     </div>
                     
                     <div class="info-label">Ghi chú đơn hàng</div>
@@ -240,8 +270,11 @@ Ngay thuc hien: 15/05/2026
     </div>
 
     <div class="th-card">
-        <div class="th-card-header" style="background-color: #FDFBFA; border-bottom: 1px solid var(--th-border);">
-            Danh Sách Sản Phẩm Đã Đặt
+        <div class="th-card-header d-flex justify-content-between align-items-center" style="background-color: #FDFBFA; border-bottom: 1px solid var(--th-border);">
+            <span>Danh Sách Sản Phẩm Đã Đặt</span>
+            <button class="th-btn" style="background-color: var(--th-primary); color: white; height: 36px; padding: 0 16px;" data-bs-toggle="modal" data-bs-target="#sendMessageModal">
+                <i class="bi bi-chat-dots"></i> Gửi thông báo cho khách
+            </button>
         </div>
         <div class="th-table-container">
             <table class="th-table">
@@ -253,6 +286,10 @@ Ngay thuc hien: 15/05/2026
                         <th style="width:180px; text-align:right;">Đơn giá</th>
                         <th style="width:100px; text-align:center;">Số lượng</th>
                         <th style="width:200px; text-align:right;">Thành tiền</th>
+                        @if (Model.Status == 6)
+                        {
+                            <th style="width:100px; text-align:center;">Thao tác</th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -292,6 +329,21 @@ Ngay thuc hien: 15/05/2026
                                 <td class="text-end fw-semibold text-muted">@detail.UnitPrice.ToString("N0") VNĐ</td>
                                 <td class="text-center fw-bold">@detail.Quantity</td>
                                 <td class="text-end fw-bold text-danger" style="font-size: 15px;">@subtotal.ToString("N0") VNĐ</td>
+                                @if (Model.Status == 6)
+                                {
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" style="margin-right:4px;" onclick="openEditModal(@Model.Id, @detail.Id, @detail.Quantity)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <form asp-action="DeleteDetail" method="post" class="d-inline">
+                                            <input type="hidden" name="orderId" value="@Model.Id" />
+                                            <input type="hidden" name="detailId" value="@detail.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này khỏi đơn hàng?');">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                }
                             </tr>
                             index++;
                         }
@@ -299,7 +351,7 @@ Ngay thuc hien: 15/05/2026
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center text-muted p-5">
+                            <td colspan="7" class="text-center text-muted p-5">
                                 <i class="bi bi-box-seam" style="font-size: 32px; opacity: 0.5;"></i>
                                 <div class="mt-2">Đơn hàng chưa có chi tiết sản phẩm.</div>
                             </td>
@@ -308,11 +360,120 @@ Ngay thuc hien: 15/05/2026
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="5" class="text-end fw-bold" style="font-size: 16px; color: var(--th-text-main);">TỔNG CỘNG:</td>
-                        <td class="text-end fw-bold text-danger" style="font-size: 20px;">@totalAmount.ToString("N0") VNĐ</td>
+                        <td colspan="@(Model.Status == 6 ? 5 : 5)" class="text-end fw-bold" style="font-size: 16px; color: var(--th-text-main); white-space: nowrap;">TỔNG CỘNG:</td>
+                        <td class="text-end fw-bold text-danger" style="font-size: 20px; white-space: nowrap;">@totalAmount.ToString("N0") VNĐ</td>
+                        @if (Model.Status == 6)
+                        {
+                            <td></td>
+                        }
                     </tr>
                 </tfoot>
             </table>
         </div>
+    </div>
+</div>
+
+
+<!-- Modal Send Message -->
+<div class="modal fade" id="sendMessageModal" tabindex="-1" aria-labelledby="sendMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="SendMessage" method="post">
+            <input type="hidden" name="orderId" value="@Model.Id" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sendMessageModalLabel">Gửi thông báo cho khách hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Nội dung thông báo (VD: Xin lỗi, sản phẩm bị lỗi kho không đủ hàng. Bạn có muốn giảm số lượng hay hủy đơn?)</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="background-color: var(--th-primary); border-color: var(--th-primary);">Gửi thông báo</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Detail -->
+<div class="modal fade" id="editDetailModal" tabindex="-1" aria-labelledby="editDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <form asp-action="EditDetail" method="post">
+            <input type="hidden" name="orderId" value="@Model.Id" />
+            <input type="hidden" name="detailId" id="editDetailId" value="" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editDetailModalLabel">Cập nhật số lượng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newQuantity" class="form-label">Số lượng mới</label>
+                        <input type="number" class="form-control" id="newQuantity" name="newQuantity" min="1" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function finishOrderUpdate() {
+        if (!confirm('Xác nhận hoàn tất cập nhật đơn hàng? Đơn hàng sẽ chuyển về trạng thái "Chờ giao hàng".')) return;
+        $.ajax({
+            url: '/Order/UpdateStatus',
+            type: 'POST',
+            data: { id: @Model.Id, status: 1 },
+            success: function(res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert("Lỗi: " + res.message);
+                }
+            },
+            error: function() {
+                alert("Có lỗi xảy ra!");
+            }
+        });
+    }
+
+    function openEditModal(orderId, detailId, currentQuantity) {
+        document.getElementById('editDetailId').value = detailId;
+        document.getElementById('newQuantity').value = currentQuantity;
+        var editModal = new bootstrap.Modal(document.getElementById('editDetailModal'));
+        editModal.show();
+    }
+</script>
+
+<!-- Modal Accept Cancel -->
+<div class="modal fade" id="acceptCancelModal" tabindex="-1" aria-labelledby="acceptCancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="AcceptCancel" method="post">
+            <input type="hidden" name="orderId" value="@Model.Id" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="acceptCancelModalLabel">Chấp nhận yêu cầu hủy đơn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="cancelReason" class="form-label">Lý do/Tin nhắn (Sẽ gửi qua email cho khách)</label>
+                        <textarea class="form-control" id="cancelReason" name="cancelReason" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xác nhận hủy đơn & Gửi Email</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>

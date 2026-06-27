@@ -51,7 +51,7 @@ export default function Blog() {
 
             {/* Khối tiêu đề trang */}
             <div className="text-center my-4 py-3 bg-white rounded shadow-sm border">
-                <h3 className="font-weight-bold text-uppercase m-0" style={{ color: 'var(--thieuhoa-primary)', letterSpacing: '1px' }}>
+                <h3 className="font-weight-bold text-uppercase m-0" style={{ color: 'var(--zeychic-primary)', letterSpacing: '1px' }}>
                     Tạp Chí Thời Trang ThaiCMS
                 </h3>
                 <p className="text-muted small m-0 font-italic mt-1">Cập nhật cẩm nang phối đồ và xu hướng mặc đẹp mới nhất từ các nhà thiết kế</p>
@@ -72,7 +72,7 @@ export default function Blog() {
                     {loading ? (
                         /* Hiệu ứng chờ mạng UX */
                         <div className="text-center py-5">
-                            <div className="spinner-border" style={{ color: 'var(--thieuhoa-primary)' }} role="status"></div>
+                            <div className="spinner-border" style={{ color: 'var(--zeychic-primary)' }} role="status"></div>
                             <p className="mt-2 text-muted small font-italic">Đang nạp cẩm nang thời trang...</p>
                         </div>
                     ) : posts.length === 0 ? (

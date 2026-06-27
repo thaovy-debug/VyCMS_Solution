@@ -2,7 +2,7 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Component hiển thị danh mục sản phẩm theo phong cách tối giản và tinh tế của Thiều Hoa
+Mo ta: Component hiển thị danh mục sản phẩm theo phong cách tối giản và tinh tế của ZeyChíc
 Ngay thuc hien: 15/05/2026
 */
 
@@ -39,7 +39,7 @@ const CategoryProductList = ({ selectedCategoryId, onSelectCategory }) => { // �
         <div className="card border-0 shadow-sm mb-4">
             <div 
                 className="card-header bg-white font-weight-bold text-uppercase py-3 d-flex justify-content-between align-items-center" 
-                style={{ color: 'var(--thieuhoa-primary)', borderBottom: '2px solid var(--thieuhoa-primary)', cursor: 'pointer' }}
+                style={{ color: 'var(--zeychic-primary)', borderBottom: '2px solid var(--zeychic-primary)', cursor: 'pointer' }}
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <span><i className="fa-solid fa-shirt mr-2"></i> Danh mục sản phẩm</span>
@@ -56,10 +56,10 @@ const CategoryProductList = ({ selectedCategoryId, onSelectCategory }) => { // �
                             className="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-4 py-3 transition-all" // Class hover mượt của danh sách
                             style={{
                                 fontSize: '0.92rem', // Kích thước chữ
-                                color: selectedCategoryId === null ? 'var(--thieuhoa-primary)' : '#333333', // Đổi màu chữ đỏ nâu nếu được chọn là Tất cả
+                                color: selectedCategoryId === null ? 'var(--zeychic-primary)' : '#333333', // Đổi màu chữ đỏ nâu nếu được chọn là Tất cả
                                 backgroundColor: selectedCategoryId === null ? 'rgba(83, 30, 24, 0.05)' : 'transparent', // Nền đỏ nâu nhạt nếu được chọn là Tất cả
                                 borderBottom: '1px solid #f2f0eb', // Gạch dưới mỏng phân cách
-                                borderLeft: selectedCategoryId === null ? '4px solid var(--thieuhoa-primary)' : '4px solid transparent', // Viền bên trái màu đỏ nâu nếu chọn là Tất cả
+                                borderLeft: selectedCategoryId === null ? '4px solid var(--zeychic-primary)' : '4px solid transparent', // Viền bên trái màu đỏ nâu nếu chọn là Tất cả
                                 transition: 'all 0.2s ease-in-out' // Hiệu ứng chuyển động mượt
                             }} // Kết thúc style
                         > {/* Kết thúc thẻ mở button */}
@@ -78,10 +78,10 @@ const CategoryProductList = ({ selectedCategoryId, onSelectCategory }) => { // �
                                     className="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-4 py-3 transition-all" // Class hover mượt của danh sách
                                     style={{
                                         fontSize: '0.92rem', // Kích thước chữ
-                                        color: item.id === selectedCategoryId ? 'var(--thieuhoa-primary)' : '#333333', // Đổi màu chữ đỏ nâu nếu được chọn
+                                        color: item.id === selectedCategoryId ? 'var(--zeychic-primary)' : '#333333', // Đổi màu chữ đỏ nâu nếu được chọn
                                         backgroundColor: item.id === selectedCategoryId ? 'rgba(83, 30, 24, 0.05)' : 'transparent', // Nền đỏ nâu nhạt nếu chọn
                                         borderBottom: '1px solid #f2f0eb', // Gạch dưới mỏng
-                                        borderLeft: item.id === selectedCategoryId ? '4px solid var(--thieuhoa-primary)' : '4px solid transparent', // Viền trái đỏ nâu nổi bật nếu chọn
+                                        borderLeft: item.id === selectedCategoryId ? '4px solid var(--zeychic-primary)' : '4px solid transparent', // Viền trái đỏ nâu nổi bật nếu chọn
                                         transition: 'all 0.2s ease-in-out' // Hiệu ứng chuyển động mượt
                                     }} // Kết thúc style
                                 > {/* Kết thúc thẻ mở button */}

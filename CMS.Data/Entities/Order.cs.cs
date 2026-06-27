@@ -34,5 +34,7 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
 
         // Quan hệ một - nhiều: Một đơn hàng có thể chứa một danh sách tập hợp nhiều chi tiết đơn hàng (OrderDetails)
         public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
+
+        public virtual ICollection<OrderHistory>? OrderHistories { get; set; }
     }
 }

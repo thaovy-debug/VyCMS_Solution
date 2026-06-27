@@ -1,0 +1,110 @@
+@model CMS.Data.Entities.Product
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Chi tiết đánh giá sản phẩm";
+}
+
+<div class="admin-wrapper" style="padding: 24px; background-color: #FAF8F5; min-height: 100vh;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold" style="color: #2C2C2C;">Đánh giá sản phẩm: @Model.Name</h2>
+            <div class="text-muted"><i class="bi bi-box-seam"></i> Mã SP: @Model.Id</div>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary" style="border-radius: 8px; font-weight: 600;">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    @if (Model.ProductReviews == null || Model.ProductReviews.Count == 0)
+    {
+        <div class="text-center p-5 card border-0 shadow-sm" style="border-radius: 16px;">
+            <i class="bi bi-chat-square-text text-muted" style="font-size: 48px;"></i>
+            <h5 class="mt-3 text-muted">Chưa có đánh giá nào cho sản phẩm này</h5>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var review in Model.ProductReviews.OrderByDescending(r => r.CreatedDate))
+            {
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div style="width: 48px; height: 48px; background-color: #F8F3ED; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #8B5E3C; font-weight: bold; font-size: 18px;">
+                                        @(review.Customer?.FullName?.Substring(0,1).ToUpper() ?? "U")
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold" style="color: #2C2C2C;">@review.Customer?.FullName</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-muted small">@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                            <span style="color: #FFB300; font-size: 13px;">
+                                                @for (int i = 0; i < review.Rating; i++) { <i class="bi bi-star-fill"></i> }
+                                                @for (int i = review.Rating; i < 5; i++) { <i class="bi bi-star"></i> }
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end text-muted small">
+                                    Đơn hàng #@review.OrderId
+                                </div>
+                            </div>
+
+                            <p style="color: #4A4A4A; font-size: 15px; line-height: 1.5;">@review.Comment</p>
+
+                            @if (!string.IsNullOrEmpty(review.ImageUrl))
+                            {
+                                <img src="@review.ImageUrl" style="max-width: 150px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #EEE7E1;" />
+                            }
+
+                            @if (!string.IsNullOrEmpty(review.AdminReply))
+                            {
+                                <div class="mt-3 p-3" style="background-color: #FDFBFA; border-left: 4px solid #8B5E3C; border-radius: 0 8px 8px 0;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold" style="color: #8B5E3C;"><i class="bi bi-shield-check"></i> Phản hồi từ Quản trị viên</span>
+                                        <span class="small text-muted">@(review.ReplyDate?.ToString("dd/MM/yyyy HH:mm") ?? "")</span>
+                                    </div>
+                                    <p class="mb-0" style="color: #555; font-size: 14px;">@review.AdminReply</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-sm mt-2" style="background-color: #F8F3ED; color: #8B5E3C; font-weight: 600; padding: 6px 16px; border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#replyModal-@review.Id">
+                                    <i class="bi bi-reply"></i> Phản hồi đánh giá
+                                </button>
+
+                                <!-- Modal Reply -->
+                                <div class="modal fade" id="replyModal-@review.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <form asp-action="Reply" method="post">
+                                            <input type="hidden" name="reviewId" value="@review.Id" />
+                                            <div class="modal-content border-0" style="border-radius: 16px;">
+                                                <div class="modal-header" style="background-color: #FDFBFA; border-bottom: 1px solid #EEE7E1;">
+                                                    <h5 class="modal-title fw-bold" style="color: #8B5E3C;">Phản hồi đánh giá của @review.Customer?.FullName</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body p-4">
+                                                    <p class="small text-muted mb-3 p-3 rounded" style="background-color: #F8F9FA;">"@review.Comment"</p>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Nội dung phản hồi</label>
+                                                        <textarea name="replyMessage" class="form-control" rows="4" required style="border-radius: 8px;" placeholder="Cảm ơn bạn đã tin tưởng Zey Chic..."></textarea>
+                                                        <div class="form-text mt-2"><i class="bi bi-bell-fill text-warning"></i> Phản hồi này sẽ được gửi thẳng đến chuông thông báo của khách hàng.</div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Hủy</button>
+                                                    <button type="submit" class="btn text-white" style="background-color: #8B5E3C; border-radius: 8px; font-weight: 600;">Gửi phản hồi</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

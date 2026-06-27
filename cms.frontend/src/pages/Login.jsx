@@ -50,7 +50,7 @@ export default function Login() {
     return (
         <main className="container py-5 flex-grow-1 d-flex justify-content-center align-items-center">
             <div className="card shadow-sm border-0 p-4" style={{ width: '100%', maxWidth: '450px', borderRadius: '12px' }}>
-                <h3 className="text-center mb-4 font-weight-bold" style={{ color: 'var(--thieuhoa-primary)' }}>ĐĂNG NHẬP</h3>
+                <h3 className="text-center mb-4 font-weight-bold" style={{ color: 'var(--zeychic-primary)' }}>ĐĂNG NHẬP</h3>
                 <form onSubmit={handleLogin}>
                     <div className="form-group mb-3">
                         <label className="font-weight-bold">Email của bạn</label>
@@ -62,17 +62,17 @@ export default function Login() {
                             <Link 
                                 to="/forgot-password" 
                                 state={{ defaultEmail: email }}
-                                style={{ color: 'var(--thieuhoa-primary)', fontSize: '0.9rem' }}
+                                style={{ color: 'var(--zeychic-primary)', fontSize: '0.9rem' }}
                             >
                                 Quên mật khẩu?
                             </Link>
                         </div>
                         <input type="password" className="form-control mt-2" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Nhập mật khẩu..." />
                     </div>
-                    <button type="submit" className="btn btn-block text-white font-weight-bold py-2 mb-3" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px', width: '100%' }}>ĐĂNG NHẬP</button>
+                    <button type="submit" className="btn btn-block text-white font-weight-bold py-2 mb-3" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px', width: '100%' }}>ĐĂNG NHẬP</button>
                     <div className="text-center">
                         <span className="text-muted">Chưa có tài khoản? </span>
-                        <Link to="/register" style={{ color: 'var(--thieuhoa-primary)', fontWeight: 'bold' }}>Đăng ký ngay</Link>
+                        <Link to="/register" style={{ color: 'var(--zeychic-primary)', fontWeight: 'bold' }}>Đăng ký ngay</Link>
                     </div>
                 </form>
             </div>

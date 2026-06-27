@@ -2,21 +2,21 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Hệ thống CSS Token toàn cục định vị màu sắc chủ đạo, font chữ phong cách Thiều Hoa và căn chỉnh bố cục
+Mo ta: Hệ thống CSS Token toàn cục định vị màu sắc chủ đạo, font chữ phong cách ZeyChíc và căn chỉnh bố cục
 Ngay thuc hien: 15/05/2026
 */
 
 :root { /* Khai báo các biến CSS Custom Properties toàn cục dùng chung cho dự án */
-  --thieuhoa-primary: #531E18; /* Màu đỏ nâu trầm truyền thống đặc trưng của thương hiệu Thiều Hoa */
-  --thieuhoa-primary-hover: #732a21; /* Màu đỏ nâu sáng hơn một chút khi người dùng di chuột (hover) */
-  --thieuhoa-gold: #D4AF37; /* Màu vàng kim loại sang trọng tạo điểm nhấn trên menu và viền nút */
-  --thieuhoa-light-gold: #FDE579; /* Màu vàng sáng cho các nhãn và badge nổi bật */
-  --thieuhoa-bg: #FCFBF9; /* Màu nền kem sữa nhã nhặn giúp làm dịu mắt người đọc */
-  --thieuhoa-card-bg: #FFFFFF; /* Màu nền trắng tinh khiết cho các khung thẻ sản phẩm và tin tức */
-  --thieuhoa-text: #333333; /* Màu chữ đen xám nhẹ tránh hiện tượng tương phản quá gắt */
-  --thieuhoa-text-light: #777777; /* Màu chữ xám nhạt cho các thông tin phụ, ngày đăng và tồn kho */
-  --thieuhoa-border: #E8E5DF; /* Màu viền ngăn cách giữa các cột và danh sách sản phẩm */
-  --thieuhoa-shadow: rgba(83, 30, 24, 0.08) 0px 8px 24px; /* Đổ bóng nhẹ mang sắc tố đỏ nâu đặc trưng */
+  --zeychic-primary: #531E18; /* Màu đỏ nâu trầm truyền thống đặc trưng của thương hiệu ZeyChíc */
+  --zeychic-primary-hover: #732a21; /* Màu đỏ nâu sáng hơn một chút khi người dùng di chuột (hover) */
+  --zeychic-gold: #D4AF37; /* Màu vàng kim loại sang trọng tạo điểm nhấn trên menu và viền nút */
+  --zeychic-light-gold: #FDE579; /* Màu vàng sáng cho các nhãn và badge nổi bật */
+  --zeychic-bg: #FCFBF9; /* Màu nền kem sữa nhã nhặn giúp làm dịu mắt người đọc */
+  --zeychic-card-bg: #FFFFFF; /* Màu nền trắng tinh khiết cho các khung thẻ sản phẩm và tin tức */
+  --zeychic-text: #333333; /* Màu chữ đen xám nhẹ tránh hiện tượng tương phản quá gắt */
+  --zeychic-text-light: #777777; /* Màu chữ xám nhạt cho các thông tin phụ, ngày đăng và tồn kho */
+  --zeychic-border: #E8E5DF; /* Màu viền ngăn cách giữa các cột và danh sách sản phẩm */
+  --zeychic-shadow: rgba(83, 30, 24, 0.08) 0px 8px 24px; /* Đổ bóng nhẹ mang sắc tố đỏ nâu đặc trưng */
   
   --sans-serif: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif; /* Khai báo font chữ không chân hiện đại, sang trọng */
 } /* Kết thúc khai báo biến CSS */
@@ -29,8 +29,8 @@ Ngay thuc hien: 15/05/2026
 
 body { /* Định dạng chi tiết cho thẻ body bao ngoài ứng dụng */
   font-family: var(--sans-serif); /* Áp dụng font chữ không chân đã cấu hình ở phần root */
-  background-color: var(--thieuhoa-bg); /* Sử dụng màu nền kem sữa toàn trang */
-  color: var(--thieuhoa-text); /* Sử dụng màu chữ xám đậm cho toàn bộ văn bản */
+  background-color: var(--zeychic-bg); /* Sử dụng màu nền kem sữa toàn trang */
+  color: var(--zeychic-text); /* Sử dụng màu chữ xám đậm cho toàn bộ văn bản */
   line-height: 1.6; /* Đặt khoảng cách giãn dòng hợp lý giúp đọc văn bản dễ dàng */
   overflow-x: hidden; /* Ẩn thanh cuộn ngang để tránh lỗi vỡ khung giao diện trên thiết bị di động */
 } /* Kết thúc cấu hình body */
@@ -63,5 +63,5 @@ a { /* Định dạng cấu trúc cho tất cả các đường liên kết anch
 
 .hover-card:hover { /* Khi người dùng di chuột vào thẻ có class hover-card */
   transform: translateY(-6px); /* Nâng nhẹ thẻ lên trên 6px tạo cảm giác nổi 3D */
-  box-shadow: var(--thieuhoa-shadow) !important; /* Kích hoạt đổ bóng màu đỏ nâu sang trọng */
+  box-shadow: var(--zeychic-shadow) !important; /* Kích hoạt đổ bóng màu đỏ nâu sang trọng */
 } /* Kết thúc hover-card:hover */

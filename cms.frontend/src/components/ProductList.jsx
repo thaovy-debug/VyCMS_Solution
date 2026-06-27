@@ -2,7 +2,7 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Component hiển thị danh sách các sản phẩm thời trang cao cấp dạng lưới theo phong cách Thiều Hoa
+Mo ta: Component hiển thị danh sách các sản phẩm thời trang cao cấp dạng lưới theo phong cách ZeyChíc
 Ngay thuc hien: 15/05/2026
 */
 
@@ -122,12 +122,6 @@ const ProductList = ({ selectedCategoryId, customFilterType, searchQuery, minPri
         <div className="row"> {/* Khởi tạo hàng lưới grid của Bootstrap */}
             {products.length === 0 ? ( // Kiểm tra nếu danh sách sản phẩm trống
                 <div className="col-12 text-center py-5">
-                    <img 
-                        src="https://thieuhoa.com.vn/wp-content/uploads/2024/03/empty-product.png" 
-                        alt="Không tìm thấy sản phẩm" 
-                        style={{ maxWidth: '200px', opacity: 0.6 }} 
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                    />
                     <p className="text-muted mt-4 font-weight-bold" style={{ fontSize: '1.1rem' }}>
                         Không tìm thấy sản phẩm nào phù hợp với tiêu chí của bạn
                     </p>
@@ -150,7 +144,7 @@ const ProductList = ({ selectedCategoryId, customFilterType, searchQuery, minPri
                                 <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
                                     <button 
                                         className="page-link shadow-none" 
-                                        style={currentPage === i + 1 ? { backgroundColor: 'var(--thieuhoa-primary)', borderColor: 'var(--thieuhoa-primary)', color: 'white' } : { color: 'var(--thieuhoa-primary)' }}
+                                        style={currentPage === i + 1 ? { backgroundColor: 'var(--zeychic-primary)', borderColor: 'var(--zeychic-primary)', color: 'white' } : { color: 'var(--zeychic-primary)' }}
                                         onClick={() => handlePageChange(i + 1)}
                                     >
                                         {i + 1}

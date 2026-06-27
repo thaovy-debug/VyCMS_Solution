@@ -57,5 +57,7 @@ namespace CMS.Data.Entities // Định nghĩa không gian tên chứa các thự
         public bool IsVisible { get; set; } = true; // Thuộc tính quyết định ẩn hiện sản phẩm
 
         public bool IsDeleted { get; set; } = false; // Thuộc tính cờ xóa mềm (soft delete)
+
+        public virtual ICollection<ProductReview> ProductReviews { get; set; } = new List<ProductReview>();
     }
 }

@@ -25,9 +25,11 @@ namespace CMS.Data // Định nghĩa không gian tên chứa lớp cấu hình D
         public DbSet<Product> Products { get; set; } // Khai báo bảng Products (Sản phẩm)
         public DbSet<Customer> Customers { get; set; } // Khai báo bảng Customers (Khách hàng)
         public DbSet<Order> Orders { get; set; } // Khai báo bảng Orders (Đơn hàng)
-        public DbSet<OrderDetail> OrderDetails { get; set; } // Khai báo bảng OrderDetails (Chi tiết đơn hàng)
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<OrderHistory> OrderHistories { get; set; } // Khai báo bảng OrderDetails (Chi tiết đơn hàng)
         public DbSet<Banner> Banners { get; set; } // Khai báo bảng Banners (Quản lý Banner)
         public DbSet<Menu> Menus { get; set; } // Khai báo bảng Menus (Quản lý Menu)
-
+        public DbSet<ProductReview> ProductReviews { get; set; } // Khai báo bảng ProductReviews (Đánh giá sản phẩm)
+        public DbSet<Notification> Notifications { get; set; } // Khai báo bảng Notifications (Thông báo)
     }
 }

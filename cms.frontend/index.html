@@ -11,6 +11,17 @@
     <title>cms.frontend</title>
   </head>
   <body>
+    <div id="error-display" style="color: red; padding: 20px; font-family: monospace; z-index: 9999; position: fixed; background: white; width: 100%; top: 0; display: none;"></div>
+    <script>
+      window.addEventListener('error', function(event) {
+        document.getElementById('error-display').style.display = 'block';
+        document.getElementById('error-display').innerText += event.error ? event.error.stack : event.message + '\n';
+      });
+      window.addEventListener('unhandledrejection', function(event) {
+        document.getElementById('error-display').style.display = 'block';
+        document.getElementById('error-display').innerText += event.reason ? event.reason.stack : event.reason + '\n';
+      });
+    </script>
     <div id="root"></div>
     <!-- Cần jQuery và Bootstrap JS để các hiệu ứng Carousel (Slider) hoạt động -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

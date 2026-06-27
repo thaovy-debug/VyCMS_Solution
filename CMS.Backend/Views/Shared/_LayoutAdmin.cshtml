@@ -155,6 +155,9 @@ Ngay thuc hien: 15/05/2026
                         <a asp-controller="Order" asp-action="Index"> @* Liên kết quản lý đơn hàng *@
                             <i class="bi bi-receipt"></i> Quản lý Đơn hàng
                         </a> @* Kết thúc liên kết *@
+                        <a asp-controller="Review" asp-action="Index"> @* Liên kết quản lý đánh giá *@
+                            <i class="bi bi-star-half"></i> Quản lý Đánh giá
+                        </a> @* Kết thúc liên kết *@
                     </div> @* Đóng vùng chứa liên kết *@
                 </div> @* Đóng khối trên *@
 
@@ -209,7 +212,7 @@ Ngay thuc hien: 15/05/2026
     </style>
     <script>
         $(document).ready(function () {
-            $('.table').DataTable({
+            $('.th-table').DataTable({
                 pageLength: 10,
                 lengthChange: false, // Ẩn nút đổi số dòng trên trang
                 language: {

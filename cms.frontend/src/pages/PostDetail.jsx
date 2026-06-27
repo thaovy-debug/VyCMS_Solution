@@ -41,7 +41,7 @@ export default function PostDetail() {
 
             <article className="card border-0 shadow-sm rounded-lg overflow-hidden p-4 p-md-5 mx-auto" style={{ maxWidth: '900px', backgroundColor: '#fff' }}>
                 <div className="mb-4 text-center">
-                    <span className="badge px-3 py-2 rounded-pill font-weight-bold text-uppercase mb-3" style={{ backgroundColor: '#F8F6F2', color: 'var(--thieuhoa-primary)', letterSpacing: '1px' }}>
+                    <span className="badge px-3 py-2 rounded-pill font-weight-bold text-uppercase mb-3" style={{ backgroundColor: '#F8F6F2', color: 'var(--zeychic-primary)', letterSpacing: '1px' }}>
                         Tin tức thời trang
                     </span>
                     <h1 className="font-weight-bold text-dark mb-3" style={{ lineHeight: '1.4', fontSize: '2rem' }}>{post.title}</h1>

@@ -88,7 +88,7 @@ const ProductCard = ({ item, colClass = 'col-lg-3 col-md-4 col-sm-6 mb-4' }) => 
 
     return (
         <div className={colClass}>
-            <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--thieuhoa-card-bg)' }}>
+            <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--zeychic-card-bg)' }}>
                 {/* Khung chứa ảnh */}
                 <Link to={`/product/${item.id}`} className="position-relative overflow-hidden d-block text-decoration-none" style={{ height: '260px', backgroundColor: '#F8F6F2' }}>
                     {item.imageUrl ? (() => {
@@ -115,7 +115,7 @@ const ProductCard = ({ item, colClass = 'col-lg-3 col-md-4 col-sm-6 mb-4' }) => 
                         <span className="position-absolute badge badge-dark px-2 py-1 small font-weight-bold text-uppercase" style={{ top: '10px', left: '10px', backgroundColor: '#111111', fontSize: '0.65rem', letterSpacing: '0.5px', zIndex: 11 }}>NEW</span>
                     )}
                     {item.discountPercent > 0 && (
-                        <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: item.createdDate && new Date() - new Date(item.createdDate) < 7 * 24 * 60 * 60 * 1000 ? '40px' : '10px', left: '10px', backgroundColor: 'var(--thieuhoa-primary)', fontSize: '0.7rem', borderRadius: '4px', zIndex: 11 }}>-{item.discountPercent}%</span>
+                        <span className="position-absolute badge badge-danger px-2 py-1 font-weight-bold" style={{ top: item.createdDate && new Date() - new Date(item.createdDate) < 7 * 24 * 60 * 60 * 1000 ? '40px' : '10px', left: '10px', backgroundColor: 'var(--zeychic-primary)', fontSize: '0.7rem', borderRadius: '4px', zIndex: 11 }}>-{item.discountPercent}%</span>
                     )}
                     
                     <div 
@@ -131,13 +131,13 @@ const ProductCard = ({ item, colClass = 'col-lg-3 col-md-4 col-sm-6 mb-4' }) => 
                 {/* Thân card chứa thông tái */}
                 <div className="card-body p-3 d-flex flex-column justify-content-between">
                     <div>
-                        <div className="small text-uppercase font-weight-bold text-muted mb-1" style={{ fontSize: '0.68rem', letterSpacing: '1px' }}>THIỀU HOA DESIGN</div>
+                        <div className="small text-uppercase font-weight-bold text-muted mb-1" style={{ fontSize: '0.68rem', letterSpacing: '1px' }}>ZEYCHÍC DESIGN</div>
                         <Link to={`/product/${item.id}`} className="text-decoration-none hover-link">
                             <h5 className="card-title font-weight-bold text-dark mb-2" style={{ fontSize: '0.92rem', lineHeight: '1.4', height: '38px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{item.name}</h5>
                         </Link>
                         
                         <div className="d-flex align-items-center mb-2" style={{ gap: '8px' }}>
-                            <span className="font-weight-bold" style={{ fontSize: '1.05rem', color: 'var(--thieuhoa-primary)' }}>
+                            <span className="font-weight-bold" style={{ fontSize: '1.05rem', color: 'var(--zeychic-primary)' }}>
                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.discountPercent > 0 ? item.price * (1 - item.discountPercent / 100) : item.price)}
                             </span>
                             {item.discountPercent > 0 && (

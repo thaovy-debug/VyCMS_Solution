@@ -92,6 +92,27 @@ namespace CMS.Backend.Controllers
                     // 3. Khấu trừ số lượng tồn kho
                     product.StockQuantity -= item.Quantity;
 
+                    // Cập nhật VariantStocks
+                    if (!string.IsNullOrEmpty(product.VariantStocks))
+                    {
+                        try
+                        {
+                            var variantStocks = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(product.VariantStocks);
+                            string key = $"{item.Color ?? ""}-{item.Size ?? ""}";
+                            
+                            if (variantStocks != null && variantStocks.ContainsKey(key))
+                            {
+                                variantStocks[key] -= item.Quantity;
+                                if (variantStocks[key] < 0) variantStocks[key] = 0;
+                                product.VariantStocks = System.Text.Json.JsonSerializer.Serialize(variantStocks);
+                            }
+                        }
+                        catch
+                        {
+                            // ignore json parse errors
+                        }
+                    }
+
                     // 4. Tạo HTML cho email
                     string variantText = "";
                     if (!string.IsNullOrEmpty(item.Color) && !string.IsNullOrEmpty(item.Size)) {
@@ -112,6 +133,16 @@ namespace CMS.Backend.Controllers
                     ";
                     totalPrice += product.Price * item.Quantity;
                 }
+
+                var notification = new Notification
+                {
+                    CustomerId = input.CustomerId,
+                    Title = "Đặt hàng thành công",
+                    Message = $"Đơn hàng #{newOrder.Id} của bạn đã được đặt thành công và đang chờ xử lý.",
+                    Type = "Order",
+                    RelatedId = newOrder.Id
+                };
+                _context.Notifications.Add(notification);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -220,6 +251,59 @@ namespace CMS.Backend.Controllers
                 .ToListAsync();
 
             return Ok(orders);
+        }
+
+        [HttpGet("CustomerResponse")]
+        public async Task<IActionResult> CustomerResponse(int orderId, string action)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+            {
+                return Content("<h2>Không tìm thấy đơn hàng.</h2>", "text/html; charset=utf-8");
+            }
+
+            if (action == "accept")
+            {
+                order.Status = 6; // Khách hàng chấp nhận sửa đơn
+                _context.OrderHistories.Add(new OrderHistory
+                {
+                    OrderId = order.Id,
+                    Action = "Khách phản hồi",
+                    Description = "Khách hàng đã chấp nhận yêu cầu (đồng ý sửa đơn).",
+                    PerformedBy = "Customer"
+                });
+                await _context.SaveChangesAsync();
+                return Content(@"
+                    <div style='text-align:center; padding: 50px; font-family: Arial, sans-serif;'>
+                        <h2 style='color: #4CAF50;'>Cảm ơn bạn!</h2>
+                        <p>Bạn đã đồng ý với yêu cầu từ cửa hàng.</p>
+                        <p>Chúng tôi sẽ sớm cập nhật lại đơn hàng của bạn.</p>
+                        <a href='http://localhost:5173/profile' style='display:inline-block; margin-top:20px; padding: 10px 20px; background: #800000; color: #fff; text-decoration: none; border-radius: 4px;'>Quay lại trang cá nhân</a>
+                    </div>
+                ", "text/html; charset=utf-8");
+            }
+            else if (action == "cancel")
+            {
+                order.Status = 7; // Khách hàng yêu cầu hủy đơn
+                _context.OrderHistories.Add(new OrderHistory
+                {
+                    OrderId = order.Id,
+                    Action = "Khách phản hồi",
+                    Description = "Khách hàng đã yêu cầu hủy đơn.",
+                    PerformedBy = "Customer"
+                });
+                await _context.SaveChangesAsync();
+                return Content(@"
+                    <div style='text-align:center; padding: 50px; font-family: Arial, sans-serif;'>
+                        <h2 style='color: #F44336;'>Yêu cầu đã được gửi</h2>
+                        <p>Yêu cầu hủy đơn hàng của bạn đã được gửi đến bộ phận quản lý.</p>
+                        <p>Chúng tôi sẽ xác nhận và gửi email thông báo lại cho bạn.</p>
+                        <a href='http://localhost:5173/profile' style='display:inline-block; margin-top:20px; padding: 10px 20px; background: #800000; color: #fff; text-decoration: none; border-radius: 4px;'>Quay lại trang cá nhân</a>
+                    </div>
+                ", "text/html; charset=utf-8");
+            }
+
+            return BadRequest("Thao tác không hợp lệ.");
         }
     }
 

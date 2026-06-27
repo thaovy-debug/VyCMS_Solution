@@ -84,8 +84,8 @@ const VariantModal = ({ show, onClose, item, onConfirm, initialColor = '', initi
                                                 onClick={() => setEditColor(c.name)}
                                                 className="btn btn-sm"
                                                 style={{
-                                                    border: editColor === c.name ? '1px solid var(--thieuhoa-primary)' : '1px solid #e0e0e0',
-                                                    color: editColor === c.name ? 'var(--thieuhoa-primary)' : '#333',
+                                                    border: editColor === c.name ? '1px solid var(--zeychic-primary)' : '1px solid #e0e0e0',
+                                                    color: editColor === c.name ? 'var(--zeychic-primary)' : '#333',
                                                     backgroundColor: editColor === c.name ? '#fff2f2' : '#f9f9f9',
                                                     fontWeight: editColor === c.name ? 'bold' : 'normal',
                                                     borderRadius: '4px'
@@ -108,8 +108,8 @@ const VariantModal = ({ show, onClose, item, onConfirm, initialColor = '', initi
                                                 onClick={() => setEditSize(s)}
                                                 className="btn btn-sm"
                                                 style={{
-                                                    border: editSize === s ? '1px solid var(--thieuhoa-primary)' : '1px solid #e0e0e0',
-                                                    color: editSize === s ? 'var(--thieuhoa-primary)' : '#333',
+                                                    border: editSize === s ? '1px solid var(--zeychic-primary)' : '1px solid #e0e0e0',
+                                                    color: editSize === s ? 'var(--zeychic-primary)' : '#333',
                                                     backgroundColor: editSize === s ? '#fff2f2' : '#f9f9f9',
                                                     fontWeight: editSize === s ? 'bold' : 'normal',
                                                     borderRadius: '4px',
@@ -124,7 +124,7 @@ const VariantModal = ({ show, onClose, item, onConfirm, initialColor = '', initi
                             )}
                         </div>
                         <div className="modal-footer border-top-0 pt-0">
-                            <button className="btn btn-block text-white font-weight-bold" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px', padding: '10px 0' }} onClick={handleConfirm}>
+                            <button className="btn btn-block text-white font-weight-bold" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px', padding: '10px 0' }} onClick={handleConfirm}>
                                 Xác nhận
                             </button>
                         </div>

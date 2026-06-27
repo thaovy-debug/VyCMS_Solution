@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import productService from '../services/productService';
 import { toast } from 'react-toastify';
+import ProductCard from '../components/ProductCard';
 
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [relatedProducts, setRelatedProducts] = useState([]);
 
     const [selectedSize, setSelectedSize] = useState('');
     const [selectedColor, setSelectedColor] = useState('');
@@ -50,6 +52,20 @@ export default function ProductDetail() {
                         setMainImage(images[0]);
                     }
                 }
+            
+                if (data.categoryProductId) {
+                    try {
+                        const relatedData = await productService.getProductsByCategory(data.categoryProductId);
+                        // Randomize and pick 4
+                        const filtered = relatedData
+                            .filter(p => p.id.toString() !== id.toString())
+                            .sort(() => 0.5 - Math.random())
+                            .slice(0, 4);
+                        setRelatedProducts(filtered);
+                    } catch (e) {
+                        console.error('Lỗi lấy sản phẩm liên quan:', e);
+                    }
+                }
             } catch (err) {
                 console.error('Lỗi khi tải chi tiết sản phẩm:', err);
             } finally {
@@ -59,13 +75,33 @@ export default function ProductDetail() {
         fetchProduct();
     }, [id]);
 
+    const getAvailableStock = () => {
+        if (!product) return 0;
+        let maxStock = product.stockQuantity || 0;
+        
+        const needsColor = parsedColors.length > 0;
+        const needsSize = product.sizes && product.sizes.split(',').length > 0;
+        const isFullySelected = (!needsColor || selectedColor) && (!needsSize || selectedSize);
+
+        if (product.variantStocks && isFullySelected) {
+            try {
+                const stocks = JSON.parse(product.variantStocks);
+                const key = `${selectedColor || ''}-${selectedSize || ''}`;
+                if (stocks[key] !== undefined) maxStock = stocks[key];
+                else if (Object.keys(stocks).length > 0) maxStock = 0;
+            } catch(e) {}
+        }
+        return maxStock;
+    };
+
     const handleQuantityChange = (delta) => {
         setQuantity(prev => {
             const next = prev + delta;
             if (next < 1) return 1;
-            if (product && product.stockQuantity < next) {
-                toast.warning(`Xin lỗi, sản phẩm này chỉ còn ${product.stockQuantity} chiếc trong kho!`);
-                return product.stockQuantity;
+            const maxStock = getAvailableStock();
+            if (maxStock < next) {
+                toast.warning(`Xin lỗi, sản phẩm này với phân loại đã chọn chỉ còn ${maxStock} chiếc trong kho!`);
+                return maxStock;
             }
             return next;
         });
@@ -94,8 +130,9 @@ export default function ProductDetail() {
         const existing = currentCart.find(item => item.id === product.id && item.size === selectedSize && item.color === selectedColor);
         
         const nextQuantity = existing ? existing.quantity + quantity : quantity;
-        if (product.stockQuantity < nextQuantity) {
-            toast.warning('Số lượng sản phẩm trong kho không đủ!');
+        const maxStock = getAvailableStock();
+        if (maxStock < nextQuantity) {
+            toast.warning(`Số lượng vượt quá tồn kho (Còn ${maxStock} sản phẩm)!`);
             return;
         }
 
@@ -118,8 +155,9 @@ export default function ProductDetail() {
             toast.warning('Vui lòng chọn màu sắc trước khi mua!');
             return;
         }
-        if (product.stockQuantity < quantity) {
-            toast.warning('Số lượng sản phẩm trong kho không đủ!');
+        const maxStock = getAvailableStock();
+        if (maxStock < quantity) {
+            toast.warning(`Số lượng vượt quá tồn kho (Còn ${maxStock} sản phẩm)!`);
             return;
         }
         const directProduct = { ...product, quantity: quantity, size: selectedSize, color: selectedColor };
@@ -261,15 +299,19 @@ export default function ProductDetail() {
                                 const num = parseInt(val, 10);
                                 if (isNaN(num)) return;
                                 if (num < 1) { setQuantity(1); }
-                                else if (product && num > product.stockQuantity) {
-                                    toast.warning(`Xin lỗi, sản phẩm này chỉ còn ${product.stockQuantity} chiếc trong kho!`);
-                                    setQuantity(product.stockQuantity);
-                                } else { setQuantity(num); }
+                                else {
+                                    const maxStock = getAvailableStock();
+                                    if (num > maxStock) {
+                                        toast.warning(`Xin lỗi, sản phẩm này với phân loại đã chọn chỉ còn ${maxStock} chiếc trong kho!`);
+                                        setQuantity(maxStock);
+                                    } else { setQuantity(num); }
+                                }
                             }} onBlur={() => {
                                 if (quantity === '') setQuantity(1);
                             }} />
                             <button className="btn btn-sm bg-transparent border-0 px-3 h-100 font-weight-bold d-flex align-items-center" style={{ fontSize: '1.2rem', color: '#555' }} onClick={() => handleQuantityChange(1)}>+</button>
                         </div>
+                        <span className="ml-3 text-muted small" style={{ fontSize: '0.9rem' }}>{getAvailableStock()} sản phẩm có sẵn</span>
                     </div>
 
                     <div className="d-flex mt-5 mb-5" style={{ gap: '15px', height: '56px' }}>
@@ -352,11 +394,41 @@ export default function ProductDetail() {
                     </div>
 
                     <h4 className="font-weight-bold text-center mb-5 text-dark text-uppercase mt-5">CÓ THỂ BẠN SẼ THÍCH</h4>
-                    <div className="row text-center mb-5 text-muted">
-                        <div className="col-12 py-5">
-                            Hiện chưa có sản phẩm gợi ý
+                    {relatedProducts && relatedProducts.length > 0 ? (
+                        <div className="d-flex align-items-center mb-5 overflow-auto" style={{ gap: '20px', paddingBottom: '15px' }}>
+                            {relatedProducts.map((item, index) => (
+                                <div key={item.id} style={{ minWidth: '250px', flex: '0 0 auto' }}>
+                                    <ProductCard item={item} colClass="" />
+                                </div>
+                            ))}
+                            {relatedProducts.length > 0 && (
+                                <div style={{ minWidth: '100px', flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+                                    <Link 
+                                        to={`/san-pham?category=${product.categoryProductId}`} 
+                                        className="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                                        style={{ width: '60px', height: '60px', transition: 'all 0.3s' }}
+                                        title="Xem thêm"
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.backgroundColor = '#222';
+                                            e.currentTarget.style.color = '#fff';
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                            e.currentTarget.style.color = '#222';
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-arrow-right" style={{ fontSize: '1.5rem' }}></i>
+                                    </Link>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    ) : (
+                        <div className="row text-center mb-5 text-muted">
+                            <div className="col-12 py-5">
+                                Hiện chưa có sản phẩm gợi ý
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </main>

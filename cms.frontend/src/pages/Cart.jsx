@@ -14,12 +14,33 @@ export default function Cart() {
         setCart(JSON.parse(localStorage.getItem(cartKey)) || []);
     }, []);
 
+    const getMaxStock = (item) => {
+        let maxStock = item.stockQuantity || 0;
+        
+        let parsedColors = [];
+        try { if (item.colors) parsedColors = JSON.parse(item.colors); } catch(e){}
+        const needsColor = parsedColors.length > 0;
+        const needsSize = item.sizes && item.sizes.split(',').length > 0;
+        const isFullySelected = (!needsColor || item.color) && (!needsSize || item.size);
+
+        if (item.variantStocks && isFullySelected) {
+            try {
+                const stocks = JSON.parse(item.variantStocks);
+                const key = `${item.color || ''}-${item.size || ''}`;
+                if (stocks[key] !== undefined) maxStock = stocks[key];
+                else if (Object.keys(stocks).length > 0) maxStock = 0;
+            } catch(e) {}
+        }
+        return maxStock;
+    };
+
     const updateQuantity = (id, size, color, delta) => {
         const newCart = cart.map(item => {
             if (item.id === id && item.size === size && item.color === color) {
                 const newQuantity = item.quantity + delta;
-                if (delta > 0 && item.stockQuantity !== undefined && newQuantity > item.stockQuantity) {
-                    toast.warning('Số lượng sản phẩm trong kho không đủ!');
+                const maxStock = getMaxStock(item);
+                if (delta > 0 && newQuantity > maxStock) {
+                    toast.warning(`Chỉ còn ${maxStock} sản phẩm cho phân loại này!`);
                     return item;
                 }
                 return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
@@ -38,9 +59,10 @@ export default function Cart() {
                 const num = parseInt(value, 10);
                 if (isNaN(num)) return item;
                 if (num < 1) return { ...item, quantity: 1 };
-                if (item.stockQuantity !== undefined && num > item.stockQuantity) {
-                    toast.warning('Số lượng sản phẩm trong kho không đủ!');
-                    return { ...item, quantity: item.stockQuantity };
+                const maxStock = getMaxStock(item);
+                if (num > maxStock) {
+                    toast.warning(`Chỉ còn ${maxStock} sản phẩm cho phân loại này!`);
+                    return { ...item, quantity: maxStock };
                 }
                 return { ...item, quantity: num };
             }
@@ -87,11 +109,11 @@ export default function Cart() {
 
     return (
         <main className="container py-5 flex-grow-1">
-            <h3 className="font-weight-bold text-uppercase mb-4" style={{ color: 'var(--thieuhoa-primary)' }}>Giỏ hàng của bạn</h3>
+            <h3 className="font-weight-bold text-uppercase mb-4" style={{ color: 'var(--zeychic-primary)' }}>Giỏ hàng của bạn</h3>
             {cart.length === 0 ? (
                 <div className="text-center py-5">
                     <p className="text-muted">Giỏ hàng trống.</p>
-                    <Link to="/" className="btn btn-thieuhoa text-white mt-3" style={{ backgroundColor: 'var(--thieuhoa-primary)' }}>Tiếp tục mua sắm</Link>
+                    <Link to="/" className="btn btn-thieuhoa text-white mt-3" style={{ backgroundColor: 'var(--zeychic-primary)' }}>Tiếp tục mua sắm</Link>
                 </div>
             ) : (
                 <div className="row">
@@ -128,6 +150,7 @@ export default function Cart() {
                                             <input type="text" className="form-control form-control-sm border-0 text-center bg-transparent shadow-none h-100 font-weight-bold p-0" style={{ fontSize: '0.9rem' }} value={item.quantity} onChange={(e) => setQuantityAbsolute(item.id, item.size, item.color, e.target.value)} onBlur={(e) => { if (item.quantity === '') setQuantityAbsolute(item.id, item.size, item.color, '1'); }} />
                                             <button className="btn btn-sm bg-transparent border-0 px-2 h-100 font-weight-bold d-flex align-items-center" onClick={() => updateQuantity(item.id, item.size, item.color, 1)}>+</button>
                                         </div>
+                                        <div className="mt-1 text-muted" style={{ fontSize: '0.8rem' }}>Kho còn: {getMaxStock(item)}</div>
                                     </div>
                                     <button className="btn btn-link text-danger ml-3" onClick={() => removeItem(item.id, item.size, item.color)}>
                                         <i className="fa-solid fa-trash"></i>
@@ -151,7 +174,7 @@ export default function Cart() {
                                     {(val => new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ')(total)}
                                 </span>
                             </div>
-                            <Link to="/checkout" className="btn btn-block text-white font-weight-bold py-3 mt-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px', fontSize: '1.05rem' }}>
+                            <Link to="/checkout" className="btn btn-block text-white font-weight-bold py-3 mt-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px', fontSize: '1.05rem' }}>
                                 TIẾN HÀNH THANH TOÁN <i className="fa-solid fa-arrow-right ml-2"></i>
                             </Link>
                         </div>

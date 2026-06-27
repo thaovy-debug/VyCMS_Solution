@@ -2,50 +2,103 @@
 Sinh vien:Nguyễn Quỳnh Thảo Vy
 Ma sv: 2123110158
 Lop:CCQ2311E
-Mo ta: Điều hướng trang chủ Backend, xử lý hiển thị bài viết mới nhất và thông tin lỗi ứng dụng, tích hợp xác thực [Authorize] cho trang quản trị chính, 
+Mo ta: Điều hướng trang chủ Backend, hiển thị Dashboard thống kê doanh thu, đơn hàng, sản phẩm bán chạy, khách hàng mới
 Ngay thuc hien: 15/05/2026
 */
 
-using CMS.Backend.Models; // Sử dụng các Model/ViewModel thuộc dự án CMS.Backend
-using Microsoft.AspNetCore.Mvc; // Sử dụng các thành phần hỗ trợ MVC Controller và IActionResult
-using Microsoft.EntityFrameworkCore; // Sử dụng Entity Framework Core cho các thao tác truy vấn CSDL nâng cao (như Include)
-using System.Diagnostics; // Cung cấp các công cụ chuẩn đoán lỗi và giám sát hệ thống (Activity)
-using CMS.Data; // Sử dụng đối tượng kết nối CSDL ApplicationDbContext
-using Microsoft.AspNetCore.Authorization; // Sử dụng phân quyền và xác thực người dùng
+using CMS.Backend.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using CMS.Data;
+using Microsoft.AspNetCore.Authorization;
 
-namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các Controller phục vụ Backend
+namespace CMS.Backend.Controllers
 {
-    [Authorize] // Bắt buộc đăng nhập để truy cập trang chủ quản trị Backend
-    public class HomeController : Controller // Định nghĩa lớp HomeController kế thừa từ Controller cơ bản
+    [Authorize]
+    public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger; // Đối tượng hỗ trợ ghi nhật ký log hoạt động
-        private readonly ApplicationDbContext _context; // Đối tượng kết nối CSDL chính của ứng dụng
+        private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context) // Phương thức khởi dựng nạp các Dependency Injection cần thiết
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
-            _logger = logger; // Gán đối tượng logger nhận được
-            _context = context; // Gán đối tượng DbContext kết nối CSDL
+            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index() // Hàm xử lý hiển thị trang chủ của CMS Backend
+        public IActionResult Index()
         {
-            var latestPosts = _context.Posts // Thực hiện truy vấn bảng Posts trong CSDL
-                .Include(p => p.Category) // Lấy kèm theo thông tin của danh mục liên kết (CategoryId)
-                .OrderByDescending(p => p.CreatedDate) // Sắp xếp theo ngày tạo giảm dần (bài mới nhất xếp đầu)
-                .Take(3) // Chỉ lấy 3 bài viết đầu tiên
-                .ToList(); // Chuyển đổi dữ liệu kết quả thành danh sách (List)
-            return View(latestPosts); // Trả về giao diện Index và truyền danh sách bài viết mới thu được sang View
+            // Tổng sản phẩm
+            ViewBag.TotalProducts = _context.Products.Count(p => !p.IsDeleted);
+
+            // Tổng đơn hàng
+            ViewBag.TotalOrders = _context.Orders.Count();
+
+            // Tổng khách hàng
+            ViewBag.TotalCustomers = _context.Customers.Count();
+
+            // Tổng doanh thu (đơn đã giao - status 3)
+            ViewBag.TotalRevenue = _context.Orders
+                .Where(o => o.Status == 3)
+                .SelectMany(o => o.OrderDetails)
+                .Sum(od => (decimal?)(od.UnitPrice * od.Quantity)) ?? 0;
+
+            // Đơn hàng theo trạng thái
+            ViewBag.OrdersPending = _context.Orders.Count(o => o.Status == 0);
+            ViewBag.OrdersProcessing = _context.Orders.Count(o => o.Status == 1);
+            ViewBag.OrdersShipping = _context.Orders.Count(o => o.Status == 2);
+            ViewBag.OrdersDelivered = _context.Orders.Count(o => o.Status == 3);
+            ViewBag.OrdersCancelled = _context.Orders.Count(o => o.Status == 4 || o.Status == 7);
+
+            // Sản phẩm bán chạy (top 5)
+            ViewBag.TopProducts = _context.OrderDetails
+                .Include(od => od.Product)
+                .Where(od => od.Product != null && !od.Product.IsDeleted)
+                .GroupBy(od => new { od.ProductId, od.Product.Name, od.Product.ImageUrl })
+                .Select(g => new {
+                    Name = g.Key.Name,
+                    ImageUrl = g.Key.ImageUrl,
+                    TotalOrdered = g.Sum(x => x.Quantity),
+                    TotalDelivered = g.Where(x => x.Order.Status == 3).Sum(x => x.Quantity)
+                })
+                .OrderByDescending(x => x.TotalOrdered)
+                .Take(5)
+                .ToList();
+
+            // Khách hàng mới nhất (top 5)
+            ViewBag.NewCustomers = _context.Customers
+                .OrderByDescending(c => c.Id)
+                .Take(5)
+                .Select(c => new { c.FullName, c.Email, c.AvatarUrl })
+                .ToList();
+
+            // Doanh thu 12 tháng gần nhất
+            var now = DateTime.Now;
+            var monthlyRevenue = new List<object>();
+            for (int i = 11; i >= 0; i--)
+            {
+                var month = now.AddMonths(-i);
+                var revenue = _context.Orders
+                    .Where(o => o.Status == 3 && o.OrderDate.Month == month.Month && o.OrderDate.Year == month.Year)
+                    .SelectMany(o => o.OrderDetails)
+                    .Sum(od => (decimal?)(od.UnitPrice * od.Quantity)) ?? 0;
+                monthlyRevenue.Add(new { Label = $"T{month.Month}", Value = revenue });
+            }
+            ViewBag.MonthlyRevenue = monthlyRevenue;
+
+            return View();
         }
 
-        public IActionResult Privacy() // Hàm hiển thị trang thông tin chính sách bảo mật
+        public IActionResult Privacy()
         {
-            return View(); // Trả về View Privacy mặc định
+            return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)] // Cấu hình không lưu bộ nhớ đệm (Cache) cho trang lỗi này
-        public IActionResult Error() // Hàm xử lý hiển thị giao diện báo lỗi khi có exception xảy ra
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); // Khởi tạo ErrorViewModel chứa mã định danh lỗi và truyền sang View Error
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

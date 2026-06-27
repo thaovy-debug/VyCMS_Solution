@@ -15,11 +15,9 @@ export default function Checkout() {
 
     // Location state
     const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
 
     const [selectedProvince, setSelectedProvince] = useState('');
-    const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedWard, setSelectedWard] = useState('');
     const [specificAddress, setSpecificAddress] = useState('');
 
@@ -72,7 +70,7 @@ export default function Checkout() {
         // Fetch Vietnam provinces API
         const fetchProvinces = async () => {
             try {
-                const res = await axios.get('https://provinces.open-api.vn/api/?depth=3');
+                const res = await axios.get('https://provinces.open-api.vn/api/v2/?depth=2');
                 setProvinces(res.data);
             } catch (err) {
                 console.error("Failed to load provinces", err);
@@ -82,36 +80,23 @@ export default function Checkout() {
     }, [location.state]);
 
     useEffect(() => {
-        if (selectedProvince) {
+        if (selectedProvince && useAddressBook === false) {
             const p = provinces.find(p => p.name === selectedProvince);
-            setDistricts(p ? p.districts : []);
-            setWards([]);
-            setSelectedDistrict('');
+            setWards(p ? p.wards : []);
             setSelectedWard('');
         }
-    }, [selectedProvince, provinces]);
-
-    useEffect(() => {
-        if (selectedDistrict && useAddressBook === false) {
-            const d = districts.find(d => d.name === selectedDistrict);
-            setWards(d ? d.wards : []);
-            setSelectedWard('');
-        }
-    }, [selectedDistrict, districts, useAddressBook]);
+    }, [selectedProvince, provinces, useAddressBook]);
 
     const handleSelectAddress = (id) => {
         setSelectedAddressId(id);
         const addr = addressBook.find(a => a.id === id);
         if (addr) {
             setSelectedProvince(addr.province);
-            // Cập nhật districts và wards tạm thời hoặc bỏ qua logic reset của useEffect
+            // Cập nhật wards
             const p = provinces.find(prov => prov.name === addr.province);
             if (p) {
-                setDistricts(p.districts);
-                const d = p.districts.find(dist => dist.name === addr.district);
-                if (d) setWards(d.wards);
+                setWards(p.wards);
             }
-            setSelectedDistrict(addr.district);
             setSelectedWard(addr.ward);
             setSpecificAddress(addr.specific);
         }
@@ -128,12 +113,12 @@ export default function Checkout() {
             return;
         }
 
-        if (!selectedProvince || !selectedDistrict || !selectedWard || !specificAddress) {
-            toast.warning("Vui lòng nhập đầy đủ địa chỉ giao hàng (Tỉnh/Thành, Quận/Huyện, Phường/Xã và Địa chỉ cụ thể).");
+        if (!selectedProvince || !selectedWard || !specificAddress) {
+            toast.warning("Vui lòng nhập đầy đủ địa chỉ giao hàng (Tỉnh/Thành, Phường/Xã và Địa chỉ cụ thể).");
             return;
         }
 
-        const fullShippingAddress = `${specificAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`;
+        const fullShippingAddress = `${specificAddress}, ${selectedWard}, ${selectedProvince}`;
 
         const orderData = {
             customerId: customer ? customer.id : null,
@@ -145,7 +130,8 @@ export default function Checkout() {
                 productId: item.id,
                 quantity: item.quantity,
                 unitPrice: item.discountPercent > 0 ? item.price * (1 - item.discountPercent / 100) : item.price,
-                size: item.size
+                size: item.size,
+                color: item.color
             }))
         };
 
@@ -170,7 +156,7 @@ export default function Checkout() {
             <main className="container py-5 flex-grow-1 text-center">
                 <h4>Giỏ hàng trống</h4>
                 <p className="text-muted">Bạn chưa chọn sản phẩm nào để thanh toán.</p>
-                <Link to="/" className="btn btn-thieuhoa text-white mt-3 px-4 py-2" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '30px' }}>Mua sắm ngay</Link>
+                <Link to="/" className="btn btn-thieuhoa text-white mt-3 px-4 py-2" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '30px' }}>Mua sắm ngay</Link>
             </main>
         );
     }
@@ -185,14 +171,14 @@ export default function Checkout() {
                     <h3 className="font-weight-bold text-dark mb-3">Đặt hàng thành công!</h3>
                     <p className="text-muted mb-4" style={{ fontSize: '1.1rem' }}>
                         Cảm ơn bạn đã tin tưởng và mua sắm tại ZEY CHÍC.<br/>
-                        Mã đơn hàng của bạn là: <strong style={{ color: 'var(--thieuhoa-primary)' }}>#{orderId}</strong>
+                        Mã đơn hàng của bạn là: <strong style={{ color: 'var(--zeychic-primary)' }}>#{orderId}</strong>
                     </p>
                     
                     <div className="d-flex flex-column" style={{ gap: '15px' }}>
                         <Link to="/profile" state={{ tab: 'orders' }} className="btn btn-outline-secondary py-3 font-weight-bold" style={{ borderRadius: '8px', border: '2px solid #6c757d' }}>
                             <i className="fas fa-file-invoice mr-2"></i>XEM CHI TIẾT ĐƠN HÀNG
                         </Link>
-                        <Link to="/" className="btn text-white py-3 font-weight-bold" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px' }}>
+                        <Link to="/" className="btn text-white py-3 font-weight-bold" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px' }}>
                             <i className="fas fa-shopping-bag mr-2"></i>TIẾP TỤC MUA SẮM
                         </Link>
                     </div>
@@ -203,7 +189,7 @@ export default function Checkout() {
 
     return (
         <main className="container py-5 flex-grow-1">
-            <h3 className="font-weight-bold text-uppercase mb-4" style={{ color: 'var(--thieuhoa-primary)' }}>Thanh Toán Đơn Hàng</h3>
+            <h3 className="font-weight-bold text-uppercase mb-4" style={{ color: 'var(--zeychic-primary)' }}>Thanh Toán Đơn Hàng</h3>
             <div className="row">
                 <div className="col-lg-7 mb-4 mb-lg-0">
                     <div className="card shadow-sm border-0 p-4 rounded-lg">
@@ -234,7 +220,6 @@ export default function Checkout() {
                                             <input className="form-check-input" type="radio" name="addressMode" id="modeNew" checked={!useAddressBook} onChange={() => {
                                                 setUseAddressBook(false);
                                                 setSelectedProvince('');
-                                                setSelectedDistrict('');
                                                 setSelectedWard('');
                                                 setSpecificAddress('');
                                             }} />
@@ -245,12 +230,12 @@ export default function Checkout() {
                                     {useAddressBook && (
                                         <div className="list-group mb-3">
                                             {addressBook.map(addr => (
-                                                <label key={addr.id} className={`list-group-item list-group-item-action ${selectedAddressId === addr.id ? 'active' : ''}`} style={{ cursor: 'pointer', borderRadius: '8px', marginBottom: '8px', border: selectedAddressId === addr.id ? '2px solid var(--thieuhoa-primary)' : '1px solid #ddd', backgroundColor: selectedAddressId === addr.id ? '#f8f9fa' : '#fff', color: '#333' }}>
+                                                <label key={addr.id} className={`list-group-item list-group-item-action ${selectedAddressId === addr.id ? 'active' : ''}`} style={{ cursor: 'pointer', borderRadius: '8px', marginBottom: '8px', border: selectedAddressId === addr.id ? '2px solid var(--zeychic-primary)' : '1px solid #ddd', backgroundColor: selectedAddressId === addr.id ? '#f8f9fa' : '#fff', color: '#333' }}>
                                                     <div className="d-flex align-items-center">
                                                         <input type="radio" className="mr-3" name="selectedAddr" checked={selectedAddressId === addr.id} onChange={() => handleSelectAddress(addr.id)} />
                                                         <div>
                                                             {addr.isDefault && <span className="badge badge-success mb-1" style={{ fontSize: '0.65rem' }}>Mặc định</span>}
-                                                            <p className="mb-0 small">{addr.specific}, {addr.ward}, {addr.district}, {addr.province}</p>
+                                                            <p className="mb-0 small">{addr.specific}, {addr.ward}, {addr.province}</p>
                                                         </div>
                                                     </div>
                                                 </label>
@@ -271,25 +256,14 @@ export default function Checkout() {
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="row">
-                                        <div className="col-md-6 form-group mb-3">
-                                            <label className="font-weight-bold">Quận / Huyện <span className="text-danger">*</span></label>
-                                            <select className="form-control" value={selectedDistrict} onChange={(e) => setSelectedDistrict(e.target.value)} required disabled={!selectedProvince}>
-                                                <option value="">-- Chọn Quận / Huyện --</option>
-                                                {districts.map(d => (
-                                                    <option key={d.code} value={d.name}>{d.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="col-md-6 form-group mb-3">
-                                            <label className="font-weight-bold">Phường / Xã <span className="text-danger">*</span></label>
-                                            <select className="form-control" value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)} required disabled={!selectedDistrict}>
-                                                <option value="">-- Chọn Phường / Xã --</option>
-                                                {wards.map(w => (
-                                                    <option key={w.code} value={w.name}>{w.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                    <div className="form-group mb-3">
+                                        <label className="font-weight-bold">Phường / Xã <span className="text-danger">*</span></label>
+                                        <select className="form-control" value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)} required disabled={!selectedProvince}>
+                                            <option value="">-- Chọn Phường / Xã --</option>
+                                            {wards.map(w => (
+                                                <option key={w.code} value={w.name}>{w.name}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className="form-group mb-3">
                                         <label className="font-weight-bold">Địa chỉ cụ thể (Số nhà, tên đường) <span className="text-danger">*</span></label>
@@ -301,7 +275,7 @@ export default function Checkout() {
                                 <label className="font-weight-bold">Ghi chú đơn hàng (Tùy chọn)</label>
                                 <textarea name="notes" className="form-control" rows="2" value={formData.notes} onChange={handleChange} placeholder="Ví dụ: Giao hàng vào giờ hành chính..."></textarea>
                             </div>
-                            <button type="submit" className="btn btn-block text-white font-weight-bold py-3 text-uppercase" style={{ backgroundColor: 'var(--thieuhoa-primary)', borderRadius: '8px', fontSize: '1.1rem' }}>XÁC NHẬN ĐẶT HÀNG</button>
+                            <button type="submit" className="btn btn-block text-white font-weight-bold py-3 text-uppercase" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px', fontSize: '1.1rem' }}>XÁC NHẬN ĐẶT HÀNG</button>
                         </form>
                     </div>
                 </div>
@@ -322,6 +296,7 @@ export default function Checkout() {
                                         <h6 className="font-weight-bold m-0" style={{ fontSize: '0.9rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.name}</h6>
                                         <small className="text-muted">
                                             Số lượng: {item.quantity} 
+                                            {item.color && <span className="ml-2 font-weight-bold text-dark">| Màu: {item.color}</span>}
                                             {item.size && <span className="ml-2 font-weight-bold text-dark">| Size: {item.size}</span>}
                                         </small>
                                         <div className="text-danger font-weight-bold mt-1" style={{ fontSize: '0.95rem' }}>
