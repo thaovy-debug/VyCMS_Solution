@@ -143,6 +143,7 @@ export default function Checkout() {
                     localStorage.removeItem(cartKey);
                     window.dispatchEvent(new Event('cartUpdated'));
                 }
+                window.dispatchEvent(new Event('notificationUpdated'));
                 setOrderId(res.data.orderId || res.data.id || "MỚI");
                 setIsSuccess(true);
             }

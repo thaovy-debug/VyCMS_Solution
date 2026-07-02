@@ -177,6 +177,28 @@ Ngay thuc hien: 15/05/2026
             </nav> @* Đóng cột Sidebar *@
 
             <main class="col-md-9 col-lg-10 ms-sm-auto p-4" style="background-color: #FAF8F5; min-height: 100vh;"> @* Cột nội dung chính bên phải *@
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="d-flex justify-content-end align-items-center mb-4">
+                        <div class="dropdown">
+                            <a class="text-decoration-none position-relative" href="#" role="button" id="adminNotificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell-fill" style="font-size: 1.5rem; color: #8B5E3C;"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="adminNotificationBadge" style="display: none; font-size: 0.6rem;">
+                                    0
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="adminNotificationDropdown" id="adminNotificationList" style="width: 350px; max-height: 400px; overflow-y: auto; z-index: 1050;">
+                                <li><h6 class="dropdown-header font-weight-bold">Thông báo</h6></li>
+                                <div id="adminNotificationsContent">
+                                    <li><span class="dropdown-item text-muted text-center" style="font-size: 0.85rem;">Đang tải...</span></li>
+                                </div>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center text-primary" href="#" id="markAllReadBtn" style="font-size: 0.85rem;">Đánh dấu tất cả đã đọc</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+
                 @if (TempData["ErrorMessage"] != null)
                 {
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -207,17 +229,113 @@ Ngay thuc hien: 15/05/2026
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <style>
         /* Ép buộc hiển thị thanh phân trang của DataTables dù chỉ có 1 trang */
-        .dataTables_wrapper .dataTables_paginate { display: block !important; }
-        .dataTables_wrapper .dataTables_info { display: block !important; }
+        .dataTables_wrapper .dataTables_paginate { display: block !important; margin-top: 24px !important;}
+        .dataTables_wrapper .dataTables_info { display: none !important; }
+        
+        /* Custom DataTables Pagination Styling (Zey Chic Tone) */
+        .dataTables_wrapper .pagination {
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .dataTables_wrapper .page-item .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border-radius: 8px !important; /* Bootstrap uses border-radius on first/last children, we override */
+            border: 1px solid var(--th-border);
+            background-color: #FFFFFF;
+            color: var(--th-text-sub);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: none;
+            margin: 0;
+        }
+        .dataTables_wrapper .page-item.previous .page-link,
+        .dataTables_wrapper .page-item.next .page-link {
+            padding: 0 16px;
+        }
+        .dataTables_wrapper .page-item:not(.disabled) .page-link:hover {
+            border-color: var(--th-primary);
+            color: var(--th-primary);
+            background-color: #FFFFFF;
+            z-index: 1;
+        }
+        .dataTables_wrapper .page-item.active .page-link {
+            background-color: var(--th-primary);
+            border-color: var(--th-primary);
+            color: #FFFFFF;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(139, 94, 60, 0.2);
+            z-index: 2;
+        }
+        .dataTables_wrapper .page-item.disabled .page-link {
+            opacity: 0.5;
+            background-color: var(--th-bg);
+            border-color: var(--th-border);
+            color: var(--th-text-sub);
+        }
+        /* Remove horizontal scrollbar */
+        .th-table-container {
+            overflow-x: hidden !important;
+        }
+        
+        /* DataTable Search Box Styling */
+        .dataTables_filter {
+            margin-bottom: 16px;
+        }
+        .dataTables_filter label {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .dataTables_filter input {
+            border: 1px solid var(--th-border) !important;
+            border-radius: 20px !important;
+            padding: 8px 45px 8px 16px !important;
+            outline: none;
+            height: 40px;
+            width: 250px !important;
+            font-size: 14px;
+            margin-left: 0 !important;
+            transition: all 0.2s;
+        }
+        .dataTables_filter input:focus {
+            border-color: var(--th-primary) !important;
+            box-shadow: 0 0 0 2px rgba(139, 94, 60, 0.1);
+        }
+        .dataTables_filter label::after {
+            content: "\F52A";
+            font-family: "bootstrap-icons";
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 45px;
+            background-color: var(--th-primary);
+            color: white;
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            font-size: 16px;
+        }
     </style>
     <script>
         $(document).ready(function () {
             $('.th-table').DataTable({
                 pageLength: 10,
                 lengthChange: false, // Ẩn nút đổi số dòng trên trang
+                info: false, // Ẩn dòng "Đang xem..."
                 language: {
                     "processing": "Đang xử lý...",
-                    "search": "Tìm kiếm nhanh:",
+                    "search": "",
+                    "searchPlaceholder": "Tìm kiếm...",
                     "lengthMenu": "Xem _MENU_ mục",
                     "info": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
                     "infoEmpty": "Đang xem 0 đến 0 trong tổng số 0 mục",
@@ -230,6 +348,90 @@ Ngay thuc hien: 15/05/2026
                         "last": "Cuối"
                     }
                 }
+            });
+
+            // Fetch Admin Notifications
+            function fetchAdminNotifications() {
+                $.ajax({
+                    url: '/api/NotificationsApi/customer/0', // Admin CustomerId = 0
+                    method: 'GET',
+                    success: function (data) {
+                        const unread = data.filter(n => !n.isRead);
+                        const badge = $('#adminNotificationBadge');
+                        if (unread.length > 0) {
+                            badge.text(unread.length).show();
+                        } else {
+                            badge.hide();
+                        }
+
+                        const content = $('#adminNotificationsContent');
+                        content.empty();
+                        if (data.length === 0) {
+                            content.append('<li><span class="dropdown-item text-muted text-center" style="font-size: 0.85rem;">Không có thông báo mới</span></li>');
+                        } else {
+                            data.forEach(n => {
+                                let icon = 'bi-info-circle';
+                                let color = 'text-primary';
+                                let link = '#';
+                                
+                                if (n.type === 'OrderCreated') { 
+                                    icon = 'bi-cart-check'; color = 'text-success'; 
+                                    link = '/Order/Details/' + n.relatedId;
+                                }
+                                else if (n.type === 'OrderCancelled') { 
+                                    icon = 'bi-cart-x'; color = 'text-danger'; 
+                                    link = '/Order/Details/' + n.relatedId;
+                                }
+                                else if (n.type === 'NewReview') { 
+                                    icon = 'bi-star'; color = 'text-warning'; 
+                                    link = '/Review';
+                                }
+
+                                content.append(`
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-start py-2 ${!n.isRead ? 'bg-light' : ''}" href="#" onclick="markAndRedirect(${n.id}, '${link}')">
+                                            <i class="bi ${icon} ${color} mt-1 me-2" style="font-size: 1.2rem;"></i>
+                                            <div>
+                                                <div class="fw-bold" style="font-size: 0.85rem; color: #2C2C2C;">${n.title}</div>
+                                                <div class="text-muted text-wrap" style="font-size: 0.8rem;">${n.message}</div>
+                                                <div class="text-muted mt-1" style="font-size: 0.7rem;">${new Date(n.createdDate).toLocaleString('vi-VN')}</div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                `);
+                            });
+                        }
+                    }
+                });
+            }
+
+            fetchAdminNotifications();
+            setInterval(fetchAdminNotifications, 10000); // Polling every 10s
+
+            window.markAndRedirect = function(id, link) {
+                $.ajax({
+                    url: '/api/NotificationsApi/' + id + '/read',
+                    method: 'PUT',
+                    success: function() {
+                        if (link && link !== '#') {
+                            window.location.href = link;
+                        } else {
+                            fetchAdminNotifications();
+                        }
+                    }
+                });
+
+            };
+
+            $('#markAllReadBtn').click(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/api/NotificationsApi/customer/0/readAll',
+                    method: 'PUT',
+                    success: function() {
+                        fetchAdminNotifications();
+                    }
+                });
             });
         });
     </script>

@@ -62,8 +62,12 @@ function App() { // Định nghĩa component chính App của dự án
 
         loadNotifications();
         const intervalId = setInterval(loadNotifications, 10000);
+        window.addEventListener('notificationUpdated', loadNotifications);
 
-        return () => clearInterval(intervalId);
+        return () => {
+            clearInterval(intervalId);
+            window.removeEventListener('notificationUpdated', loadNotifications);
+        };
     }, []);
 
     const handleMarkAsRead = async (id) => {
@@ -373,7 +377,7 @@ function App() { // Định nghĩa component chính App của dự án
                                         <div key={menu.id} className="mega-menu-hover"> {/* Lớp cha hover */}
                                             <Link 
                                                 to={menu.link} 
-                                                className={`btn zeychic-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${selectedCategoryId === null && customFilterType === null && window.location.pathname === '/san-pham' ? 'active' : ''}`} 
+                                                className={`btn zeychic-nav-link border-0 bg-transparent text-decoration-none mr-1 shadow-none ${window.location.pathname === '/san-pham' && !window.location.search.includes('filter=') && !window.location.search.includes('search=') && !window.location.search.includes('category=') ? 'active' : ''}`} 
                                                 style={{ outline: 'none', padding: '14px 15px !important', textTransform: 'uppercase' }}
                                             >
                                                 {menu.name} <i className="fa-solid fa-chevron-down ml-1" style={{ fontSize: '0.7rem' }}></i>

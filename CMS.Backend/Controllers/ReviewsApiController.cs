@@ -119,6 +119,17 @@ namespace CMS.Backend.Controllers
             };
 
             _context.ProductReviews.Add(review);
+
+            // Add notification for admin
+            _context.Notifications.Add(new Notification
+            {
+                CustomerId = 0, // Admin notification
+                Title = "Đánh giá sản phẩm mới",
+                Message = $"Sản phẩm ID {model.ProductId} vừa nhận được đánh giá {model.Rating} sao từ khách hàng.",
+                Type = "NewReview",
+                RelatedId = model.ProductId
+            });
+
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Đánh giá thành công!", review });

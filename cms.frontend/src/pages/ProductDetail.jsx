@@ -176,6 +176,22 @@ export default function ProductDetail() {
         return <div className="text-center py-5 my-5 text-danger font-weight-bold">Không tìm thấy sản phẩm!</div>;
     }
 
+    // Combine main images and color variant images
+    const allImages = (() => {
+        let imgs = [];
+        if (product.imageUrl) {
+            imgs = [...product.imageUrl.split(',').filter(x => x.trim() !== '')];
+        }
+        if (parsedColors && parsedColors.length > 0) {
+            parsedColors.forEach(c => {
+                if (c.image && !imgs.includes(c.image)) {
+                    imgs.push(c.image);
+                }
+            });
+        }
+        return imgs;
+    })();
+
     return (
         <main className="container py-5 flex-grow-1">
             {/* Breadcrumb */}
@@ -190,35 +206,55 @@ export default function ProductDetail() {
             <div className="row">
                 {/* Hình ảnh sản phẩm (Left Column) */}
                 <div className="col-md-7 mb-4 mb-md-0">
-                    <div className="d-flex flex-column flex-md-row">
+                    <div className="d-flex flex-column flex-md-row position-relative">
                         {/* Thumbnails */}
-                        {product.imageUrl && (
-                            <div className="d-flex flex-row flex-md-column mr-md-3 mb-3 mb-md-0 overflow-auto" style={{ gap: '15px', minWidth: '90px', width: '90px' }}>
-                                {product.imageUrl.split(',').filter(x => x.trim() !== '').map((img, idx) => (
-                                    <img
-                                        key={idx}
-                                        src={img.startsWith('http') ? img : `${import.meta.env.VITE_API_URL}${img}`}
-                                        alt={`thumbnail-${idx}`}
-                                        className={`img-fluid ${mainImage === img ? 'border border-dark' : 'border border-light'}`}
-                                        style={{ cursor: 'pointer', objectFit: 'cover', height: '120px', width: '100%', flexShrink: 0, opacity: mainImage === img ? 1 : 0.6 }}
-                                        onClick={() => setMainImage(img)}
-                                        onMouseOver={(e) => e.currentTarget.style.opacity = 1}
-                                        onMouseOut={(e) => { if(mainImage !== img) e.currentTarget.style.opacity = 0.6 }}
-                                    />
-                                ))}
-                            </div>
+                        {allImages.length > 0 && (
+                            <>
+                                {/* Desktop view thumbnails - absolute trick to match height */}
+                                <div className="d-none d-md-block mr-md-3 mb-3 mb-md-0" style={{ minWidth: '110px', width: '110px' }}>
+                                    <div className="d-flex flex-column overflow-auto position-absolute custom-scrollbar" style={{ width: '110px', top: 0, bottom: 0, left: 0, gap: '15px' }}>
+                                        {allImages.map((img, idx) => (
+                                            <img
+                                                key={idx}
+                                                src={img.startsWith('http') ? img : `${import.meta.env.VITE_API_URL}${img}`}
+                                                alt={`thumbnail-${idx}`}
+                                                className={`img-fluid ${mainImage === img ? 'border border-dark' : 'border border-light'}`}
+                                                style={{ cursor: 'pointer', objectFit: 'cover', height: 'calc((100% - 45px) / 4)', width: '100%', flexShrink: 0, opacity: mainImage === img ? 1 : 0.6 }}
+                                                onClick={() => setMainImage(img)}
+                                                onMouseOver={(e) => e.currentTarget.style.opacity = 1}
+                                                onMouseOut={(e) => { if(mainImage !== img) e.currentTarget.style.opacity = 0.6 }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* Mobile view thumbnails - horizontal scroll */}
+                                <div className="d-flex d-md-none flex-row overflow-auto mb-3" style={{ gap: '15px', width: '100%' }}>
+                                    {allImages.map((img, idx) => (
+                                        <img
+                                            key={idx}
+                                            src={img.startsWith('http') ? img : `${import.meta.env.VITE_API_URL}${img}`}
+                                            alt={`thumbnail-${idx}`}
+                                            className={`img-fluid ${mainImage === img ? 'border border-dark' : 'border border-light'}`}
+                                            style={{ cursor: 'pointer', objectFit: 'cover', height: '146px', width: '110px', flexShrink: 0, opacity: mainImage === img ? 1 : 0.6 }}
+                                            onClick={() => setMainImage(img)}
+                                            onMouseOver={(e) => e.currentTarget.style.opacity = 1}
+                                            onMouseOut={(e) => { if(mainImage !== img) e.currentTarget.style.opacity = 0.6 }}
+                                        />
+                                    ))}
+                                </div>
+                            </>
                         )}
                         {/* Main Image */}
-                        <div className="flex-grow-1" style={{ height: '650px', backgroundColor: '#e2e2e2' }}>
+                        <div className="flex-grow-1" style={{ backgroundColor: '#F8F6F2' }}>
                             {mainImage ? (
                                  <img 
                                     src={mainImage.startsWith('http') ? mainImage : `${import.meta.env.VITE_API_URL}${mainImage}`} 
                                     alt={product.name} 
-                                    className="w-100 h-100" 
-                                    style={{ objectFit: 'cover', objectPosition: 'center top' }} 
+                                    className="w-100" 
+                                    style={{ height: 'auto', display: 'block' }} 
                                 />
                             ) : (
-                                <div className="w-100 h-100 d-flex align-items-center justify-content-center text-muted" style={{ backgroundColor: '#f8f9fa' }}>
+                                <div className="w-100 d-flex align-items-center justify-content-center text-muted" style={{ height: '650px', backgroundColor: '#f8f9fa' }}>
                                     <i className="fa-regular fa-image" style={{ fontSize: '4rem', opacity: 0.3 }}></i>
                                 </div>
                             )}
@@ -251,42 +287,86 @@ export default function ProductDetail() {
                     </div>
 
                     {/* Colors - Dynamic from parsedColors */}
-                    {parsedColors.length > 0 && (
-                        <div className="mb-4 d-flex align-items-center">
-                            <p className="mb-0 text-dark font-weight-bold" style={{ width: '120px', fontSize: '1.05rem' }}>Màu sắc:</p>
-                            <div className="d-flex flex-wrap" style={{ gap: '10px' }}>
-                                {parsedColors.map((colorObj, idx) => (
-                                    <button
-                                        key={idx}
-                                        className={`btn btn-sm ${selectedColor === colorObj.name ? 'border-dark font-weight-bold' : 'border'}`}
-                                        style={{ backgroundColor: 'transparent', minWidth: '60px', height: '36px', borderRadius: '4px' }}
-                                        onClick={() => handleColorClick(colorObj)}
-                                        title={colorObj.name}
-                                    >
-                                        {colorObj.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    {(() => {
+                        let stocks = {};
+                        if (product.variantStocks) {
+                            try { stocks = JSON.parse(product.variantStocks); } catch(e){}
+                        }
+                        const isColorDisabled = (colorName) => {
+                            if (!selectedSize || Object.keys(stocks).length === 0) return false;
+                            const key = `${colorName}-${selectedSize}`;
+                            return stocks[key] === undefined || stocks[key] <= 0;
+                        };
+                        const isSizeDisabled = (sizeName) => {
+                            if (!selectedColor || Object.keys(stocks).length === 0) return false;
+                            const key = `${selectedColor}-${sizeName}`;
+                            return stocks[key] === undefined || stocks[key] <= 0;
+                        };
 
-                    {product.sizes && (
-                        <div className="mb-4 d-flex align-items-center">
-                            <p className="mb-0 text-dark font-weight-bold" style={{ width: '120px', fontSize: '1.05rem' }}>Size:</p>
-                            <div className="d-flex flex-wrap" style={{ gap: '10px' }}>
-                                {product.sizes.split(',').map(s => s.trim()).filter(s => s).map(size => (
-                                    <button
-                                        key={size}
-                                        className={`btn btn-sm ${selectedSize === size ? 'border-dark font-weight-bold' : 'border'}`}
-                                        style={{ minWidth: '45px', height: '36px', backgroundColor: 'transparent', borderRadius: '4px' }}
-                                        onClick={() => setSelectedSize(size)}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                        return (
+                            <>
+                                {parsedColors.length > 0 && (
+                                    <div className="mb-4 d-flex align-items-center">
+                                        <p className="mb-0 text-dark font-weight-bold" style={{ width: '120px', fontSize: '1.05rem' }}>Màu sắc:</p>
+                                        <div className="d-flex flex-wrap" style={{ gap: '10px' }}>
+                                            {parsedColors.map((colorObj, idx) => {
+                                                const disabled = isColorDisabled(colorObj.name);
+                                                return (
+                                                    <button
+                                                        key={idx}
+                                                        className={`btn btn-sm position-relative overflow-hidden ${selectedColor === colorObj.name ? 'border-dark font-weight-bold' : 'border'}`}
+                                                        style={{ 
+                                                            backgroundColor: selectedColor === colorObj.name ? '#fff2f2' : (disabled ? '#f1f1f1' : 'transparent'), 
+                                                            minWidth: '60px', height: '36px', borderRadius: '4px',
+                                                            color: disabled ? '#aaa' : '#333',
+                                                            opacity: disabled ? 0.6 : 1,
+                                                            cursor: disabled ? 'not-allowed' : 'pointer'
+                                                        }}
+                                                        disabled={disabled}
+                                                        onClick={() => { if(!disabled) handleColorClick(colorObj); }}
+                                                        title={colorObj.name}
+                                                    >
+                                                        {colorObj.name}
+                                                        {disabled && <div style={{position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: '#aaa', transform: 'rotate(-15deg)'}}></div>}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {product.sizes && (
+                                    <div className="mb-4 d-flex align-items-center">
+                                        <p className="mb-0 text-dark font-weight-bold" style={{ width: '120px', fontSize: '1.05rem' }}>Size:</p>
+                                        <div className="d-flex flex-wrap" style={{ gap: '10px' }}>
+                                            {product.sizes.split(',').map(s => s.trim()).filter(s => s).map(size => {
+                                                const disabled = isSizeDisabled(size);
+                                                return (
+                                                    <button
+                                                        key={size}
+                                                        className={`btn btn-sm position-relative overflow-hidden ${selectedSize === size ? 'border-dark font-weight-bold' : 'border'}`}
+                                                        style={{ 
+                                                            minWidth: '45px', height: '36px', 
+                                                            backgroundColor: selectedSize === size ? '#fff2f2' : (disabled ? '#f1f1f1' : 'transparent'), 
+                                                            borderRadius: '4px',
+                                                            color: disabled ? '#aaa' : '#333',
+                                                            opacity: disabled ? 0.6 : 1,
+                                                            cursor: disabled ? 'not-allowed' : 'pointer'
+                                                        }}
+                                                        disabled={disabled}
+                                                        onClick={() => { if(!disabled) setSelectedSize(size); }}
+                                                    >
+                                                        {size}
+                                                        {disabled && <div style={{position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: '#aaa', transform: 'rotate(-20deg)'}}></div>}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        );
+                    })()}
 
                     {/* Quantity */}
                     <div className="mb-4 d-flex align-items-center">
@@ -318,11 +398,11 @@ export default function ProductDetail() {
                         <button className="btn d-flex align-items-center justify-content-center" style={{ width: '64px', backgroundColor: '#f0f0f0', border: 'none', borderRadius: '4px' }}>
                             <i className="fa-regular fa-heart" style={{ fontSize: '1.5rem', color: '#666' }}></i>
                         </button>
-                        <button onClick={handleAddToCart} disabled={product.stockQuantity === 0} className={`btn ${product.stockQuantity === 0 ? 'btn-secondary' : 'btn-outline-dark'} font-weight-bold text-uppercase flex-grow-1`} style={{ borderRadius: '4px', border: '1.5px solid #222', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
-                            {product.stockQuantity === 0 ? "Đã hết hàng" : "THÊM VÀO GIỎ HÀNG"}
+                        <button onClick={handleAddToCart} disabled={product.stockQuantity === 0 || getAvailableStock() === 0} className={`btn ${(product.stockQuantity === 0 || getAvailableStock() === 0) ? 'btn-secondary' : 'btn-outline-dark'} font-weight-bold text-uppercase flex-grow-1`} style={{ borderRadius: '4px', border: '1.5px solid #222', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
+                            {(product.stockQuantity === 0 || getAvailableStock() === 0) ? "Đã hết hàng" : "THÊM VÀO GIỎ HÀNG"}
                         </button>
-                        <button onClick={handleBuyNow} disabled={product.stockQuantity === 0} className={`btn ${product.stockQuantity === 0 ? 'btn-secondary' : 'btn-dark'} font-weight-bold text-uppercase flex-grow-1`} style={{ borderRadius: '4px', backgroundColor: '#222', border: 'none', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
-                            {product.stockQuantity === 0 ? "Hết hàng" : "MUA NGAY"}
+                        <button onClick={handleBuyNow} disabled={product.stockQuantity === 0 || getAvailableStock() === 0} className={`btn ${(product.stockQuantity === 0 || getAvailableStock() === 0) ? 'btn-secondary' : 'btn-dark'} font-weight-bold text-uppercase flex-grow-1`} style={{ borderRadius: '4px', backgroundColor: '#222', border: 'none', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
+                            {(product.stockQuantity === 0 || getAvailableStock() === 0) ? "Hết hàng" : "MUA NGAY"}
                         </button>
                     </div>
 
@@ -331,41 +411,43 @@ export default function ProductDetail() {
             </div>
 
             {/* Chi tiết và bảng size - 2 cột ngang hàng */}
-            <div className="row mt-5 pt-5 border-top">
-                <div className="col-md-6 pr-md-4 mb-4 mb-md-0" style={{ borderRight: '1px solid #eee' }}>
-                    <div 
-                        className="d-flex justify-content-between align-items-center mb-4 text-dark" 
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setOpenAccordion(openAccordion === 'details' ? null : 'details')}
-                    >
-                        <h4 className="font-weight-bold m-0" style={{ fontSize: '1.15rem' }}>Thông tin chi tiết</h4>
-                        <i className={`fa-solid ${openAccordion === 'details' ? 'fa-minus' : 'fa-plus'}`}></i>
-                    </div>
-                    {openAccordion === 'details' && (
-                        <div className="text-muted" style={{ lineHeight: '1.8', fontSize: '1rem' }} dangerouslySetInnerHTML={{ __html: product.description || "Chưa có thông tin mô tả cho sản phẩm này." }}>
+            {(product.description || product.sizeGuideImageUrl) && (
+                <div className="row mt-5 pt-5 border-top">
+                    {product.description && (
+                        <div className={`${product.sizeGuideImageUrl ? 'col-md-6 pr-md-4 mb-4 mb-md-0' : 'col-12'}`} style={product.sizeGuideImageUrl ? { borderRight: '1px solid #eee' } : {}}>
+                            <div 
+                                className="d-flex justify-content-between align-items-center mb-4 text-dark" 
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => setOpenAccordion(openAccordion === 'details' ? null : 'details')}
+                            >
+                                <h4 className="font-weight-bold m-0" style={{ fontSize: '1.15rem' }}>Thông tin chi tiết</h4>
+                                <i className={`fa-solid ${openAccordion === 'details' ? 'fa-minus' : 'fa-plus'}`}></i>
+                            </div>
+                            {openAccordion === 'details' && (
+                                <div className="text-muted" style={{ lineHeight: '1.8', fontSize: '1rem' }} dangerouslySetInnerHTML={{ __html: product.description }}>
+                                </div>
+                            )}
                         </div>
                     )}
-                </div>
-                <div className="col-md-6 pl-md-4">
-                    <div 
-                        className="d-flex justify-content-between align-items-center mb-4 text-dark" 
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setOpenAccordion(openAccordion === 'size' ? null : 'size')}
-                    >
-                        <h4 className="font-weight-bold m-0" style={{ fontSize: '1.15rem' }}>Bảng size</h4>
-                        <i className={`fa-solid ${openAccordion === 'size' ? 'fa-minus' : 'fa-plus'}`}></i>
-                    </div>
-                    {openAccordion === 'size' && (
-                        <div className="text-center">
-                            {product.sizeGuideImageUrl ? (
-                                <img src={product.sizeGuideImageUrl.startsWith('http') ? product.sizeGuideImageUrl : `${import.meta.env.VITE_API_URL}${product.sizeGuideImageUrl}`} alt="Bảng size" className="img-fluid rounded border shadow-sm" style={{ maxWidth: '100%' }} />
-                            ) : (
-                                <p className="text-muted text-left">Chưa có bảng size cho sản phẩm này.</p>
+                    {product.sizeGuideImageUrl && (
+                        <div className={product.description ? "col-md-6 pl-md-4" : "col-12"}>
+                            <div 
+                                className="d-flex justify-content-between align-items-center mb-4 text-dark" 
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => setOpenAccordion(openAccordion === 'size' ? null : 'size')}
+                            >
+                                <h4 className="font-weight-bold m-0" style={{ fontSize: '1.15rem' }}>Bảng size</h4>
+                                <i className={`fa-solid ${openAccordion === 'size' ? 'fa-minus' : 'fa-plus'}`}></i>
+                            </div>
+                            {openAccordion === 'size' && (
+                                <div className={product.description ? "text-center" : ""}>
+                                    <img src={product.sizeGuideImageUrl.startsWith('http') ? product.sizeGuideImageUrl : `${import.meta.env.VITE_API_URL}${product.sizeGuideImageUrl}`} alt="Bảng size" className="img-fluid rounded border shadow-sm" style={{ maxWidth: '100%' }} />
+                                </div>
                             )}
                         </div>
                     )}
                 </div>
-            </div>
+            )}
 
             {/* Bottom sections */}
             <div className="row mt-5 pt-5 border-top">

@@ -9,12 +9,16 @@ Ngay thuc hien: 15/05/2026
 import React, { useState, useEffect } from 'react'; // Nhập React và các Hooks useState, useEffect
 import { Link } from 'react-router-dom';
 import blogService from '../services/blogService'; // Nhập lớp dịch vụ blogService để gọi API bài viết từ Backend
+import Pagination from './Pagination'; // Nhập component phân trang
 
 const PostList = ({ isHome, postsProp, loadingProp }) => { // Định nghĩa component chức năng PostList
     const [posts, setPosts] = useState([]); // Khai báo state posts lưu trữ mảng bài viết từ API, mặc định rỗng
     const [loading, setLoading] = useState(true); // Khai báo state loading quản lý trạng thái tải dữ liệu
+    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+    const itemsPerPage = 6; // Số bài viết hiển thị trên một trang
 
     useEffect(() => { // Tự động chạy tải bài viết khi component được nạp lần đầu
+        setCurrentPage(1); // Reset về trang 1
         if (postsProp !== undefined) {
             setPosts(postsProp);
             setLoading(loadingProp);
@@ -40,6 +44,17 @@ const PostList = ({ isHome, postsProp, loadingProp }) => { // Định nghĩa com
         return <div className="text-center my-4 text-muted">Đang tải tin tức thời trang xu hướng...</div>; // Trả về giao diện thông báo chờ tải dữ liệu
     } // Kết thúc điều kiện kiểm tra loading
 
+    // Tính toán phân trang
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentPosts = posts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(posts.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return ( // Trả về cấu trúc JSX của phần danh sách bài viết thời trang
         <div className="mt-5 mb-5"> {/* Khung div bao ngoài cách lề trên mt-5 và lề dưới mb-5 */}
             {/* Tiêu đề mục tin tức phong cách sang trọng ZeyChíc */}
@@ -53,7 +68,7 @@ const PostList = ({ isHome, postsProp, loadingProp }) => { // Định nghĩa com
                 <p className="text-muted text-center py-4">Chưa có bài viết tin tức nào.</p> // Hiển thị thông báo trống
             ) : ( // Ngược lại nếu mảng chứa dữ liệu bài viết
                 <div className="row"> {/* Khởi tạo hàng lưới grid Bootstrap */}
-                    {posts.map((post) => ( // Lặp qua từng bài viết để tạo cấu trúc thẻ hiển thị tương ứng
+                    {currentPosts.map((post) => ( // Lặp qua từng bài viết hiện tại để tạo cấu trúc thẻ hiển thị tương ứng
                         <div className="col-lg-6 mb-4" key={post.id}> {/* Mỗi bài viết chiếm một nửa chiều ngang màn hình máy tính (6/12) */}
                             <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--zeychic-card-bg)' }}> {/* Card bo góc nền trắng có hover nổi */}
                                 <div className="row no-gutters h-100"> {/* Khởi tạo hàng ngang Bootstrap không khoảng giãn */}
@@ -95,6 +110,17 @@ const PostList = ({ isHome, postsProp, loadingProp }) => { // Định nghĩa com
                         </div> // Kết thúc cột bài viết
                     )) // Kết thúc vòng lặp bài viết
                 } {/* Kết thúc khối lặp dữ liệu */}
+                
+                {/* Thanh điều hướng phân trang */}
+                {totalPages >= 1 && (
+                    <div className="col-12 mt-2">
+                        <Pagination 
+                            currentPage={currentPage} 
+                            totalPages={totalPages} 
+                            onPageChange={handlePageChange} 
+                        />
+                    </div>
+                )}
                 </div> // Kết thúc div row
             )} {/* Kết thúc khối biểu thức điều kiện */}
         </div> // Kết thúc div mb-5 bao ngoài

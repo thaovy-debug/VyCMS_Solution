@@ -74,57 +74,103 @@ const VariantModal = ({ show, onClose, item, onConfirm, initialColor = '', initi
                                 </div>
                             </div>
 
-                            {parsedColors.length > 0 && (
-                                <div className="mb-3">
-                                    <p className="font-weight-bold mb-2">Màu sắc</p>
-                                    <div className="d-flex flex-wrap" style={{ gap: '10px' }}>
-                                        {parsedColors.map(c => (
-                                            <button 
-                                                key={c.name}
-                                                onClick={() => setEditColor(c.name)}
-                                                className="btn btn-sm"
-                                                style={{
-                                                    border: editColor === c.name ? '1px solid var(--zeychic-primary)' : '1px solid #e0e0e0',
-                                                    color: editColor === c.name ? 'var(--zeychic-primary)' : '#333',
-                                                    backgroundColor: editColor === c.name ? '#fff2f2' : '#f9f9f9',
-                                                    fontWeight: editColor === c.name ? 'bold' : 'normal',
-                                                    borderRadius: '4px'
-                                                }}
-                                            >
-                                                {c.name}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                            {(() => {
+                                let stocks = {};
+                                if (item.variantStocks) {
+                                    try { stocks = JSON.parse(item.variantStocks); } catch(e){}
+                                }
+                                const isColorDisabled = (colorName) => {
+                                    if (!editSize || Object.keys(stocks).length === 0) return false;
+                                    const key = `${colorName}-${editSize}`;
+                                    return stocks[key] === undefined || stocks[key] <= 0;
+                                };
+                                const isSizeDisabled = (sizeName) => {
+                                    if (!editColor || Object.keys(stocks).length === 0) return false;
+                                    const key = `${editColor}-${sizeName}`;
+                                    return stocks[key] === undefined || stocks[key] <= 0;
+                                };
 
-                            {sizes.length > 0 && (
-                                <div className="mb-3 mt-3">
-                                    <p className="font-weight-bold mb-2">Size</p>
-                                    <div className="d-flex flex-wrap" style={{ gap: '10px' }}>
-                                        {sizes.map(s => (
-                                            <button 
-                                                key={s}
-                                                onClick={() => setEditSize(s)}
-                                                className="btn btn-sm"
-                                                style={{
-                                                    border: editSize === s ? '1px solid var(--zeychic-primary)' : '1px solid #e0e0e0',
-                                                    color: editSize === s ? 'var(--zeychic-primary)' : '#333',
-                                                    backgroundColor: editSize === s ? '#fff2f2' : '#f9f9f9',
-                                                    fontWeight: editSize === s ? 'bold' : 'normal',
-                                                    borderRadius: '4px',
-                                                    minWidth: '40px'
-                                                }}
-                                            >
-                                                {s}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                                return (
+                                    <>
+                                        {parsedColors.length > 0 && (
+                                            <div className="mb-3">
+                                                <p className="font-weight-bold mb-2">Màu sắc</p>
+                                                <div className="d-flex flex-wrap" style={{ gap: '10px' }}>
+                                                    {parsedColors.map(c => {
+                                                        const disabled = isColorDisabled(c.name);
+                                                        return (
+                                                            <button 
+                                                                key={c.name}
+                                                                onClick={() => setEditColor(c.name)}
+                                                                disabled={disabled}
+                                                                className="btn btn-sm position-relative overflow-hidden"
+                                                                style={{
+                                                                    border: editColor === c.name ? '1px solid var(--zeychic-primary)' : '1px solid #e0e0e0',
+                                                                    color: editColor === c.name ? 'var(--zeychic-primary)' : (disabled ? '#aaa' : '#333'),
+                                                                    backgroundColor: editColor === c.name ? '#fff2f2' : (disabled ? '#f1f1f1' : '#f9f9f9'),
+                                                                    fontWeight: editColor === c.name ? 'bold' : 'normal',
+                                                                    borderRadius: '4px',
+                                                                    opacity: disabled ? 0.6 : 1,
+                                                                    cursor: disabled ? 'not-allowed' : 'pointer'
+                                                                }}
+                                                            >
+                                                                {c.name}
+                                                                {disabled && <div style={{position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: '#aaa', transform: 'rotate(-15deg)'}}></div>}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {sizes.length > 0 && (
+                                            <div className="mb-3 mt-3">
+                                                <p className="font-weight-bold mb-2">Size</p>
+                                                <div className="d-flex flex-wrap" style={{ gap: '10px' }}>
+                                                    {sizes.map(s => {
+                                                        const disabled = isSizeDisabled(s);
+                                                        return (
+                                                            <button 
+                                                                key={s}
+                                                                onClick={() => setEditSize(s)}
+                                                                disabled={disabled}
+                                                                className="btn btn-sm position-relative overflow-hidden"
+                                                                style={{
+                                                                    border: editSize === s ? '1px solid var(--zeychic-primary)' : '1px solid #e0e0e0',
+                                                                    color: editSize === s ? 'var(--zeychic-primary)' : (disabled ? '#aaa' : '#333'),
+                                                                    backgroundColor: editSize === s ? '#fff2f2' : (disabled ? '#f1f1f1' : '#f9f9f9'),
+                                                                    fontWeight: editSize === s ? 'bold' : 'normal',
+                                                                    borderRadius: '4px',
+                                                                    minWidth: '40px',
+                                                                    opacity: disabled ? 0.6 : 1,
+                                                                    cursor: disabled ? 'not-allowed' : 'pointer'
+                                                                }}
+                                                            >
+                                                                {s}
+                                                                {disabled && <div style={{position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: '#aaa', transform: 'rotate(-20deg)'}}></div>}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </div>
                         <div className="modal-footer border-top-0 pt-0">
-                            <button className="btn btn-block text-white font-weight-bold" style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px', padding: '10px 0' }} onClick={handleConfirm}>
+                            <button 
+                                className="btn btn-block font-weight-bold" 
+                                style={{ 
+                                    backgroundColor: (editMaxStock <= 0 || (needsColor && !editColor) || (needsSize && !editSize)) ? '#cccccc' : 'var(--zeychic-primary)', 
+                                    color: (editMaxStock <= 0 || (needsColor && !editColor) || (needsSize && !editSize)) ? '#666666' : '#ffffff',
+                                    borderRadius: '8px', 
+                                    padding: '10px 0',
+                                    cursor: (editMaxStock <= 0 || (needsColor && !editColor) || (needsSize && !editSize)) ? 'not-allowed' : 'pointer'
+                                }} 
+                                disabled={editMaxStock <= 0 || (needsColor && !editColor) || (needsSize && !editSize)}
+                                onClick={handleConfirm}
+                            >
                                 Xác nhận
                             </button>
                         </div>

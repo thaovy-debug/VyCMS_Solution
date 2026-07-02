@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react'; // Nhập React và các hoo
 import { Link } from 'react-router-dom';
 import productService from '../services/productService'; // Nhập lớp dịch vụ gọi API sản phẩm từ Backend
 import ProductCard from './ProductCard'; // Nhập component thẻ sản phẩm
+import Pagination from './Pagination'; // Nhập component phân trang
 
 const ProductList = ({ selectedCategoryId, customFilterType, searchQuery, minPrice, maxPrice, selectedSize, selectedColor, onAvailableFiltersChange }) => { // Định nghĩa component nhận prop selectedCategoryId và customFilterType từ component cha
     const [products, setProducts] = useState([]); // Khai báo state products lưu trữ danh sách sản phẩm, mặc định rỗng
@@ -18,6 +19,7 @@ const ProductList = ({ selectedCategoryId, customFilterType, searchQuery, minPri
     const itemsPerPage = 8; // Số sản phẩm trên mỗi trang
 
     useEffect(() => { // Tải dữ liệu tự động mỗi khi selectedCategoryId hoặc customFilterType thay đổi
+        setCurrentPage(1); // Quan trọng: Reset về trang 1 mỗi khi đổi bộ lọc (Sale, Hot, Mới...)
         const fetchProducts = async () => { // Định nghĩa hàm bất đồng bộ tải sản phẩm
             try { // Khối bắt đầu try
                 setLoading(true); // Kích hoạt trạng thái loading hiển thị vòng chờ
@@ -136,23 +138,13 @@ const ProductList = ({ selectedCategoryId, customFilterType, searchQuery, minPri
             )} {/* Kết thúc khối biểu thức điều kiện */}
             
             {/* Thanh điều hướng phân trang */}
-            {totalPages > 1 && (
-                <div className="col-12 mt-4 d-flex justify-content-center">
-                    <nav>
-                        <ul className="pagination" style={{ gap: '5px' }}>
-                            {[...Array(totalPages)].map((_, i) => (
-                                <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                                    <button 
-                                        className="page-link shadow-none" 
-                                        style={currentPage === i + 1 ? { backgroundColor: 'var(--zeychic-primary)', borderColor: 'var(--zeychic-primary)', color: 'white' } : { color: 'var(--zeychic-primary)' }}
-                                        onClick={() => handlePageChange(i + 1)}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
+            {totalPages >= 1 && (
+                <div className="col-12 mt-4">
+                    <Pagination 
+                        currentPage={currentPage} 
+                        totalPages={totalPages} 
+                        onPageChange={handlePageChange} 
+                    />
                 </div>
             )}
         </div> // Kết thúc div row bao ngoài

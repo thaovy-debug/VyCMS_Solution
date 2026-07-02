@@ -30,10 +30,12 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
             [FromQuery] string search = null,
             [FromQuery] double? minPrice = null,
             [FromQuery] double? maxPrice = null,
-            [FromQuery] int? categoryId = null,
-            [FromQuery] string sortBy = null,
-            [FromQuery] string filter = null,
-            [FromQuery] int? take = null)
+            [FromQuery] CategoryDropdown? categoryId = null,
+            [FromQuery] SortByDropdown? sortBy = null,
+            [FromQuery] FilterDropdown? filter = null,
+            [FromQuery] int? take = null,
+            [FromQuery] SizeDropdown? size = null,
+            [FromQuery] string color = null)
         {
             var query = _context.Products.Where(p => p.IsVisible).AsQueryable();
 
@@ -52,26 +54,36 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
                 query = query.Where(p => (p.DiscountPercent > 0 ? p.Price * (1 - p.DiscountPercent / 100m) : p.Price) <= (decimal)maxPrice.Value);
             }
 
-            if (categoryId.HasValue)
+            if (categoryId.HasValue && categoryId.Value != CategoryDropdown.TatCa)
             {
-                query = query.Where(p => p.CategoryProductId == categoryId.Value);
+                query = query.Where(p => p.CategoryProductId == (int)categoryId.Value);
             }
 
-            if (!string.IsNullOrEmpty(filter))
+            if (filter.HasValue)
             {
-                if (filter.ToLower() == "new")
+                if (filter.Value == FilterDropdown.New)
                     query = query.Where(p => p.IsNew);
-                else if (filter.ToLower() == "sale")
+                else if (filter.Value == FilterDropdown.Sale)
                     query = query.Where(p => p.DiscountPercent > 0);
-                else if (filter.ToLower() == "hot")
+                else if (filter.Value == FilterDropdown.Hot)
                     query = query.Where(p => p.IsHot);
             }
 
-            if (!string.IsNullOrEmpty(sortBy))
+            if (size.HasValue)
             {
-                if (sortBy.ToLower() == "price_asc")
+                query = query.Where(p => p.Sizes.Contains(size.Value.ToString()));
+            }
+
+            if (!string.IsNullOrEmpty(color))
+            {
+                query = query.Where(p => p.Colors.Contains(color));
+            }
+
+            if (sortBy.HasValue)
+            {
+                if (sortBy.Value == SortByDropdown.Price_Asc)
                     query = query.OrderBy(p => p.DiscountPercent > 0 ? p.Price * (1 - p.DiscountPercent / 100m) : p.Price);
-                else if (sortBy.ToLower() == "price_desc")
+                else if (sortBy.Value == SortByDropdown.Price_Desc)
                     query = query.OrderByDescending(p => p.DiscountPercent > 0 ? p.Price * (1 - p.DiscountPercent / 100m) : p.Price);
                 else
                     query = query.OrderByDescending(p => p.Id);
@@ -224,5 +236,44 @@ namespace CMS.Backend.Controllers // Khai báo không gian tên tương ứng v�
 
             return Ok(product); // Trả về toàn bộ đối tượng sản phẩm (bao gồm cả trường Description) kèm mã HTTP 200 OK
         }
+    }
+
+    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+    public enum CategoryDropdown
+    {
+        TatCa = 0,
+        Quan = 11,
+        Dam = 12,
+        Ao = 13,
+        PhuKien = 14,
+        ChanVay = 16,
+        AoKhoac = 17,
+        SaleOff = 18
+    }
+
+    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+    public enum FilterDropdown
+    {
+        New,
+        Sale,
+        Hot
+    }
+
+    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+    public enum SortByDropdown
+    {
+        Price_Asc,
+        Price_Desc
+    }
+
+    [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+    public enum SizeDropdown
+    {
+        S,
+        M,
+        L,
+        XL,
+        XXL,
+        Freesize
     }
 }

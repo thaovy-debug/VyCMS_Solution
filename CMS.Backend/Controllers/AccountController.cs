@@ -76,6 +76,13 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
 
                 return RedirectToAction("Index", "Home"); // Chuyển hướng người dùng về trang chủ quản trị hệ thống
             }
+            // Kiểm tra xem có phải là tài khoản khách hàng không
+            var customer = _context.Customers.FirstOrDefault(c => (c.Email == username || c.Phone == username || c.FullName == username) && c.Password == hashedPassword);
+            if (customer != null)
+            {
+                ViewBag.Error = "Tài khoản không có quyền truy cập admin";
+                return View();
+            }
 
             // Nếu thông tin đăng nhập không hợp lý
             ViewBag.Error = "Tên đăng nhập hoặc mật khẩu không đúng!"; // Lưu thông báo lỗi vào ViewBag để hiển thị ngoài View

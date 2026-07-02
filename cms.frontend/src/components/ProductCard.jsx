@@ -90,15 +90,15 @@ const ProductCard = ({ item, colClass = 'col-lg-3 col-md-4 col-sm-6 mb-4' }) => 
         <div className={colClass}>
             <div className="card h-100 shadow-sm border-0 rounded-lg overflow-hidden transition-all hover-card" style={{ backgroundColor: 'var(--zeychic-card-bg)' }}>
                 {/* Khung chứa ảnh */}
-                <Link to={`/product/${item.id}`} className="position-relative overflow-hidden d-block text-decoration-none" style={{ height: '260px', backgroundColor: '#F8F6F2' }}>
+                <Link to={`/product/${item.id}`} className="position-relative overflow-hidden d-block text-decoration-none" style={{ backgroundColor: '#F8F6F2' }}>
                     {item.imageUrl ? (() => {
                         const firstImg = item.imageUrl.split(',')[0];
                         return (
                             <img 
                                 src={firstImg.startsWith('http') ? firstImg : `${import.meta.env.VITE_API_URL}${firstImg}`} 
-                                className="w-100 h-100 hover-zoom" 
+                                className="w-100 hover-zoom" 
                                 alt={item.name} 
-                                style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} 
+                                style={{ height: 'auto', display: 'block', transition: 'transform 0.4s ease' }} 
                             />
                         );
                     })() : (

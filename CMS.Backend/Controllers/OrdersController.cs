@@ -77,6 +77,30 @@ namespace CMS.Backend.Controllers
                         return BadRequest(new { message = $"Sản phẩm {product.Name} không đủ số lượng trong kho" });
                     }
 
+                    // Cập nhật VariantStocks và kiểm tra tồn kho của biến thể
+                    if (!string.IsNullOrEmpty(product.VariantStocks))
+                    {
+                        try
+                        {
+                            var variantStocks = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(product.VariantStocks);
+                            string key = $"{item.Color ?? ""}-{item.Size ?? ""}";
+                            
+                            if (variantStocks != null && variantStocks.ContainsKey(key))
+                            {
+                                if (variantStocks[key] < item.Quantity)
+                                {
+                                    return BadRequest(new { message = $"Sản phẩm {product.Name} phân loại (Màu: {item.Color}, Size: {item.Size}) đã hết hàng hoặc không đủ số lượng!" });
+                                }
+                                variantStocks[key] -= item.Quantity;
+                                product.VariantStocks = System.Text.Json.JsonSerializer.Serialize(variantStocks);
+                            }
+                        }
+                        catch
+                        {
+                            // ignore json parse errors
+                        }
+                    }
+
                     var orderDetail = new OrderDetail
                     {
                         OrderId = newOrder.Id,
@@ -89,29 +113,8 @@ namespace CMS.Backend.Controllers
 
                     _context.OrderDetails.Add(orderDetail);
 
-                    // 3. Khấu trừ số lượng tồn kho
+                    // 3. Khấu trừ số lượng tồn kho tổng
                     product.StockQuantity -= item.Quantity;
-
-                    // Cập nhật VariantStocks
-                    if (!string.IsNullOrEmpty(product.VariantStocks))
-                    {
-                        try
-                        {
-                            var variantStocks = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(product.VariantStocks);
-                            string key = $"{item.Color ?? ""}-{item.Size ?? ""}";
-                            
-                            if (variantStocks != null && variantStocks.ContainsKey(key))
-                            {
-                                variantStocks[key] -= item.Quantity;
-                                if (variantStocks[key] < 0) variantStocks[key] = 0;
-                                product.VariantStocks = System.Text.Json.JsonSerializer.Serialize(variantStocks);
-                            }
-                        }
-                        catch
-                        {
-                            // ignore json parse errors
-                        }
-                    }
 
                     // 4. Tạo HTML cho email
                     string variantText = "";
@@ -143,6 +146,16 @@ namespace CMS.Backend.Controllers
                     RelatedId = newOrder.Id
                 };
                 _context.Notifications.Add(notification);
+
+                // Add notification for admin
+                _context.Notifications.Add(new Notification
+                {
+                    CustomerId = 0,
+                    Title = "Đơn hàng mới",
+                    Message = $"Có đơn hàng mới #{newOrder.Id} vừa được đặt.",
+                    Type = "OrderCreated",
+                    RelatedId = newOrder.Id
+                });
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -207,11 +220,14 @@ namespace CMS.Backend.Controllers
                         </body>
                         </html>
                     ";
-                    try {
-                        await _emailService.SendEmailAsync(customer.Email, subject, body);
-                    } catch {
-                        // Log lỗi gửi mail nhưng không làm lỗi đơn hàng
-                    }
+                    // Gửi email bất đồng bộ trong background để không làm chậm luồng phản hồi cho người dùng
+                    _ = Task.Run(async () => {
+                        try {
+                            await _emailService.SendEmailAsync(customer.Email, subject, body);
+                        } catch {
+                            // Log lỗi gửi mail ngầm
+                        }
+                    });
                 }
 
                 return StatusCode(201, new {
@@ -222,7 +238,8 @@ namespace CMS.Backend.Controllers
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return StatusCode(500, new { message = "Lỗi xử lý tạo đơn hàng ngầm", detail = ex.Message });
+                var innerMsg = ex.InnerException != null ? ex.InnerException.Message : "";
+                return StatusCode(500, new { message = "Lỗi xử lý tạo đơn hàng ngầm", detail = ex.Message + " | " + innerMsg });
             }
         }
 
@@ -305,6 +322,80 @@ namespace CMS.Backend.Controllers
 
             return BadRequest("Thao tác không hợp lệ.");
         }
+
+        [HttpPut("{orderId}/cancel")]
+        public async Task<IActionResult> CancelOrder(int orderId, [FromBody] CancelOrderDTO dto)
+        {
+            var order = await _context.Orders.Include(o => o.OrderDetails).ThenInclude(od => od.Product).FirstOrDefaultAsync(o => o.Id == orderId);
+            if (order == null) return NotFound(new { message = "Không tìm thấy đơn hàng" });
+
+            if (order.Status != 0)
+            {
+                return BadRequest(new { message = "Chỉ có thể hủy đơn hàng khi đang ở trạng thái Chờ xác nhận" });
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                order.Status = 4; // Đã hủy
+                
+                // Add order history
+                _context.OrderHistories.Add(new OrderHistory
+                {
+                    OrderId = order.Id,
+                    Action = "Khách hàng hủy đơn",
+                    Description = $"Lý do: {dto.Reason}",
+                    PerformedBy = "Customer"
+                });
+
+                // Restore stock
+                foreach (var item in order.OrderDetails)
+                {
+                    var product = item.Product;
+                    if (product != null)
+                    {
+                        product.StockQuantity += item.Quantity;
+                        
+                        if (!string.IsNullOrEmpty(product.VariantStocks))
+                        {
+                            try
+                            {
+                                var variantStocks = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(product.VariantStocks);
+                                string key = $"{item.Color ?? ""}-{item.Size ?? ""}";
+                                
+                                if (variantStocks != null && variantStocks.ContainsKey(key))
+                                {
+                                    variantStocks[key] += item.Quantity;
+                                    product.VariantStocks = System.Text.Json.JsonSerializer.Serialize(variantStocks);
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+
+                // Add notification for admin
+                _context.Notifications.Add(new Notification
+                {
+                    CustomerId = 0, // Admin notification
+                    Title = "Khách hàng hủy đơn",
+                    Message = $"Đơn hàng #{order.Id} đã bị khách hàng hủy. Lý do: {dto.Reason}",
+                    Type = "OrderCancelled",
+                    RelatedId = order.Id
+                });
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new { message = "Đã hủy đơn hàng thành công" });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                var innerMsg = ex.InnerException != null ? ex.InnerException.Message : "";
+                return StatusCode(500, new { message = "Lỗi xử lý hủy đơn hàng", detail = ex.Message + " | " + innerMsg });
+            }
+        }
     }
 
     public class OrderInputDTO
@@ -322,5 +413,10 @@ namespace CMS.Backend.Controllers
         public int Quantity { get; set; }
         public string? Size { get; set; } // Thêm trường Size
         public string? Color { get; set; } // Thêm trường Color
+    }
+
+    public class CancelOrderDTO
+    {
+        public string Reason { get; set; }
     }
 }

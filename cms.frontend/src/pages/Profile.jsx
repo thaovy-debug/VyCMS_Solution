@@ -12,6 +12,12 @@ function Profile() {
     const [loadingOrders, setLoadingOrders] = useState(true);
     const [expandedOrderId, setExpandedOrderId] = useState(null);
 
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const [cancelOrderId, setCancelOrderId] = useState(null);
+    const [cancelReason, setCancelReason] = useState('Không có nhu cầu');
+    const [cancelCustomReason, setCancelCustomReason] = useState('');
+    const [isCanceling, setIsCanceling] = useState(false);
+
     const [activeTab, setActiveTab] = useState('account');
     const [readNotifications, setReadNotifications] = useState(() => JSON.parse(localStorage.getItem(`read_notifications_${JSON.parse(localStorage.getItem('customer'))?.id}`)) || []);
 
@@ -169,6 +175,37 @@ function Profile() {
             setMessage(error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
         } finally {
             setUpdating(false);
+        }
+    };
+
+    const submitCancelOrder = async () => {
+        if (!cancelOrderId) return;
+        const finalReason = cancelReason === 'Lý do khác' ? cancelCustomReason : cancelReason;
+        if (!finalReason.trim()) {
+            toast.warning("Vui lòng nhập lý do hủy đơn");
+            return;
+        }
+        setIsCanceling(true);
+        try {
+            const response = await axios.put(`${import.meta.env.VITE_API_URL}/api/Orders/${cancelOrderId}/cancel`, {
+                reason: finalReason
+            });
+            toast.success(response.data.message || "Đã hủy đơn hàng thành công");
+            setCancelModalOpen(false);
+            setCancelOrderId(null);
+            setCancelReason('Không có nhu cầu');
+            setCancelCustomReason('');
+            
+            // Cập nhật lại orders
+            const ordersResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/Orders/customer/${customer.id}`);
+            setOrders(ordersResponse.data);
+            
+            // Trigger notification update
+            window.dispatchEvent(new Event('notificationUpdated'));
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Lỗi khi hủy đơn hàng");
+        } finally {
+            setIsCanceling(false);
         }
     };
 
@@ -605,50 +642,71 @@ function Profile() {
                                                         </div>
                                                     </div>
                                                     
-                                                    {expandedOrderId === order.id && order.details && order.details.map((d, idx) => (
-                                                        <div key={idx} className="d-flex align-items-center mb-3 bg-white border-bottom pb-3">
-                                                            <div className="d-flex flex-grow-1 align-items-center">
-                                                                <div className="mr-3 shadow-sm" style={{ width: '80px', height: '80px', flexShrink: 0, borderRadius: '8px', overflow: 'hidden' }}>
-                                                                    {d.imageUrl ? (
-                                                                        <img src={d.imageUrl.split(',')[0].startsWith('http') ? d.imageUrl.split(',')[0] : `${import.meta.env.VITE_API_URL}${d.imageUrl.split(',')[0]}`} alt={d.productName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                                    ) : (
-                                                                        <div className="w-100 h-100 bg-light d-flex align-items-center justify-content-center"><i className="fa-regular fa-image text-muted"></i></div>
+                                                    {expandedOrderId === order.id && (
+                                                        <>
+                                                            {order.details && order.details.map((d, idx) => (
+                                                                <div key={idx} className="d-flex align-items-center mb-3 bg-white border-bottom pb-3">
+                                                                    <div className="d-flex flex-grow-1 align-items-center">
+                                                                        <div className="mr-3 shadow-sm" style={{ width: '80px', height: '80px', flexShrink: 0, borderRadius: '8px', overflow: 'hidden' }}>
+                                                                            {d.imageUrl ? (
+                                                                                <img src={d.imageUrl.split(',')[0].startsWith('http') ? d.imageUrl.split(',')[0] : `${import.meta.env.VITE_API_URL}${d.imageUrl.split(',')[0]}`} alt={d.productName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                            ) : (
+                                                                                <div className="w-100 h-100 bg-light d-flex align-items-center justify-content-center"><i className="fa-regular fa-image text-muted"></i></div>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="d-flex flex-column justify-content-center">
+                                                                            <h6 className="font-weight-bold mb-2 text-dark" style={{ fontSize: '1rem' }}>{d.productName}</h6>
+                                                                            <div className="d-flex flex-wrap align-items-center mb-2" style={{ gap: '8px' }}>
+                                                                                {d.color && (
+                                                                                    <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Màu: {d.color}</span>
+                                                                                )}
+                                                                                {d.size && (
+                                                                                    <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Size: {d.size}</span>
+                                                                                )}
+                                                                                {(!d.color && !d.size) && (
+                                                                                    <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Phân loại: Mặc định</span>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="text-secondary" style={{ fontSize: '0.85rem' }}>ID sản phẩm: {d.productId}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div className="d-flex align-items-center justify-content-end text-right ml-4" style={{ gap: '30px', minWidth: '300px' }}>
+                                                                        <div className="text-muted" style={{ fontSize: '0.95rem' }}>
+                                                                            {d.unitPrice.toLocaleString('vi-VN')} VNĐ
+                                                                        </div>
+                                                                        <div className="font-weight-bold text-dark" style={{ width: '30px', textAlign: 'center', fontSize: '1.05rem' }}>
+                                                                            {d.quantity}
+                                                                        </div>
+                                                                        <div className="font-weight-bold" style={{ color: 'var(--zeychic-primary)', minWidth: '120px', fontSize: '1.05rem' }}>
+                                                                            {(d.unitPrice * d.quantity).toLocaleString('vi-VN')} VNĐ
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                            <div className="border-top pt-3 mt-2 d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    {order.status === 0 && (
+                                                                        <button 
+                                                                            className="btn btn-outline-danger font-weight-bold px-3 py-1" 
+                                                                            style={{ borderRadius: '6px' }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setCancelOrderId(order.id);
+                                                                                setCancelModalOpen(true);
+                                                                            }}
+                                                                        >
+                                                                            Hủy đơn
+                                                                        </button>
                                                                     )}
                                                                 </div>
-                                                                <div className="d-flex flex-column justify-content-center">
-                                                                    <h6 className="font-weight-bold mb-2 text-dark" style={{ fontSize: '1rem' }}>{d.productName}</h6>
-                                                                    <div className="d-flex flex-wrap align-items-center mb-2" style={{ gap: '8px' }}>
-                                                                        {d.color && (
-                                                                            <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Màu: {d.color}</span>
-                                                                        )}
-                                                                        {d.size && (
-                                                                            <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Size: {d.size}</span>
-                                                                        )}
-                                                                        {(!d.color && !d.size) && (
-                                                                            <span className="font-weight-bold text-muted" style={{ backgroundColor: '#F8F6F2', fontSize: '0.85rem', padding: '4px 10px', borderRadius: '6px' }}>Phân loại: Mặc định</span>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="text-secondary" style={{ fontSize: '0.85rem' }}>ID sản phẩm: {d.productId}</div>
+                                                                <div className="d-flex align-items-center">
+                                                                    <span className="mr-3 text-dark">Tổng số tiền:</span>
+                                                                    <span className="h5 mb-0 font-weight-bold" style={{ color: 'var(--zeychic-primary)' }}>{order.totalAmount?.toLocaleString('vi-VN')} VNĐ</span>
                                                                 </div>
                                                             </div>
-                                                            
-                                                            <div className="d-flex align-items-center justify-content-end text-right ml-4" style={{ gap: '30px', minWidth: '300px' }}>
-                                                                <div className="text-muted" style={{ fontSize: '0.95rem' }}>
-                                                                    {d.unitPrice.toLocaleString('vi-VN')} VNĐ
-                                                                </div>
-                                                                <div className="font-weight-bold text-dark" style={{ width: '30px', textAlign: 'center', fontSize: '1.05rem' }}>
-                                                                    {d.quantity}
-                                                                </div>
-                                                                <div className="font-weight-bold" style={{ color: 'var(--zeychic-primary)', minWidth: '120px', fontSize: '1.05rem' }}>
-                                                                    {(d.unitPrice * d.quantity).toLocaleString('vi-VN')} VNĐ
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    <div className="border-top pt-3 mt-2 d-flex justify-content-end align-items-center">
-                                                        <span className="mr-3 text-dark">Tổng số tiền:</span>
-                                                        <span className="h5 mb-0 font-weight-bold" style={{ color: 'var(--zeychic-primary)' }}>{order.totalAmount?.toLocaleString('vi-VN')} VNĐ</span>
-                                                    </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -774,6 +832,58 @@ function Profile() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal Hủy Đơn Hàng */}
+            {cancelModalOpen && (
+                <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }} tabIndex="-1">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content border-0 shadow" style={{ borderRadius: '12px' }}>
+                            <div className="modal-header border-0 pb-0">
+                                <h5 className="modal-title font-weight-bold">Hủy Đơn Hàng #{cancelOrderId}</h5>
+                                <button type="button" className="close" onClick={() => { setCancelModalOpen(false); setCancelOrderId(null); }}>
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="text-muted mb-3">Vui lòng chọn lý do hủy đơn hàng:</p>
+                                <div className="form-group">
+                                    <select 
+                                        className="form-control shadow-none bg-light border-0" 
+                                        style={{ padding: '10px 15px', height: 'auto', borderRadius: '8px' }}
+                                        value={cancelReason}
+                                        onChange={(e) => setCancelReason(e.target.value)}
+                                    >
+                                        <option value="Không có nhu cầu">Không có nhu cầu</option>
+                                        <option value="Thay đổi địa chỉ">Thay đổi địa chỉ</option>
+                                        <option value="Thay đổi phân loại size, màu sắc">Thay đổi phân loại size, màu sắc</option>
+                                        <option value="Lý do khác">Lý do khác</option>
+                                    </select>
+                                </div>
+                                {cancelReason === 'Lý do khác' && (
+                                    <div className="form-group mt-3">
+                                        <textarea 
+                                            className="form-control shadow-none bg-light border-0" 
+                                            style={{ borderRadius: '8px' }}
+                                            rows="3" 
+                                            placeholder="Nhập lý do cụ thể..."
+                                            value={cancelCustomReason}
+                                            onChange={(e) => setCancelCustomReason(e.target.value)}
+                                        ></textarea>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer border-0 pt-0">
+                                <button type="button" className="btn btn-light" onClick={() => { setCancelModalOpen(false); setCancelOrderId(null); }} style={{ borderRadius: '8px' }} disabled={isCanceling}>
+                                    Trở lại
+                                </button>
+                                <button type="button" className="btn text-white font-weight-bold" onClick={submitCancelOrder} style={{ backgroundColor: 'var(--zeychic-primary)', borderRadius: '8px' }} disabled={isCanceling}>
+                                    {isCanceling ? 'Đang xử lý...' : 'Xác nhận hủy'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

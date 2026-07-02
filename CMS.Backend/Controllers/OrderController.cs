@@ -20,11 +20,13 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
     {
         private readonly ApplicationDbContext _context; // Biến kết nối CSDL
         private readonly CMS.Backend.Services.IEmailService _emailService; // Dịch vụ gửi email
+        private readonly Microsoft.Extensions.DependencyInjection.IServiceScopeFactory _scopeFactory;
 
-        public OrderController(ApplicationDbContext context, CMS.Backend.Services.IEmailService emailService) // Phương thức khởi dựng
+        public OrderController(ApplicationDbContext context, CMS.Backend.Services.IEmailService emailService, Microsoft.Extensions.DependencyInjection.IServiceScopeFactory scopeFactory) // Phương thức khởi dựng
         {
             _context = context; // Gán đối tượng kết nối CSDL
             _emailService = emailService;
+            _scopeFactory = scopeFactory;
         }
 
         public IActionResult Index() // Hàm hiển thị danh sách toàn bộ các đơn hàng
@@ -81,6 +83,10 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                     Type = "Order",
                     RelatedId = order.Id
                 });
+                if (model.Status == 1 || model.Status == 2)
+                {
+                    SendStatusEmailInBackground(order.Id, model.Status);
+                }
             }
 
             order.Status = model.Status; // Cập nhật trạng thái đơn hàng
@@ -107,6 +113,10 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
                     Type = "Order",
                     RelatedId = order.Id
                 });
+                if (status == 1 || status == 2)
+                {
+                    SendStatusEmailInBackground(order.Id, status);
+                }
             }
 
             order.Status = status;
@@ -436,6 +446,38 @@ namespace CMS.Backend.Controllers // Định nghĩa không gian tên chứa các
 
             _context.SaveChanges();
             return Json(new { success = true });
+        }
+        // Helper method to send emails in the background
+        // Thêm hàm hỗ trợ gửi email ngầm khi đổi trạng thái để không làm chậm thao tác admin
+        private void SendStatusEmailInBackground(int orderId, int newStatus)
+        {
+            _ = System.Threading.Tasks.Task.Run(async () => {
+                try {
+                    using var scope = _scopeFactory.CreateScope();
+                    var emailService = scope.ServiceProvider.GetRequiredService<CMS.Backend.Services.IEmailService>();
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    
+                    var order = await context.Orders.Include(o => o.Customer).FirstOrDefaultAsync(o => o.Id == orderId);
+                    if (order != null && order.Customer != null && !string.IsNullOrEmpty(order.Customer.Email))
+                    {
+                        string subject = newStatus == 1 ? $"ZEY CHÍC - Đơn hàng #{order.Id} đang được giao" : $"ZEY CHÍC - Đơn hàng #{order.Id} đã giao thành công";
+                        string msg = newStatus == 1 ? "Đơn hàng của bạn đã được chúng tôi đóng gói và đang trên đường vận chuyển đến bạn." : "Đơn hàng của bạn đã được giao thành công. Cảm ơn bạn đã tin tưởng và mua sắm tại ZEY CHÍC!";
+                        string body = $@"
+                            <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                                <h2 style='color: #800000;'>ZEY CHÍC</h2>
+                                <p>Kính chào {order.Customer.FullName},</p>
+                                <p>{msg}</p>
+                                <br/>
+                                <p>Trân trọng,</p>
+                                <p>Đội ngũ ZEY CHÍC</p>
+                            </div>
+                        ";
+                        await emailService.SendEmailAsync(order.Customer.Email, subject, body);
+                    }
+                } catch {
+                    // Ignore any error in background
+                }
+            });
         }
     }
 
